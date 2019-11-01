@@ -51,8 +51,8 @@ print '     QUADRUPOLE PROFILE     '
 print '----------------------------'
 
 
-# for q in np.arange(0.1,1.,0.2):
-for logM in np.arange(12.5,15,0.5):
+for q in np.arange(0.1,1.,0.2):
+# for logM in np.arange(12.5,15,0.5):
      
      print q
      print logM
