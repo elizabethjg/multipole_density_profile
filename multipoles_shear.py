@@ -4,6 +4,13 @@ from astropy.cosmology import LambdaCDM
 from scipy.misc import derivative
 from scipy import integrate
 
+#parameters
+
+cvel = 299792458;   # Speed of light (m.s-1)
+G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
+pc   = 3.085678e16; # 1 pc (m)
+Msun = 1.989e30 # Solar mass (kg)
+
 def multipole_clampitt(r,theta,M200=1.e14,z=0.2,zs=0.35,
 					   h=0.7,misscentred=False,s_off=0.4):
 
