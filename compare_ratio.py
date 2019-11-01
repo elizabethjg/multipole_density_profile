@@ -108,3 +108,5 @@ for logM in np.arange(12.5,15,0.5):
      ax2[1].set_xlabel('r [Mpc]')
      
 plt.show()
+
+print 'END OF PROGRAM :)'
