@@ -3,6 +3,7 @@ from pylab import *
 from astropy.cosmology import LambdaCDM
 from scipy.misc import derivative
 from scipy import integrate
+from profiles_fit import *
 
 #parameters
 
