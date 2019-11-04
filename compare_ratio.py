@@ -18,7 +18,7 @@ logM = 14.
 M    = 10**logM
 q    = 0.6
 
-a  = np.logspace(np.log10(0.05),np.log10(1.5),15)
+a  = np.logspace(np.log10(0.05),np.log10(1.5),10)
 a  = np.append(a,-1.*a)
 
 x,y = np.meshgrid(a,a)
@@ -65,7 +65,7 @@ for q in np.arange(0.1,1.,0.2):
      DSt = (Pa['I1'] + Pa['I2'] - Pa['quadrupole'])*(ellip)
      DSx = (Pa['I1'] - Pa['I2'])*(ellip)
      
-     ax[0,0].plot([0,5],[0,0],'k--')
+     ax[0,0].plot([0,1.5],[0,0],'k--')
      ax[0,0].plot(r,DSt,str(q/2.))
      ax[0,0].set_xscale('log')
      ax[0,0].set_ylabel(r'$\Delta \Sigma^c_+$')

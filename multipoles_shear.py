@@ -410,14 +410,19 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		gamma_t_off = []
 		gamma_x_off = []
 		for R in r:
-			print R
+			print 'computing DS_t0_off'
+			t1 = time.time()
 			def DS_t_off0(theta):
 				gamma_t0 = Delta_Sigma_off(R,theta)
 				return gamma_t0
 			argumento = lambda x: DS_t_off0(x)
-			integral  = integrate.quad(argumento, 0, 2.*np.pi)[0]
-			gamma_t0_off = np.append(gamma_t0_off,integral/np.pi)
-				
+			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi])[0]
+			gamma_t0_off = np.append(gamma_t0_off,integral/(2.*np.pi))
+			t2 = time.time()
+			print (t2-t1)/60.
+			
+			print 'computing DS_t_off'
+			t1 = time.time()
 			def DS_t_off(theta):
 				gamma_t0 = Delta_Sigma_off(R,theta)
 				gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
@@ -426,26 +431,28 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-			integral  = integrate.quad(argumento, 0, 2.*np.pi)[0]
+			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[0])[0]
 			gamma_t_off = np.append(gamma_t_off,integral/np.pi)
+			t2 = time.time()
+			print (t2-t1)/60.
 			
-			
+			print 'computing DS_x_off'
+			t1 = time.time()
 			def DS_x_off(theta):
 				gamma_x2 = ((-6*psi2_off(R,theta)/R**2) 
 				            - 4.*monopole_off(R,theta))
 				return ellip*gamma_x2*np.sin(2.*theta)
-
 			argumento = lambda x: DS_x_off(x)*np.cos(2.*x)
 			integral  = integrate.quad(argumento, 0, 2.*np.pi)[0]
 			gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
+			t2 = time.time()
+			print (t2-t1)/60.
 			
-		
+		gamma_t0_off = np.repeat(gamma_t_off,c)
 		gamma_t_off = np.repeat(gamma_t_off,c)
-		return gamma_t_off
-
+		gamma_x_off = np.repeat(gamma_t_off,c)
 		
-		
-		return monopole_off_r,quadrupole_off_r,psi2_off_r
+		return gamma_t0_off, gamma_t_off, gamma_x_off
 		
 	
 	m,q,p2 = quantities_centred(r)
