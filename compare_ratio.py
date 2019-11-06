@@ -49,15 +49,15 @@ print '     QUADRUPOLE PROFILE     '
 print '----------------------------'
 
 
-for q in np.arange(0.1,1.,0.2):
-# for logM in np.arange(12.5,15,0.5):
+# for q in np.arange(0.1,1.,0.2):
+for logM in np.arange(12.5,15,0.5):
      
      print q
      print logM
      
      M = 10**logM
      
-     Pa = multipole_clampitt(r,theta,M200=M,z=0.2,zs=0.6)
+     Pa = multipole_clampitt(r,M200=M,z=0.2,zs=0.6)
      ellip = (1.- q**2)/(2.*(1. + q**2))
      
      # Adhikari et al. (2015) - eq 14 y 15
@@ -77,13 +77,13 @@ for q in np.arange(0.1,1.,0.2):
      
      ax2[0].plot([0,1.5],[0,0],'k--')
      ax2[1].plot([0,1.5],[0,0],'k--')
-     ax2[0].plot(r,DSt,'C0',alpha=1.-(q/2.))
+     ax2[0].plot(r,-1.*DSt,'C0--',alpha=1.-(q/2.))
      ax2[0].set_ylabel(r'$\Delta \Sigma_+$')
-     ax2[1].plot(r,DSx,'C0',alpha=1.-(q/2.))
+     ax2[1].plot(r,-1.*DSx,'C0--',alpha=1.-(q/2.))
      ax2[1].set_ylabel(r'$\Delta \Sigma_x$')
      
-     Pv = multipole_vanUitert(r,theta,M200=M,z=0.2,zs=0.6)
-     # ellip = (1.- q)/(1. + q) 
+     Pv = multipole_vanUitert(r,M200=M,z=0.2,zs=0.6)
+     ellip = (1.- q)/(1. + q) 
      
      DS_t = ellip*((-6*Pv['psi2']/r**2) - 2.*Pv['monopole'] + Pv['quadrupole'])
      DS_x = ellip*((-6*Pv['psi2']/r**2) - 4.*Pv['monopole'])

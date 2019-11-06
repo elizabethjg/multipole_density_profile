@@ -14,7 +14,7 @@ G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
 pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
 
-def multipole_clampitt(r,theta,M200=1.e14,z=0.2,zs=0.35,
+def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 					   h=0.7,misscentred=False,s_off=0.4):
 
 	cosmo = LambdaCDM(H0=h*100, Om0=0.3, Ode0=0.7)
@@ -163,7 +163,11 @@ def multipole_clampitt(r,theta,M200=1.e14,z=0.2,zs=0.35,
 	vec_DSoff = np.vectorize(Delta_Sigma_off)
 	
 	def quadrupole_off(R,theta):
-		argumento = lambda x: quadrupole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
+		def roff(x,R,theta):
+			return np.round(R**2+x**2-2*x*R*np.cos(theta),6)
+		def qoff(x,R,theta):
+			return quadrupole(roff(x,R,theta))*P_Roff(x)
+		argumento = lambda x: qoff(x,R,theta)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
 		integral2  = integrate.quad(argumento, 0., R)[0]
 		integral3  = integrate.quad(argumento, R, np.inf)[0]
@@ -230,8 +234,9 @@ def multipole_clampitt(r,theta,M200=1.e14,z=0.2,zs=0.35,
 	return output
 
 
-def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
-					   h=0.7,misscentred=False,s_off=0.4,ncores=20):
+def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
+						misscentred=False,s_off=0.4,ellip=0.5):
+
 
 	cosmo = LambdaCDM(H0=h*100, Om0=0.3, Ode0=0.7)
 	H        = cosmo.H(z).value/(1.0e3*pc) #H at z_pair s-1 
@@ -268,7 +273,7 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
-		x=(R*c)/R200
+		x=np.round((R*c)/R200,12)
 		m1= x< 1.0
 		m2= x> 1.0 
 		m3= (x == 1.0)
@@ -321,7 +326,7 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
-		x=(R*c)/R200
+		x=np.round((R*c)/R200,12)
 		m1= x< 1.0
 		m2= x> 1.0 
 		m3= (x == 1.0)
@@ -340,7 +345,7 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		return kapak*jota
 
 	def quadrupole(R):
-		m0p = derivative(monopole,R,dx=1e-12)
+		m0p = derivative(monopole,R,dx=1e-6)
 		return m0p*R
 
 	def psi2(R):
@@ -358,10 +363,12 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))
 	
 	def monopole_off(R,theta):
-		argumento = lambda x: monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
+		def moff(x):
+			return monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
+		argumento = lambda x: moff(x)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R)[0]
-		integral3  = integrate.quad(argumento, R, np.inf)[0]
+		integral2  = integrate.quad(argumento, 0., R-1.e6)[0]
+		integral3  = integrate.quad(argumento, R+1.e6, np.inf)[0]
 		return integral1 + integral2 + integral3
 	vec_moff = np.vectorize(monopole_off)
 
@@ -374,18 +381,27 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 	vec_DSoff = np.vectorize(Delta_Sigma_off)
 	
 	def quadrupole_off(R,theta):
+		b = -2*R*np.cos(theta)
+		c = R**2-1.e-6
+		if (b**2 - 4.*c) > 0.:		
+			dr = abs(abs(-b - np.sqrt(b**2 - 4.*c))*0.5 - R)		
+		else:
+			dr = 0.
+		def rp(roff):
+			return R**2+roff**2-2*roff*R*np.cos(theta)
 		def q_off(roff):
-			return quadrupole(R**2+roff**2-2*roff*R*np.cos(theta))*P_Roff(roff)
+			return quadrupole(rp(roff))*P_Roff(roff)
 		argumento = lambda x: q_off(x)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R)[0]
-		integral3  = integrate.quad(argumento, R, np.inf)[0]
+		integral2  = integrate.quad(argumento, 0., R-dr)[0]
+		integral3  = integrate.quad(argumento, R+dr, np.inf)[0]
 		return integral1 + integral2 + integral3	
 	vec_qoff = np.vectorize(quadrupole_off)
 	
-	
 	def psi2_off(R,theta):
-		argumento = lambda x: (x**3)*monopole_off(x,theta)
+		def arg(x):
+			return (x**3)*monopole_off(x,theta)
+		argumento = lambda x: arg(x)
 		integral = integrate.quad(argumento, 0, R)[0]
 		return integral*(-2./(R**2))
 		
@@ -435,7 +451,7 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-			integral  = integrate.quad(argumento, 0, 2.*np.pi,epsabs=1.e-6,epsrel=1.e-6)[0]
+			integral  = integrate.quad(argumento, 1.e-6, 2.*np.pi,epsabs=1.e-6,epsrel=1.e-6)[0]
 			gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 			t2 = time.time()
 			print (t2-t1)/60.
@@ -456,28 +472,14 @@ def multipole_vanUitert(r,theta,M200=1.e14,z=0.2,zs=0.35,
 		gamma_t_off = np.repeat(gamma_t_off,c)
 		gamma_x_off = np.repeat(gamma_t_off,c)
 		
-		return [gamma_t0_off, gamma_t_off, gamma_x_off]
+		return gamma_t0_off, gamma_t_off, gamma_x_off
 		
 	
 	m,q,p2 = quantities_centred(r)
 	output = {'monopole':m,'quadrupole':q,'psi2':p2}
 	
 	if misscentred:
-		slicer = int(round(len(r)/ncores, 0))
-		slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
-		pool = Pool(processes=(ncores))
-		
-		salida=np.array(pool.map(quantities_misscentred, np.split(r,slices))
-		
-		gt0_off = salida[0,0]
-		gt2_off = salida[0,1]
-		gx2_off = salida[0,2]
-		
-		for j in np.arange(1,ncores): 
-			gt0_off = np.concatenate((gt0_off,salida[j,0]))
-			gt2_off = np.concatenate((gt2_off,salida[j,1]))
-			gx2_off = np.concatenate((gx2_off,salida[j,2]))
-		
+		gt0_off, gt2_off, gx2_off = quantities_misscentred(r)	
 		output.update({'gt0_off':gt0_off,'gt2_off':gt2_off,'gx2_off':gx2_off})
 		
 	return output
