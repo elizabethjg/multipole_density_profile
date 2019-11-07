@@ -13,7 +13,7 @@ cd /home/elizabeth/multipole_density_profile
 
 export OMP_NUM_THREADS=20
 
-anaconda2
-py2env
+module load softwares/anaconda2/5.0-intel-2018.0
+source activate py2env
 
 srun python -u run_parallel.py
