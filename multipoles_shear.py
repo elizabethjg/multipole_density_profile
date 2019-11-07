@@ -434,6 +434,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		argumento = lambda x: (x**3)*monopole(x)
 		integral = integrate.quad(argumento, 0, R)[0]
 		return integral*(-2./(R**2))
+	
+	vecpsi2 = np.vectorize(psi2)
 		
 	#print '##################'
 	#print '    MISCENTRED    '
