@@ -234,8 +234,33 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 	return output
 
 
-def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
+def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 					h=0.7,misscentred=False,s_off=0.4):
+
+'''
+	Equations from van Uitert (vU, arXiv:1610.04226) for the 
+	multipole expansion and from Ford et al. (F,2015) for
+	the misscentring
+
+	INPUTS:
+	r               [Mpc] - Float or numpy_array
+	                Distance to the centre of 
+	                the gravitational potential
+	
+	OPTIONAL:
+	M200            [M_sun] - Float/ Cluster Mass
+	ellip           Float / Halo ellipticity defined as
+	                (1-q)/(1+q) where q is the semi-axis
+	                ratio (q < 1)
+	z               Float/ Lens redshift
+	zs              Float/ Source redshift
+	h               Float/ Cosmological quantity
+	misscentred     Float/ If True computes de misscentred quantities
+	s_off           Float/ sigma_offset width of the distribution 
+	                of cluster offsets (F_Eq11)
+	
+
+'''
 
 	if not isinstance(r, (np.ndarray)):
 		r = np.array([r])
@@ -573,7 +598,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		gx2 = np.append(gx2,s['Gx2'])
 		if misscentred:
 			gt0_off = np.append(gt0_off,s['Gt0_off'])
-			gt0_off = np.append(gt0_off,s['Gt_off'])
+			gt_off0 = np.append(gt_off0,s['Gt_off'])
 			gt_off  = np.append(gt_off,s['Gt_off_cos'])
 			gx_off  = np.append(gx_off,s['Gx_off_sin'])
 			
