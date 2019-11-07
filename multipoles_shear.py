@@ -237,7 +237,7 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 					h=0.7,misscentred=False,s_off=0.4):
 
-'''
+	'''
 	Equations from van Uitert (vU, arXiv:1610.04226) for the 
 	multipole expansion and from Ford et al. (F,2015) for
 	the misscentring
@@ -260,7 +260,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	                of cluster offsets (F_Eq11)
 	
 
-'''
+	'''
 
 	if not isinstance(r, (np.ndarray)):
 		r = np.array([r])
