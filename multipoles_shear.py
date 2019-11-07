@@ -256,23 +256,42 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	zs              Float/ Source redshift
 	h               Float/ Cosmological quantity
 	misscentred     Float/ If True computes de misscentred quantities
+					The misscentred is 
 	s_off           Float/ sigma_offset width of the distribution 
 	                of cluster offsets (F_Eq11)
 	
-
+	OUTPUT:
+	output          Dictionary (the shear is scales with the
+	                critical density Gamma_i = Sigma_cr*gamma_i
+	                ---------- vU_Eq18 ---------
+	                Gt0: Shear monopole
+	                Gt2: Tangential component for the quadrupole
+	                Gx2: Cross component for the quadrupole
+	                --------- Misscentred terms --------
+	                Gt0_off: (ellip = 0) F_Eq14
+	                Gt_off: Integrated tangential component (vU_Eq17)
+	                for considering kappa_offset
+	                Gt_off_cos: Integrated tangential component times
+	                cos(2theta) (vU_Eq17) for considering kappa_offset
+	                Gx_off_sin: Integrated cross component times
+	                sin(2theta) (vU_Eq17) for considering kappa_offset
 	'''
 
+	# Check if r is float or numpy array
 	if not isinstance(r, (np.ndarray)):
 		r = np.array([r])
 
+	# Compute cosmological parameters
 	cosmo = LambdaCDM(H0=h*100, Om0=0.3, Ode0=0.7)
 	H        = cosmo.H(z).value/(1.0e3*pc) #H at z_pair s-1 
 	roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
 	roc_mpc  = roc*((pc*1.0e6)**3.0)
 	
-	
+	# Compute R_200
 	R200 = r200_nfw(M200,roc_mpc)
 	R200 = R200.astype(float128)
+	
+	# Scaling sigma_off
 	s_off = s_off/h	
 	
 	############  COMPUTING S_crit
@@ -291,6 +310,10 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	#print '##################'
 	
 	def Delta_Sigma(R):
+		'''
+		Density contraste for NFW
+		
+		'''
 		
 		#calculo de c usando la relacion de Duffy et al 2008
 		
@@ -338,6 +361,13 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	
 	
 	def monopole(R):
+		
+		'''
+		Projected density for NFW
+		
+		'''
+
+		
 		
 		if not isinstance(R, (np.ndarray)):
 			R = np.array([R])
@@ -387,24 +417,40 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		return kapak*jota
 
 	def quadrupole(R):
+		'''
+		Quadrupole term defined as (d(Sigma)/dr)*r
+		
+		'''
+		
+		
 		m0p = derivative(monopole,R,dx=1e-6)
 		return m0p*R
 
 	def psi2(R):
+		'''
+		vU_Eq10
+		
+		'''
 		argumento = lambda x: (x**3)*monopole(x)
 		integral = integrate.quad(argumento, 0, R)[0]
 		return integral*(-2./(R**2))
-		
-	vecpsi2 = np.vectorize(psi2)
 		
 	#print '##################'
 	#print '    MISCENTRED    '
 	#print '##################'
 
 	def P_Roff(Roff):
+		'''
+		F_Eq11
+		
+		'''		
 		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))
 	
 	def monopole_off(R,theta):
+		'''
+		F_Eq12
+		
+		'''				
 		def moff(x):
 			return monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
 		argumento = lambda x: moff(x)
