@@ -6,7 +6,7 @@ from scipy import integrate
 from profiles_fit import *
 from multiprocessing import Pool
 from multiprocessing import Process
-
+import time
 #parameters
 
 cvel = 299792458;   # Speed of light (m.s-1)
@@ -403,7 +403,6 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 			return R**2+roff**2-2*roff*R*np.cos(theta)
 			
 		def q_off(roff):
-			# return quadrupole(rp(roff))*P_Roff(roff)
 			if rp(roff) > 1.e-5:
 				return quadrupole(rp(roff))*P_Roff(roff)
 			else:
@@ -469,7 +468,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 				gamma_t0 = Delta_Sigma_off(R,theta)
 				return gamma_t0
 			argumento = lambda x: DS_t_off0(x)
-			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi])[0]
+			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
 			gamma_t0_off = np.append(gamma_t0_off,integral/(2.*np.pi))
 			t2 = time.time()
 			print (t2-t1)/60.
@@ -484,7 +483,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-			integral  = integrate.quad(argumento, 1.e-6, 2.*np.pi)[0]
+			integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
 			gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 			t2 = time.time()
 			print (t2-t1)/60.
@@ -496,7 +495,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 				            - 4.*monopole_off(R,theta))
 				return ellip*gamma_x2*np.sin(2.*theta)
 			argumento = lambda x: DS_x_off(x)*np.cos(2.*x)
-			integral  = integrate.quad(argumento, 0, 2.*np.pi)[0]
+			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
 			gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
 			t2 = time.time()
 			print (t2-t1)/60.
@@ -517,32 +516,60 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 	
 	if misscentred:
 		gt0_off, gt_off, gx_off = quantities_misscentred(r)	
-		output.update({'Gt0_off':gt0_off,'Gt_off':gt2_off,'Gx_off':gx2_off})
+		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off,'Gx_off':gx_off})
 		
 	return output
 
-'''
+# '''
 
 def multipole_shear_unpack(minput):
 	return multipole_shear(*minput)
 	
-def multipole_shear_parallel(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
-					         h=0.7,misscentred=False,s_off=0.4,ncores):
+def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
+					         h=0.7,misscentred=False,s_off=0.4,ncores=2):
 	
-     slicer = int(round(len(r)/ncores, 0))
-     slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
-     r_splited = np.split(r,slices)
-
-     M200  = np.ones(ncores)*M200
-     ellip = np.ones(ncores)*ellip
-     z     = np.ones(ncores)*z
-     zs    = np.ones(ncores)*zs
-     h     = np.ones(ncores)*h
-     miss  = np.ones(ncores,dtype=bool)*misscentred
-     s_off = np.ones(ncores)*s_off
-     
-     entrada = np.array([r_splited,M200,ellip,z,zs,h,miss,s_off]).T
-     
-
+	slicer = int(round(len(r)/float(ncores), 0))
+	slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
+	slices = slices[(slices <= len(r))]
+	r_splitted = np.split(r,slices)
 	
-'''
+	ncores = len(r_splitted)
+	
+	M200  = np.ones(ncores)*M200
+	ellip = np.ones(ncores)*ellip
+	z     = np.ones(ncores)*z
+	zs    = np.ones(ncores)*zs
+	h     = np.ones(ncores)*h
+	miss  = np.ones(ncores,dtype=bool)*misscentred
+	s_off = np.ones(ncores)*s_off
+	
+	entrada = np.array([r_splitted,M200,ellip,z,zs,h,miss,s_off]).T
+	
+	pool = Pool(processes=(ncores))
+	salida=np.array(pool.map(multipole_shear_unpack, entrada))
+	pool.terminate()
+
+	gt0 = []
+	gt2 = []
+	gx2 = []
+	
+	if misscentred:
+		gt0_off = []
+		gt_off  = []
+		gx_off  = []
+
+	for s in salida:
+		gt0 = np.append(gt0,s['Gt0'])
+		gt2 = np.append(gt2,s['Gt2'])
+		gx2 = np.append(gx2,s['Gx2'])
+		if misscentred:
+			gt0_off = np.append(gt0_off,s['Gt0_off'])
+			gt_off  = np.append(gt_off,s['Gt_off'])
+			gt_off  = np.append(gx_off,s['Gx_off'])
+			
+	output = {'Gt0':gt0,'Gt2':gt2,'Gx2':gx2}
+	
+	if misscentred:
+		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off,'Gx_off':gx_off})
+
+	return output
