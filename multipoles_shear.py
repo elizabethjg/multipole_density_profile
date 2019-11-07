@@ -459,6 +459,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 		print 'computing misscentred profile'
 		r,c = np.unique(r,return_counts=True)
 		gamma_t0_off = []
+		gamma_t_off0 = []
 		gamma_t_off = []
 		gamma_x_off = []
 		for R in r:
@@ -473,7 +474,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 			t2 = time.time()
 			print (t2-t1)/60.
 			
-			print 'computing DS_t_off'
+			print 'computing DS_t_off_cos'
 			t1 = time.time()
 			def DS_t_off(theta):
 				gamma_t0 = Delta_Sigma_off(R,theta)
@@ -487,24 +488,31 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 			gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 			t2 = time.time()
 			print (t2-t1)/60.
+
+			print 'computing DS_t_off'
+			t1 = time.time()
+			argumento = lambda x: DS_t_off(x)
+			integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+			gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 			
-			print 'computing DS_x_off'
+			print 'computing DS_x_off_sin'
 			t1 = time.time()
 			def DS_x_off(theta):
 				gamma_x2 = ((-6*psi2_off(R,theta)/R**2) 
 				            - 4.*monopole_off(R,theta))
 				return ellip*gamma_x2*np.sin(2.*theta)
-			argumento = lambda x: DS_x_off(x)*np.cos(2.*x)
+			argumento = lambda x: DS_x_off(x)*np.sin(2.*x)
 			integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
 			gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
 			t2 = time.time()
 			print (t2-t1)/60.
 			
-		gamma_t0_off = np.repeat(gamma_t_off,c)
+		gamma_t0_off = np.repeat(gamma_t0_off,c)
+		gamma_t_off0 = np.repeat(gamma_t_off0,c)
 		gamma_t_off = np.repeat(gamma_t_off,c)
-		gamma_x_off = np.repeat(gamma_t_off,c)
+		gamma_x_off = np.repeat(gamma_x_off,c)
 		
-		return gamma_t0_off, gamma_t_off, gamma_x_off
+		return gamma_t0_off, gamma_t_off0, gamma_t_off, gamma_x_off
 		
 	
 	gt0,m,q,p2 = quantities_centred(r)
@@ -515,8 +523,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
 	output = {'Gt0':gt0,'Gt2':gt2,'Gx2':gx2}
 	
 	if misscentred:
-		gt0_off, gt_off, gx_off = quantities_misscentred(r)	
-		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off,'Gx_off':gx_off})
+		gt0_off, gt_off0, gt_off, gx_off = quantities_misscentred(r)	
+		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
 		
 	return output
 
@@ -555,6 +563,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	
 	if misscentred:
 		gt0_off = []
+		gt_off0 = []
 		gt_off  = []
 		gx_off  = []
 
@@ -564,12 +573,13 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		gx2 = np.append(gx2,s['Gx2'])
 		if misscentred:
 			gt0_off = np.append(gt0_off,s['Gt0_off'])
-			gt_off  = np.append(gt_off,s['Gt_off'])
-			gt_off  = np.append(gx_off,s['Gx_off'])
+			gt0_off = np.append(gt0_off,s['Gt_off'])
+			gt_off  = np.append(gt_off,s['Gt_off_cos'])
+			gx_off  = np.append(gx_off,s['Gx_off_sin'])
 			
 	output = {'Gt0':gt0,'Gt2':gt2,'Gx2':gx2}
 	
 	if misscentred:
-		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off,'Gx_off':gx_off})
+		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
 
 	return output

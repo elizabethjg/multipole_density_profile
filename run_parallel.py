@@ -18,10 +18,10 @@ logM = 14.
 M    = 10**logM
 q    = 0.6
 
-r  = np.logspace(np.log10(0.05),np.log10(1.5),50)
+r  = np.logspace(np.log10(0.05),np.log10(1.5),4)
 
 ellip = (1.- q)/(1. + q)
-out = multipole_shear_parallel(r,M200=M,z=0.2,zs=0.6,ellip=ellip,misscentred=True,ncores=20)
+out = multipole_shear_parallel(r,M200=M,z=0.2,zs=0.6,ellip=ellip,misscentred=True,ncores=2)
 
 save = np.array([r,out['Gt0'],out['Gt2'],out['Gx2'],out['Gt0_off'],out['Gt_off'],out['Gx_off']]).T
 # save = np.array([r,out['Gt0'],out['Gt2'],out['Gx2']]).T
