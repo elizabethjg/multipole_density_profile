@@ -15,23 +15,26 @@ pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
 
 def pru(r,a=2):
-     
-     return [r, a*2.]
+     return {'r':r, '2a':a*2.}
 
 def pru2(into):
      return pru(*into)
 
 ncores = 2
-r = np.array([0.1,0.2,0.3,0.4])
-slicer = int(round(len(r)/ncores, 0))
-slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
-r_splited = np.split(r,slices)
-a = np.ones(len(r_splited))
 
-pool = Pool(processes=(ncores))
-salida=np.array(pool.map(pru2, [r_splited,a]))
+def run_parallel(ncores=2):
+     r = np.array([0.1,0.2,0.3,0.4])
+     slicer = int(round(len(r)/ncores, 0))
+     slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
+     r_splited = np.split(r,slices)
+     a = np.ones(len(r_splited))
+     
+     pool = Pool(processes=(ncores))
+     salida=np.array(pool.map(pru2, np.array([r_splited,a]).T))
+     pool.terminate()
+     return salida
 
-'''
+# '''
 ############  MAKING A GRID
 
 logM = 14.
@@ -58,4 +61,8 @@ j   = argsort(r)
 r   = r[j]
 theta  = theta[j]
 x,y = x[j],y[j]
+
+
+
+
 '''

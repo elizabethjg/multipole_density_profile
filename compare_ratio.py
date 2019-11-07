@@ -82,11 +82,11 @@ for logM in np.arange(12.5,15,0.5):
      ax2[1].plot(r,-1.*DSx,'C0--',alpha=1.-(q/2.))
      ax2[1].set_ylabel(r'$\Delta \Sigma_x$')
      
-     Pv = multipole_vanUitert(r,M200=M,z=0.2,zs=0.6)
-     ellip = (1.- q)/(1. + q) 
+     ellip = (1.- q)/(1. + q)
+     Pv = multipole_shear(r,M200=M,z=0.2,zs=0.6,ellip=ellip)
      
-     DS_t = ellip*((-6*Pv['psi2']/r**2) - 2.*Pv['monopole'] + Pv['quadrupole'])
-     DS_x = ellip*((-6*Pv['psi2']/r**2) - 4.*Pv['monopole'])
+     DS_t = Pv['Gt2']
+     DS_x = Pv['Gx2']
 
      ax[1,0].plot([0,1.5],[0,0],'k--')
      ax[1,0].plot(r,DS_t,str(q/2.))

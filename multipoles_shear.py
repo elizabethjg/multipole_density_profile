@@ -234,9 +234,11 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 	return output
 
 
-def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
-						misscentred=False,s_off=0.4,ellip=0.5):
+def multipole_shear(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
+					h=0.7,misscentred=False,s_off=0.4):
 
+	if not isinstance(r, (np.ndarray)):
+		r = np.array([r])
 
 	cosmo = LambdaCDM(H0=h*100, Om0=0.3, Ode0=0.7)
 	H        = cosmo.H(z).value/(1.0e3*pc) #H at z_pair s-1 
@@ -245,7 +247,7 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 	
 	
 	R200 = r200_nfw(M200,roc_mpc)
-	
+	R200 = R200.astype(float128)
 	s_off = s_off/h	
 	
 	############  COMPUTING S_crit
@@ -315,6 +317,9 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 		if not isinstance(R, (np.ndarray)):
 			R = np.array([R])
 		
+		R = R.astype(float128)
+
+		
 		# m = R == 0.
 		# R[m] = 1.e-8
 		
@@ -326,10 +331,12 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
-		x=np.round((R*c)/R200,12)
-		m1= x< 1.0
-		m2= x> 1.0 
-		m3= (x == 1.0)
+		c = c.astype(float128)
+		x=(R*c)/R200
+		m1 = x <= (1.0-1.e-5)
+		m2 = x >= (1.0+1.e-5)
+		m3 = (x == 1.0)
+		m4 = (~m1)*(~m2)*(~m3)
 	
 		jota  = np.zeros(len(x))
 		atanh = np.arctanh(np.sqrt((1.0-x[m1])/(1.0+x[m1])))
@@ -339,6 +346,16 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 		jota[m2] = (1./(x[m2]**2-1.))*(1.-(2./np.sqrt(x[m2]**2 - 1.))*atan) 
 	
 		jota[m3] = 1./3.
+		
+		x1 = 1.-1.e-5
+		atanh1 = np.arctanh(np.sqrt((1.0-x1)/(1.0+x1)))
+		j1 = (1./(x1**2-1.))*(1.-(2./np.sqrt(1.-x1**2))*atanh1) 
+		
+		x2 = 1.+1.e-5
+		atan2 = np.arctan(((x2-1.0)/(1.0+x2))**0.5)
+		j2 = (1./(x2**2-1.))*(1.-(2./np.sqrt(x2**2 - 1.))*atan2) 
+		
+		jota[m4] = np.interp(x[m4].astype(float64),[x1,x2],[j1,j2])
 					
 		rs_m=(R200*1.e6*pc)/c
 		kapak=((2.*rs_m*deltac*roc_mpc)*(pc**2/Msun))/((pc*1.0e6)**3.0)
@@ -367,8 +384,8 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 			return monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
 		argumento = lambda x: moff(x)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R-1.e6)[0]
-		integral3  = integrate.quad(argumento, R+1.e6, np.inf)[0]
+		integral2  = integrate.quad(argumento, 0., R)[0]
+		integral3  = integrate.quad(argumento, R, np.inf)[0]
 		return integral1 + integral2 + integral3
 	vec_moff = np.vectorize(monopole_off)
 
@@ -381,20 +398,33 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 	vec_DSoff = np.vectorize(Delta_Sigma_off)
 	
 	def quadrupole_off(R,theta):
-		b = -2*R*np.cos(theta)
-		c = R**2-1.e-6
-		if (b**2 - 4.*c) > 0.:		
-			dr = abs(abs(-b - np.sqrt(b**2 - 4.*c))*0.5 - R)		
-		else:
-			dr = 0.
+
 		def rp(roff):
 			return R**2+roff**2-2*roff*R*np.cos(theta)
+			
 		def q_off(roff):
-			return quadrupole(rp(roff))*P_Roff(roff)
+			# return quadrupole(rp(roff))*P_Roff(roff)
+			if rp(roff) > 1.e-5:
+				return quadrupole(rp(roff))*P_Roff(roff)
+			else:
+				
+				b = -2*R*np.cos(theta)
+				c = R**2-1.e-5
+				R1 = np.round(((-b - np.sqrt(b**2 - 4.*c))*0.5),6)
+				R2 = np.round(((-b + np.sqrt(b**2 - 4.*c))*0.5),6)
+				R1 = min(R1,R2)		
+				R2 = max(R1,R2)
+
+				q1 = (quadrupole(rp(R1))*P_Roff(R1))[0]
+				q2 = (quadrupole(rp(R2))*P_Roff(R2))[0]
+				
+				return np.interp(roff,[R1,R2],[q1,q2])
+
 		argumento = lambda x: q_off(x)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R-dr)[0]
-		integral3  = integrate.quad(argumento, R+dr, np.inf)[0]
+		integral2  = integrate.quad(argumento, 0., R)[0]
+		integral3  = integrate.quad(argumento, R, np.inf)[0]
+
 		return integral1 + integral2 + integral3	
 	vec_qoff = np.vectorize(quadrupole_off)
 	
@@ -412,16 +442,19 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 		# optimize using unique r
 		r,c = np.unique(r,return_counts=True)
 		
+		gt0 = Delta_Sigma(r)
 		monopole_r = monopole(r)
 		quadrupole_r = quadrupole(r)
 		print 'computing psi2 centred'	
 		psi2_r = vecpsi2(r)
 		
+		
 		monopole_r   = np.repeat(monopole_r,c)
 		quadrupole_r = np.repeat(quadrupole_r,c)
 		psi2_r       = np.repeat(psi2_r,c)
+		gt0          = np.repeat(gt0,c)
 		
-		return monopole_r,quadrupole_r,psi2_r
+		return gt0,monopole_r,quadrupole_r,psi2_r
 		
 	def quantities_misscentred(r):
 		print 'computing misscentred profile'
@@ -451,7 +484,7 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-			integral  = integrate.quad(argumento, 1.e-6, 2.*np.pi,epsabs=1.e-6,epsrel=1.e-6)[0]
+			integral  = integrate.quad(argumento, 1.e-6, 2.*np.pi)[0]
 			gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 			t2 = time.time()
 			print (t2-t1)/60.
@@ -475,11 +508,41 @@ def multipole_vanUitert(r,M200=1.e14,z=0.2,zs=0.35,h=0.7,
 		return gamma_t0_off, gamma_t_off, gamma_x_off
 		
 	
-	m,q,p2 = quantities_centred(r)
-	output = {'monopole':m,'quadrupole':q,'psi2':p2}
+	gt0,m,q,p2 = quantities_centred(r)
+	
+	gt2 = ellip*((-6*p2/r**2) - 2.*m + q)
+	gx2 = ellip*((-6*p2/r**2) - 4.*m)
+	
+	output = {'Gt0':gt0,'Gt2':gt2,'Gx2':gx2}
 	
 	if misscentred:
-		gt0_off, gt2_off, gx2_off = quantities_misscentred(r)	
-		output.update({'gt0_off':gt0_off,'gt2_off':gt2_off,'gx2_off':gx2_off})
+		gt0_off, gt_off, gx_off = quantities_misscentred(r)	
+		output.update({'Gt0_off':gt0_off,'Gt_off':gt2_off,'Gx_off':gx2_off})
 		
 	return output
+
+'''
+
+def multipole_shear_unpack(minput):
+	return multipole_shear(*minput)
+	
+def multipole_shear_parallel(r,M200=1.e14,ellip=0.5,z=0.2,zs=0.35,
+					         h=0.7,misscentred=False,s_off=0.4,ncores):
+	
+     slicer = int(round(len(r)/ncores, 0))
+     slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
+     r_splited = np.split(r,slices)
+
+     M200  = np.ones(ncores)*M200
+     ellip = np.ones(ncores)*ellip
+     z     = np.ones(ncores)*z
+     zs    = np.ones(ncores)*zs
+     h     = np.ones(ncores)*h
+     miss  = np.ones(ncores,dtype=bool)*misscentred
+     s_off = np.ones(ncores)*s_off
+     
+     entrada = np.array([r_splited,M200,ellip,z,zs,h,miss,s_off]).T
+     
+
+	
+'''
