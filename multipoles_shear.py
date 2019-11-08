@@ -256,7 +256,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	zs              Float/ Source redshift
 	h               Float/ Cosmological quantity
 	misscentred     Float/ If True computes de misscentred quantities
-					The misscentred is 
+					The misscentred is considered only in the 
+					x - axis
 	s_off           Float/ sigma_offset width of the distribution 
 	                of cluster offsets (F_Eq11)
 	
@@ -463,6 +464,10 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	vec_moff = np.vectorize(monopole_off)
 
 	def Delta_Sigma_off(R,theta):
+		'''
+		F_Eq14
+		
+		'''						
 		argumento = lambda x: monopole_off(x,theta)*x
 		integral  = integrate.quad(argumento, 0, R)[0]
 		DS_off    = (2./R**2)*integral - monopole_off(R,theta)
@@ -476,10 +481,11 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 			return R**2+roff**2-2*roff*R*np.cos(theta)
 			
 		def q_off(roff):
+			
 			if rp(roff) > 1.e-5:
 				return quadrupole(rp(roff))*P_Roff(roff)
 			else:
-				
+				# for larger precission interpolates
 				b = -2*R*np.cos(theta)
 				c = R**2-1.e-5
 				R1 = np.round(((-b - np.sqrt(b**2 - 4.*c))*0.5),6)
