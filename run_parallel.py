@@ -31,7 +31,7 @@ for q in np.arange(0.1,1.,0.2):
                     out['Gt_off'],out['Gt_off_cos'],out['Gx_off_sin']]).T
      # save = np.array([r,out['Gt0'],out['Gt2'],out['Gx2']]).T
      
-     np.savetxt('../multipoles_'+str(q)+'.out',save)
+     np.savetxt('../multipoles_'+str('%2.1f' % q)+'.out',save)
 
 q    = 0.6
 ellip = (1.- q)/(1. + q)

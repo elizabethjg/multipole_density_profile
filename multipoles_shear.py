@@ -361,15 +361,11 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		return kapak*jota
 	
 	
-	def monopole(R):
-		
+	def monopole(R):		
 		'''
 		Projected density for NFW
 		
-		'''
-
-		
-		
+		'''		
 		if not isinstance(R, (np.ndarray)):
 			R = np.array([R])
 		
@@ -421,9 +417,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		'''
 		Quadrupole term defined as (d(Sigma)/dr)*r
 		
-		'''
-		
-		
+		'''		
 		m0p = derivative(monopole,R,dx=1e-6)
 		return m0p*R
 
@@ -447,7 +441,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		F_Eq11
 		
 		'''		
-		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))
+		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))*0.5
 	
 	def monopole_off(R,theta):
 		'''
