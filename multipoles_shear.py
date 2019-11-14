@@ -7,6 +7,15 @@ from profiles_fit import *
 from multiprocessing import Pool
 from multiprocessing import Process
 import time
+import sys, os
+
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
 #parameters
 
 cvel = 299792458;   # Speed of light (m.s-1)
@@ -235,7 +244,7 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 
 
 def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
-					h=0.7,misscentred=False,s_off=0.4):
+					h=0.7,misscentred=False,s_off=0.4,verbose=True):
 
 	'''
 	Equations from van Uitert (vU, arXiv:1610.04226) for the 
@@ -260,6 +269,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 					x - axis
 	s_off           Float/ sigma_offset width of the distribution 
 	                of cluster offsets (F_Eq11)
+	verbose         Print time computing
 	
 	OUTPUT:
 	output          Dictionary (the shear is scales with the
@@ -277,6 +287,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	                Gx_off_sin: Integrated cross component times
 	                sin(2theta) (vU_Eq17) for considering kappa_offset
 	'''
+	
+	if not verbose:
+		blockPrint()
 
 	# Check if r is float or numpy array
 	if not isinstance(r, (np.ndarray)):
@@ -598,6 +611,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	if misscentred:
 		gt0_off, gt_off0, gt_off, gx_off = quantities_misscentred(r)	
 		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
+
+	enablePrint()
 		
 	return output
 
@@ -606,8 +621,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 def multipole_shear_unpack(minput):
 	return multipole_shear(*minput)
 	
-def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
-					         h=0.7,misscentred=False,s_off=0.4,ncores=2):
+def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
+							 zs=0.35, h=0.7,misscentred=False,
+							 s_off=0.4,verbose = True, ncores=2):
 	
 	slicer = int(round(len(r)/float(ncores), 0))
 	slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
@@ -623,8 +639,9 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	h     = np.ones(ncores)*h
 	miss  = np.ones(ncores,dtype=bool)*misscentred
 	s_off = np.ones(ncores)*s_off
+	v  = np.ones(ncores,dtype=bool)*verbose
 	
-	entrada = np.array([r_splitted,M200,ellip,z,zs,h,miss,s_off]).T
+	entrada = np.array([r_splitted,M200,ellip,z,zs,h,miss,s_off,v]).T
 	
 	pool = Pool(processes=(ncores))
 	salida=np.array(pool.map(multipole_shear_unpack, entrada))
@@ -656,3 +673,24 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
 
 	return output
+
+
+def model_Gamma(multipole_out,component = 't', misscentred = True, pcc = 0.8):
+	
+	if misscentred:
+		if component == 't':
+			G = pcc*multipole_out['Gt0'] + (1-pcc)*multipole_out['Gt_off']
+		if component == 'tcos':
+			G = pcc*multipole_out['Gt2'] + (1-pcc)*multipole_out['Gt_off_cos']
+		if component == 'xsin':
+			G = pcc*multipole_out['Gx2'] + (1-pcc)*multipole_out['Gx_off_sin']
+	else:
+		if component == 't':
+			G = multipole_out['Gt0'] 
+		if component == 'tcos':
+			G = multipole_out['Gt2'] 
+		if component == 'xsin':
+			G = multipole_out['Gx2'] 
+			
+	return model
+

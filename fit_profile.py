@@ -5,54 +5,69 @@ from scipy.misc import derivative
 from scipy import integrate
 from multipoles_shear import *
 from scipy.optimize import minimize
+import emcee
+import corner
+import time
+from multiprocessing import Pool
 
-np.random.seed(123)
-
-# Choose the "true" parameters.
-m_true = -0.9594
-b_true = 4.294
-f_true = 0.534
-
-# Generate some synthetic data from the model.
-N = 50
-x = np.sort(10 * np.random.rand(N))
-yerr = 0.1 + 0.5 * np.random.rand(N)
-y = m_true * x + b_true
-y += np.abs(f_true * y) * np.random.randn(N)
-y += yerr * np.random.randn(N)
-
-plt.errorbar(x, y, yerr=yerr, fmt=".k", capsize=0)
-x0 = np.linspace(0, 10, 500)
-plt.plot(x0, m_true * x0 + b_true, "k", alpha=0.3, lw=3)
-plt.xlim(0, 10)
-plt.xlabel("x")
-plt.ylabel("y")
-
-def log_likelihood(theta, x, y, yerr):
-    m, b, log_f = theta
-    model = m * x + b
-    sigma2 = yerr ** 2 + model ** 2 * np.exp(2 * log_f)
-    return -0.5 * np.sum((y - model) ** 2 / sigma2 + np.log(sigma2))
+def log_likelihood(data_model, r, Gamma, e_Gamma):
+    log_M200, q = data_model
+    ellip = (1.- q)/(1. + q)
+    M200 = 10**log_M200
+    # model = multipole_shear_parallel(r,M200=M200,ellip=ellip,z=0.2,zs=0.6,verbose=False)['Gt2']
+    multipoles = multipole_shear(r,M200=M200,ellip=ellip,z=0.2,zs=0.6,verbose=False)
+    model = multipoles['Gt2']
+    sigma2 = e_Gamma**2
+    return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
     
-np.random.seed(42)
-nll = lambda *args: -log_likelihood(*args)
-initial = np.array([m_true, b_true, np.log(f_true)]) + 0.1 * np.random.randn(3)
-soln = minimize(nll, initial, args=(x, y, yerr))
-m_ml, b_ml, log_f_ml = soln.x
 
-print("Maximum likelihood estimates:")
-print("m = {0:.3f}".format(m_ml))
-print("b = {0:.3f}".format(b_ml))
-print("f = {0:.3f}".format(np.exp(log_f_ml)))
+def log_prior(data_model):
+    log_M200, q = data_model
+    if 13.5 < log_M200 < 14.5 and 0.5 < q < 1.0:
+        return 0.0
+    return -np.inf
 
-plt.errorbar(x, y, yerr=yerr, fmt=".k", capsize=0)
-plt.plot(x0, m_true * x0 + b_true, "k", alpha=0.3, lw=3, label="truth")
-plt.plot(x0, np.dot(np.vander(x0, 2), w), "--k", label="LS")
-plt.plot(x0, np.dot(np.vander(x0, 2), [m_ml, b_ml]), ":k", label="ML")
-plt.legend(fontsize=14)
-plt.xlim(0, 10)
-plt.xlabel("x")
-plt.ylabel("y")
+def log_probability(data_model, r, Gamma, e_Gamma):
+    lp = log_prior(data_model)
+    if not np.isfinite(lp):
+        return -np.inf
+    return lp + log_likelihood(data_model, r, Gamma, e_Gamma)
+
+pos = np.array([np.random.normal(13.7,0.5,35),np.random.normal(0.7,0.2,35)]).T
+me = pos[:,1]>1.
+pos[me,1] = pos[me,1] == 1.
+nwalkers, ndim = pos.shape
+
+pool = Pool(processes=(ncores))
+
+t1 = time.time()
+sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(r,Gt2, e_Gt2), pool = pool)
+sampler.run_mcmc(pos, 200, progress=True);
+print (time.time()-t1)/60.
 
 
+'''
+flat_samples = sampler.get_chain(discard=100, thin=1, flat=True)
+print(flat_samples.shape)
+
+fig = corner.corner(flat_samples, labels=labels, truths=[14.,0.6])
+
+
+fig, axes = plt.subplots(2, figsize=(10, 7), sharex=True)
+samples = sampler.get_chain()
+labels = ['M200','e']
+for i in range(ndim):
+    ax = axes[i]
+    ax.plot(samples[:, :, i], "k", alpha=0.3)
+    ax.set_xlim(0, len(samples))
+    ax.set_ylabel(labels[i])
+    ax.yaxis.set_label_coords(-0.1, 0.5)
+
+axes[-1].set_xlabel("step number")
+p1 = np.percentile(flat_samples[:, 0], [16, 50, 84])
+p2 = np.percentile(flat_samples[:, 1], [16, 50, 84])
+
+print p1[1],np.diff(p1)
+print p2[1],np.diff(p2)
+'''
 print 'END OF PROGRAM'
