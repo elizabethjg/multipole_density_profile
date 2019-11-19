@@ -692,5 +692,5 @@ def model_Gamma(multipole_out,component = 't', misscentred = True, pcc = 0.8):
 		if component == 'xsin':
 			G = multipole_out['Gx2'] 
 			
-	return model
+	return G
 

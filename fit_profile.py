@@ -16,7 +16,7 @@ def log_likelihood(data_model, r, Gamma, e_Gamma):
     M200 = 10**log_M200
     # model = multipole_shear_parallel(r,M200=M200,ellip=ellip,z=0.2,zs=0.6,verbose=False)['Gt2']
     multipoles = multipole_shear(r,M200=M200,ellip=ellip,z=0.2,zs=0.6,verbose=False)
-    model = multipoles['Gt2']
+    model = model_Gamma(multipoles,'tcos')
     sigma2 = e_Gamma**2
     return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
     
