@@ -28,7 +28,7 @@ def log_likelihood(theta, x, y, yerr):
     m, b, log_f = theta
     model = m * x + b
     sigma2 = yerr ** 2 + model ** 2 * np.exp(2 * log_f)
-    return -0.5 * np.sum((y - model) ** 2 / sigma2 + np.log(sigma2))
+    return -0.5 * np.sum((y - model) ** 2 / sigma2 + np.log(zsigma2))
     
 np.random.seed(42)
 nll = lambda *args: -log_likelihood(*args)

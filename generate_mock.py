@@ -23,10 +23,13 @@ ellip = (1.- q)/(1. + q)
 out = multipole_shear_parallel(r,M200=M,z=0.2,zs=0.6,
                               ellip=ellip,misscentred=False,
                               ncores=2)
-     
-Gt2   = out['Gt2']*(np.random.rand(len(r))*0.4 + 0.8)
-e_Gt2 = np.random.rand(len(r))*0.2*out['Gt2']
 
-# plt.plot(r,out['Gt2'],'-')
-# plt.errorbar(r,Gt2, yerr=e_Gt2,fmt='none')
+modelo = model_Gamma(out,'tcos',misscentred=False)     
+Gt2   = modelo*(np.random.rand(len(r))*np.logspace(np.log10(0.5),np.log10(0.2),10) + np.logspace(np.log10(0.75),np.log10(0.9),10))
+e_Gt2 = np.logspace(np.log10(0.5),np.log10(0.2),10)*modelo
+
+plt.plot(r,out['Gt2'],'-')
+plt.plot(r,modelo,'-')
+plt.errorbar(r,Gt2, yerr=e_Gt2,fmt='none')
+plt.plot(r,Gt2, 'o')
 

@@ -675,7 +675,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	return output
 
 
-def model_Gamma(multipole_out,component = 't', misscentred = True, pcc = 0.8):
+def model_Gamma(multipole_out,component = 't', misscentred = False, pcc = 0.8):
 	
 	if misscentred:
 		if component == 't':
