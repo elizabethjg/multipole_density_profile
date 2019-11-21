@@ -19,7 +19,7 @@ RA    = members[1].data['RA']#[mask]
 RA[RA > 275] = RA[RA>275] - 360.
 DEC   = members[1].data['DEC']#[mask]
 P     = members[1].data['P']
-Lum_r = 10.**(-0.4*members[1].data['MODEL_MAG_R'])
+
 
 ID,c = np.unique(ides,return_counts=True)
 
@@ -35,6 +35,10 @@ D_ang    = np.array(cosmo.angular_diameter_distance(zc))
 kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
 KPCSCALE = np.repeat(kpcscale,c)
 
+zc = np.repeat(zc,c)
+D_lum    = np.array(cosmo.luminosity_distance(zc))*1.e6
+MAG_abs=members[1].data['MODEL_MAG_R']+5.0-5.0*np.log10(D_lum)
+Lum_r = 10.**(-0.4*MAG_abs)
 
 
 mcen = R_cen == 0.
@@ -62,18 +66,20 @@ twl  = np.repeat(angles['theta_wlum'],c)
 twp  = np.repeat(angles['theta_wp'],c)
 tp   = np.repeat(angles['theta_pcut'],c)
 tpwl = np.repeat(angles['theta_pcut_wlum'],c)
+tpwd = np.repeat(angles['theta_pcut_wd'],c)
 
 e    = np.repeat(angles['e'],c)
 ewl  = np.repeat(angles['e_wlum'],c)
 ewp  = np.repeat(angles['e_wp'],c)
 ep   = np.repeat(angles['e_pcut'],c)
 epwl = np.repeat(angles['e_pcut_wlum'],c)
+epwd = np.repeat(angles['e_pcut_wd'],c)
 # '''
 
 dx = ((RA - RA0)*3600.*KPCSCALE*1.e-3)/R_lambda
 dy = ((DEC - DEC0)*3600.*KPCSCALE*1.e-3)/R_lambda
 
-mask = (abs(dx) < 0.01)*(abs(dy) < 0.01)
+mask = np.isfinite(dx)
 dx = dx[mask]
 dy = dy[mask]
 
@@ -85,6 +91,8 @@ x_p  = (dx*np.cos(tp[mask]) + dy*np.sin(tp[mask]))
 y_p = (-1.*dx*np.sin(tp[mask]) + dy*np.cos(tp[mask])) 
 x_pwl  = (dx*np.cos(tpwl[mask]) + dy*np.sin(tpwl[mask])) 
 y_pwl = (-1.*dx*np.sin(tpwl[mask]) + dy*np.cos(tpwl[mask])) 
+x_pwd  = (dx*np.cos(tpwd[mask]) + dy*np.sin(tpwd[mask])) 
+y_pwd = (-1.*dx*np.sin(tpwd[mask]) + dy*np.cos(tpwd[mask])) 
 
 lgrid = 20
 Max = 1800
@@ -95,12 +103,50 @@ ax[0,1].hexbin(x_t,y_t,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='
 ax[0,2].hexbin(x_l,y_l,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[1,0].hexbin(x_p,y_p,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[1,1].hexbin(x_pwl,y_pwl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,2].hexbin(x_pwd,y_pwd,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 f.subplots_adjust(hspace=0,wspace=0)
 
 xedges = np.linspace(-0.4,0.4,20)
 yedges = np.linspace(-0.4,0.4,20)
+
+xedges = np.linspace(-1.,1.,20)
+yedges = np.linspace(-1.,1.,20)
 xcenters = (xedges[:-1] + xedges[1:]) / 2.
 ycenters = (yedges[:-1] + yedges[1:]) / 2.
-H, xedges, yedges = np.histogram2d(x_t, y_t, bins=(xedges, yedges))
 X,Y = np.meshgrid(xcenters,ycenters)
-cp = plt.contour(X, Y, H,100)
+H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
+levels = np.linspace(H.min(),10000.,7)
+
+f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
+H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
+ax[0,0].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges))
+ax[0,1].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges))
+ax[0,2].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))
+ax[1,0].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))
+ax[1,1].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))
+ax[1,2].contour(X, Y, H.T,levels)
+
+f.subplots_adjust(hspace=0,wspace=0)
+
+levels = np.linspace(15000,150000.,7)
+f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
+H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[0,0].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[0,1].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[0,2].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[1,0].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[1,1].contour(X, Y, H.T,levels)
+H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[1,2].contour(X, Y, H.T,levels)
+
+f.subplots_adjust(hspace=0,wspace=0)
+
