@@ -3,7 +3,25 @@ import numpy as np
 from astropy.io import fits
 #parameters
 from astropy.cosmology import LambdaCDM
+from astropy.wcs import WCS
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
+
+wcs = WCS(naxis=2)
+wcs.wcs.crpix = [0., 0.]
+wcs.wcs.cdelt = [1./3600., 1./3600.]
+wcs.wcs.ctype = ["RA---TAN", "DEC--TAN"]
+
+def momentos(dx,dy,w):
+     
+     Q11  = np.sum((dx**2)*w)/np.sum(w)
+     Q22  = np.sum((dy**2)*w)/np.sum(w)
+     Q12  = np.sum((dx*dy*2)*w)/np.sum(w)
+     E1 = (Q11-Q22)/(Q11+Q22)
+     E2 = (2.*Q12)/(Q11+Q22)
+     e = np.sqrt(E1**2 + E2**2)
+     theta = np.arctan2(E2,E1)/2.
+     return e,theta
+     
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
 
@@ -15,6 +33,7 @@ ID,c = np.unique(ides,return_counts=True)
 
 R_cen = members[1].data['R']
 RA    = members[1].data['RA']
+RA[RA > 275] = RA[RA>275] - 360.
 DEC   = members[1].data['DEC']
 
 P     = members[1].data['P']
@@ -38,8 +57,8 @@ theta = np.array([])
 e_lum = np.array([])
 theta_lum = np.array([])
 
-e_p = np.array([])
-theta_p = np.array([])
+e_pcutdl = np.array([])
+theta_pcutdl = np.array([])
 
 e_pcut = np.array([])
 theta_pcut = np.array([])
@@ -50,117 +69,111 @@ theta_pcutl = np.array([])
 e_pcutd = np.array([])
 theta_pcutd = np.array([])
 
+e_control = np.array([])
+theta_control = np.array([])
+
+
+X = np.array([])
+Y = np.array([])
+
 plots = np.linspace(1,len(ID_c),10)
 
-# for j in plots.astype(int):
+f,ax = plt.subplots()
+f2,ax2 = plt.subplots()
 
-for j in range(len(ID_c)):
+for j in ind.astype(int):
+     mid  = ides == j
+# for j in range(len(ID_c)):
      print j
-     mid  = ides == ID_c[j]
+     # mid  = ides == ID_c[j]
      N = np.append(N,mid.sum())
      ra   = RA[mid]
      dec  = DEC[mid]
+     mcen = R_cen[mid] == 0
+     
+     ra0  = ra[mcen]
+     dec0 = dec[mcen]
+     
+     wcs.wcs.crval = [ra0[0],dec0[0]]
+     dx, dy = wcs.wcs_world2pix(ra, dec, 0)
+
+     X = np.append(X,dx)
+     Y = np.append(Y,dy)
+
+
+     dx = dx[~mcen]
+     dy = dy[~mcen]
+
+     # control
+     ellip, ang = momentos(ra[~mcen]-ra0,dec[~mcen]-dec0,np.ones(len(dx)))
+     e_control = np.append(e_control,ellip)
+     theta_control = np.append(theta_control,ang)     
      
      # all members
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[~mcen]-ra0)**2)/np.sum(~mcen)
-     Q22  = np.sum((dec[~mcen]-dec0)**2)/np.sum(~mcen)
-     Q12  = np.sum((ra[~mcen]-ra0)*(dec[~mcen]-dec0))/np.sum(~mcen)
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e = np.append(e,np.sqrt(E1**2 + E2**2))
-     theta = np.append(theta,np.arctan2(E2,E1)/2.)
+     ellip, ang = momentos(dx,dy,np.ones(len(dx)))
+     e = np.append(e,ellip)
+     theta = np.append(theta,ang)
      
      # weighted by luminosity
-     wl    = Lum_r[mid]
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[~mcen]-ra0)**2*wl[~mcen])/np.sum(wl[~mcen])
-     Q22  = np.sum((dec[~mcen]-dec0)**2*wl[~mcen])/np.sum(wl[~mcen])
-     Q12  = np.sum((ra[~mcen]-ra0)*(dec[~mcen]-dec0)*wl[~mcen])/np.sum(wl[~mcen])
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e_lum = np.append(e_lum,np.sqrt(E1**2 + E2**2))
-     theta_lum = np.append(theta_lum,np.arctan2(E2,E1)/2.)
-     
-     # weighted by p_member
-     wc   = P[mid]
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[~mcen]-ra0)**2*wc[~mcen])/np.sum(wc[~mcen])
-     Q22  = np.sum((dec[~mcen]-dec0)**2*wc[~mcen])/np.sum(wc[~mcen])
-     Q12  = np.sum((ra[~mcen]-ra0)*(dec[~mcen]-dec0)*wc[~mcen])/np.sum(wc[~mcen])
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e_p = np.append(e_p,np.sqrt(E1**2 + E2**2))
-     theta_p = np.append(theta_p,np.arctan2(E2,E1)/2.)
-     
+     wl    = Lum_r[mid][~mcen]
+     ellip, ang = momentos(dx,dy,wl)
+     e_lum = np.append(e_lum,ellip)
+     theta_lum = np.append(theta_lum,ang)
+          
      # p_cut
-     pcut = P[mid] > 0.5
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[(~mcen)*pcut]-ra0)**2)/np.sum((~mcen)*pcut)
-     Q22  = np.sum((dec[(~mcen)*pcut]-dec0)**2)/np.sum((~mcen)*pcut)
-     Q12  = np.sum((ra[(~mcen)*pcut]-ra0)*(dec[~mcen*pcut]-dec0))/np.sum((~mcen)*pcut)
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e_pcut = np.append(e_pcut,np.sqrt(E1**2 + E2**2))
-     theta_pcut = np.append(theta_pcut,np.arctan2(E2,E1)/2.)
+     pcut = P[mid][~mcen] > 0.5
+     ellip, ang = momentos(dx[pcut],dy[pcut],np.ones(len(dx[pcut])))
+     e_pcut = np.append(e_pcut,ellip)
+     theta_pcut = np.append(theta_pcut,ang)
      
      # p_cut weighted by lum
-     pcut = P[mid] > 0.5
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[(~mcen)*pcut]-ra0)**2*wl[(~mcen)*pcut])/np.sum(wl[(~mcen)*pcut])
-     Q22  = np.sum((dec[(~mcen)*pcut]-dec0)**2*wl[(~mcen)*pcut])/np.sum(wl[(~mcen)*pcut])
-     Q12  = np.sum((ra[(~mcen)*pcut]-ra0)*(dec[~mcen*pcut]-dec0)*wl[(~mcen)*pcut])/np.sum(wl[(~mcen)*pcut])
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e_pcutl = np.append(e_pcutl,np.sqrt(E1**2 + E2**2))
-     theta_pcutl = np.append(theta_pcutl,np.arctan2(E2,E1)/2.)    
+     ellip, ang = momentos(dx[pcut],dy[pcut],wl[pcut])
+     e_pcutl = np.append(e_pcutl,ellip)
+     theta_pcutl = np.append(theta_pcutl,ang)    
      
      # p_cut weighted by distance
-     wd   = 1./((ra - ra0)**2 + (dec -dec0)**2)
-     pcut = P[mid] > 0.5
-     mcen = R_cen[mid] == 0
-     ra0  = ra[mcen]
-     dec0 = dec[mcen]
-     Q11  = np.sum((ra[(~mcen)*pcut]-ra0)**2*wd[(~mcen)*pcut])/np.sum(wd[(~mcen)*pcut])
-     Q22  = np.sum((dec[(~mcen)*pcut]-dec0)**2*wd[(~mcen)*pcut])/np.sum(wd[(~mcen)*pcut])
-     Q12  = np.sum((ra[(~mcen)*pcut]-ra0)*(dec[~mcen*pcut]-dec0)*wd[(~mcen)*pcut])/np.sum(wd[(~mcen)*pcut])
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e_pcutd = np.append(e_pcutd,np.sqrt(E1**2 + E2**2))
-     theta_pcutd = np.append(theta_pcutd,np.arctan2(E2,E1)/2.)         
+     wd   = 1./(dx**2 + dy**2)
+     ellip, ang = momentos(dx[pcut],dy[pcut],wd[pcut])
+     e_pcutd = np.append(e_pcutd,ellip)
+     theta_pcutd = np.append(theta_pcutd,ang)         
+     
+     # p_cut weighted by distance and lum
+     wd   = Lum_r[mid][~mcen]/(dx**2 + dy**2)
+     ellip, ang = momentos(dx[pcut],dy[pcut],wd[pcut])
+     e_pcutdl = np.append(e_pcutdl,ellip)
+     theta_pcutdl = np.append(theta_pcutdl,ang)
+     
+     # plt.plot(ra,dec,'r.')
+     
+     ax.plot(ra-ra0,dec-dec0,'C0.')
+     ax2.plot(dx,dy,'C1.')
      
      ''' 
-     l = 0.5*(max(ra)-min(ra))
+     l = 0.5*(max(dx)-min(dx))
      plt.figure()
-     plt.scatter(ra,dec,c=np.log10(wl))
-     plt.plot(ra0,dec0,'ro')
-     plt.plot([ra0,ra0+l*np.cos(theta[-1])],[dec0,dec0+l*np.sin(theta[-1])],label = 'All members')
-     plt.plot([ra0,ra0+l*np.cos(theta_lum[-1])],[dec0,dec0+l*np.sin(theta_lum[-1])],label = 'Weighted by luminosity')
-     plt.plot([ra0,ra0+l*np.cos(theta_p[-1])],[dec0,dec0+l*np.sin(theta_p[-1])],label = 'Weighted by p_membership')
-     plt.plot([ra0,ra0+l*np.cos(theta_pcut[-1])],[dec0,dec0+l*np.sin(theta_pcut[-1])],label = 'p_membership > 0.5')
-     plt.plot([ra0,ra0+l*np.cos(theta_pcutl[-1])],[dec0,dec0+l*np.sin(theta_pcutl[-1])],label = 'p_membership > 0.5 + wL')
-     plt.legend()
-     plt.savefig(folder+str(ID_c[j])+'.png',format='png',bbox_inches='tight')
-      # '''
+     plt.scatter(dx,dy,c=np.log10(wl))
+     plt.plot(0,0,'ro')
+     plt.plot([0.,l*np.cos(theta[-1])],[0,l*np.sin(theta[-1])],label = 'All members')
+     plt.plot([0.,l*np.cos(theta_lum[-1])],[0,l*np.sin(theta_lum[-1])],label = 'Weighted by luminosity')
+     plt.plot([0.,l*np.cos(theta_pcutdl[-1])],[0,l*np.sin(theta_pcutdl[-1])],label = 'Weighted by p_membership')
+     plt.plot([0.,l*np.cos(theta_pcut[-1])],[0,l*np.sin(theta_pcut[-1])],label = 'p_membership > 0.5')
+     plt.plot([0.,l*np.cos(theta_pcutl[-1])],[0,l*np.sin(theta_pcutl[-1])],label = 'p_membership > 0.5 + wL')
+     plt.plot([0.,l*np.cos(theta_pcutd[-1])],[0,l*np.sin(theta_pcutd[-1])],label = 'p_membership > 0.5 + wL')
+     # plt.legend()
+     plt.savefig(folder+str(j)+'.png',format='png',bbox_inches='tight')
+      '''
 
-# '''
+X = np.array(X)
+Y = np.array(Y)
+
+'''
 tbhdu = fits.BinTableHDU.from_columns(
         [fits.Column(name='e', format='D', array=e),
         fits.Column(name='theta', format='D', array=theta),
         fits.Column(name='e_wlum', format='D', array=e_lum),
         fits.Column(name='theta_wlum', format='D', array=theta_lum),
-        fits.Column(name='e_wp', format='D', array=e_p),
-        fits.Column(name='theta_wp', format='D', array=theta_p),
+        fits.Column(name='e_pcut_wdl', format='D', array=e_pcutdl),
+        fits.Column(name='theta_pcut_wdl', format='D', array=theta_pcutdl),
         fits.Column(name='e_pcut', format='D', array=e_pcut),
         fits.Column(name='theta_pcut', format='D', array=theta_pcut),
         fits.Column(name='e_pcut_wlum', format='D', array=e_pcutl),
@@ -169,4 +182,12 @@ tbhdu = fits.BinTableHDU.from_columns(
         fits.Column(name='theta_pcut_wd', format='D', array=theta_pcutd)])
         
 tbhdu.writeto(folder+'angles_redMapper.fits',overwrite=True)        
+
+
+tbhdu = fits.BinTableHDU.from_columns(
+        [fits.Column(name='X', format='D', array=X),
+        fits.Column(name='Y', format='D', array=Y)])
+        
+tbhdu.writeto(folder+'redMapper_projected_member_position.fits',overwrite=True)        
+
 '''
