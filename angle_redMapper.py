@@ -4,24 +4,13 @@ from astropy.io import fits
 #parameters
 from astropy.cosmology import LambdaCDM
 from astropy.wcs import WCS
+from member_distribution import momentos
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 
 wcs = WCS(naxis=2)
 wcs.wcs.crpix = [0., 0.]
 wcs.wcs.cdelt = [1./3600., 1./3600.]
-wcs.wcs.ctype = ["RA---TAN", "DEC--TAN"]
-
-def momentos(dx,dy,w):
-     
-     Q11  = np.sum((dx**2)*w)/np.sum(w)
-     Q22  = np.sum((dy**2)*w)/np.sum(w)
-     Q12  = np.sum((dx*dy*2)*w)/np.sum(w)
-     E1 = (Q11-Q22)/(Q11+Q22)
-     E2 = (2.*Q12)/(Q11+Q22)
-     e = np.sqrt(E1**2 + E2**2)
-     theta = np.arctan2(E2,E1)/2.
-     return e,theta
-     
+wcs.wcs.ctype = ["RA---TAN", "DEC--TAN"]    
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
 
@@ -78,14 +67,14 @@ Y = np.array([])
 
 plots = np.linspace(1,len(ID_c),10)
 
-f,ax = plt.subplots()
-f2,ax2 = plt.subplots()
+# f,ax = plt.subplots()
+# f2,ax2 = plt.subplots()
 
-for j in ind.astype(int):
-     mid  = ides == j
-# for j in range(len(ID_c)):
+# for j in ind.astype(int):
+     # mid  = ides == j
+for j in range(len(ID_c)):
      print j
-     # mid  = ides == ID_c[j]
+     mid  = ides == ID_c[j]
      N = np.append(N,mid.sum())
      ra   = RA[mid]
      dec  = DEC[mid]
@@ -145,10 +134,13 @@ for j in ind.astype(int):
      
      # plt.plot(ra,dec,'r.')
      
-     ax.plot(ra-ra0,dec-dec0,'C0.')
-     ax2.plot(dx,dy,'C1.')
      
      ''' 
+
+     ax.plot(ra-ra0,dec-dec0,'C0.')
+     ax2.plot(dx,dy,'C1.')
+
+
      l = 0.5*(max(dx)-min(dx))
      plt.figure()
      plt.scatter(dx,dy,c=np.log10(wl))
@@ -166,9 +158,10 @@ for j in ind.astype(int):
 X = np.array(X)
 Y = np.array(Y)
 
-'''
+# '''
 tbhdu = fits.BinTableHDU.from_columns(
-        [fits.Column(name='e', format='D', array=e),
+        [fits.Column(name='N', format='D', array=e),
+        fits.Column(name='e', format='D', array=e),
         fits.Column(name='theta', format='D', array=theta),
         fits.Column(name='e_wlum', format='D', array=e_lum),
         fits.Column(name='theta_wlum', format='D', array=theta_lum),
@@ -190,4 +183,4 @@ tbhdu = fits.BinTableHDU.from_columns(
         
 tbhdu.writeto(folder+'redMapper_projected_member_position.fits',overwrite=True)        
 
-'''
+# '''
