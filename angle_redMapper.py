@@ -160,7 +160,7 @@ Y = np.array(Y)
 
 # '''
 tbhdu = fits.BinTableHDU.from_columns(
-        [fits.Column(name='N', format='D', array=e),
+        [fits.Column(name='N', format='D', array=N),
         fits.Column(name='e', format='D', array=e),
         fits.Column(name='theta', format='D', array=theta),
         fits.Column(name='e_wlum', format='D', array=e_lum),

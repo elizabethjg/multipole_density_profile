@@ -2,6 +2,11 @@ import numpy as np
 # from pylab import *
 from astropy.io import fits
 from astropy.cosmology import LambdaCDM
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+matplotlib.rcParams.update({'font.size': 12})
+
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
@@ -88,38 +93,56 @@ f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
 ax[0,0].hexbin(dx,dy,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[0,1].hexbin(x_t,y_t,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[0,2].hexbin(x_l,y_l,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,0].hexbin(x_p,y_p,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,1].hexbin(x_pwl,y_pwl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,2].hexbin(x_pwd,y_pwd,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,0].hexbin(x_pwl,y_pwl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,1].hexbin(x_pwd,y_pwd,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,2].hexbin(x_p,y_p,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 f.subplots_adjust(hspace=0,wspace=0)
 
-xedges = np.linspace(-0.4,0.4,20)
-yedges = np.linspace(-0.4,0.4,20)
 
-xedges = np.linspace(-1.,1.,20)
-yedges = np.linspace(-1.,1.,20)
+xedges = np.linspace(-2.,2.,40)
+yedges = np.linspace(-2.,2.,40)
 xcenters = (xedges[:-1] + xedges[1:]) / 2.
 ycenters = (yedges[:-1] + yedges[1:]) / 2.
 X,Y = np.meshgrid(xcenters,ycenters)
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
-levels = np.linspace(H.min(),10000.,7)
+levels = np.linspace(H.min(),10000.,15)
 
-f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
+f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(7,5))
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
 ax[0,0].contour(X, Y, H.T,levels)
+# ax[0,0].set_xlabel('$x_1/R_{\lambda}$')
+ax[0,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
+
 H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges))
 ax[0,1].contour(X, Y, H.T,levels)
+# ax[0,1].set_xlabel('$x_1/R_{\lambda}$')
+# ax[0,1].set_ylabel('$x_2/R_{\lambda}$')
+
 H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges))
 ax[0,2].contour(X, Y, H.T,levels)
-H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))
-ax[1,0].contour(X, Y, H.T,levels)
+# ax[0,2].set_xlabel('$x_1/R_{\lambda}$')
+# ax[0,2].set_ylabel('$x_2/R_{\lambda}$')
+
 H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))
-ax[1,1].contour(X, Y, H.T,levels)
+ax[1,0].contour(X, Y, H.T,levels)
+ax[1,0].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+ax[1,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
+
 H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))
+ax[1,1].contour(X, Y, H.T,levels)
+ax[1,1].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+# ax[1,1].set_ylabel('$x_2/R_{\lambda}$')
+
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))
 ax[1,2].contour(X, Y, H.T,levels)
+ax[1,2].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+# ax[1,2].set_ylabel('$x_2/R_{\lambda}$')
+
 
 f.subplots_adjust(hspace=0,wspace=0)
+plt.savefig(folder+'contours.eps',format='eps',bbox_inches='tight')
 
+'''
 levels = np.linspace(20000,80000.,7)
 f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges),weights=np.log10(Lum_r))
@@ -137,3 +160,4 @@ ax[1,2].contour(X, Y, H.T,levels)
 
 f.subplots_adjust(hspace=0,wspace=0)
 
+'''

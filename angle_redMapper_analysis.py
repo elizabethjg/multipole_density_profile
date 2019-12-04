@@ -2,6 +2,7 @@ import numpy as np
 # from pylab import *
 from astropy.io import fits
 from astropy.cosmology import LambdaCDM
+import modified_corner
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
@@ -46,3 +47,20 @@ ep    = angles['e_pcut']
 epwl  = angles['e_pcut_wlum']
 epwd  = angles['e_pcut_wd']
 
+
+inc = np.zeros((len(e),5))
+inc[:,0] = e
+inc[:,1] = ewl
+inc[:,2] = epwl
+inc[:,3] = epwd
+inc[:,4] = epwdl
+
+truths = np.median(inc,axis=0)
+
+labels = ['$\epsilon^{(1)}_{sat}$','$\epsilon^{(2)}_{sat}$',
+          '$\epsilon^{(3)}_{sat}$','$\epsilon^{(4)}_{sat}$',
+          '$\epsilon^{(5)}_{sat}$']
+
+fig = modified_corner.corner(inc,labels = labels,
+                              range=[(0,0.8),(0,0.8),(0.,0.8),(0,0.8),(0,0.8)],
+                              plot_contours = False, truths = truths)
