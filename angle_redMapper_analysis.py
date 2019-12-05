@@ -48,19 +48,47 @@ epwl  = angles['e_pcut_wlum']
 epwd  = angles['e_pcut_wd']
 
 
+
+
+mask = (e<0.8)*(ewl<0.8)*(ewl<0.8)*(epwl<0.8)*(epwdl<0.8)
 inc = np.zeros((len(e),5))
+
 inc[:,0] = e
 inc[:,1] = ewl
 inc[:,2] = epwl
 inc[:,3] = epwd
 inc[:,4] = epwdl
 
-truths = np.median(inc,axis=0)
+truths = np.average(inc,axis=0)
+
+inc = inc[mask]
 
 labels = ['$\epsilon^{(1)}_{sat}$','$\epsilon^{(2)}_{sat}$',
           '$\epsilon^{(3)}_{sat}$','$\epsilon^{(4)}_{sat}$',
           '$\epsilon^{(5)}_{sat}$']
 
 fig = modified_corner.corner(inc,labels = labels,
-                              range=[(0,0.8),(0,0.8),(0.,0.8),(0,0.8),(0,0.8)],
+                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
                               plot_contours = False, truths = truths)
+
+plt.savefig(folder+'e_comparison.pdf',format='pdf',bbox_inches='tight')
+
+labels = [r'$\theta^{(1)}_{sat}$',r'$\theta^{(2)}_{sat}$',
+          r'$\theta^{(3)}_{sat}$',r'$\theta^{(4)}_{sat}$',
+          r'$\theta^{(5)}_{sat}$']
+
+inc = np.zeros((len(e),5))
+inc[:,0] = np.rad2deg(np.abs(t))
+inc[:,1] = np.rad2deg(np.abs(twl))
+inc[:,2] = np.rad2deg(np.abs(tpwl))
+inc[:,3] = np.rad2deg(np.abs(tpwd))
+inc[:,4] = np.rad2deg(np.abs(tpwdl))
+
+truths = np.average(inc,axis=0)
+
+
+fig = modified_corner.corner(inc,labels = labels,
+                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
+                              plot_contours = False, truths = truths)
+
+plt.savefig(folder+'theta_comparison.pdf',format='pdf',bbox_inches='tight')

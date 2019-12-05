@@ -198,7 +198,7 @@ def corner(xs, bins=20, range=None, weights=None, color="k", hist_bin_factor=1,
 
     # Create a new figure if one wasn't provided.
     if fig is None:
-        fig, axes = pl.subplots(K, K, figsize=(dim, dim))
+        fig, axes = pl.subplots(K, K, figsize=(4,4))
     else:
         try:
             axes = np.array(fig.axes).reshape((K, K))
@@ -340,9 +340,10 @@ def corner(xs, bins=20, range=None, weights=None, color="k", hist_bin_factor=1,
             # Deal with masked arrays.
             if hasattr(y, "compressed"):
                 y = y.compressed()
-            
-            ax.plot(x,y,'k,')
-            ax.plot([0,0.8],[0,0.8],'C1')
+
+            ax.axis([xs.min(),xs.max(),xs.min(),xs.max()])            
+            ax.plot(x,y,'k,',alpha=0.3)
+            ax.plot([xs.min(),xs.max()],[xs.min(),xs.max()],'C1')
             
             '''
             hist2d(y, x, ax=ax, range=[range[j], range[i]], weights=weights,
