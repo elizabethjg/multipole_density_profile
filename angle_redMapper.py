@@ -46,6 +46,9 @@ theta = np.array([])
 e_lum = np.array([])
 theta_lum = np.array([])
 
+e_wd = np.array([])
+theta_wd = np.array([])
+
 e_pcutdl = np.array([])
 theta_pcutdl = np.array([])
 
@@ -108,6 +111,12 @@ for j in range(len(ID_c)):
      ellip, ang = momentos(dx,dy,wl)
      e_lum = np.append(e_lum,ellip)
      theta_lum = np.append(theta_lum,ang)
+
+     # weighted by distance
+     wd   = 1./(dx**2 + dy**2)
+     ellip, ang = momentos(dx,dy,wd)
+     e_wd = np.append(e_wd,ellip)
+     theta_wd = np.append(theta_wd,ang)
           
      # p_cut
      pcut = P[mid][~mcen] > 0.5
@@ -165,6 +174,8 @@ tbhdu = fits.BinTableHDU.from_columns(
         fits.Column(name='theta', format='D', array=theta),
         fits.Column(name='e_wlum', format='D', array=e_lum),
         fits.Column(name='theta_wlum', format='D', array=theta_lum),
+        fits.Column(name='e_wd', format='D', array=e_wd),
+        fits.Column(name='theta_wd', format='D', array=theta_wd),
         fits.Column(name='e_pcut_wdl', format='D', array=e_pcutdl),
         fits.Column(name='theta_pcut_wdl', format='D', array=theta_pcutdl),
         fits.Column(name='e_pcut', format='D', array=e_pcut),

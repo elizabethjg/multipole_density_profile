@@ -49,19 +49,21 @@ mcen = R_cen == 0.
 RA0  = np.repeat(RA[mcen],c)
 DEC0 = np.repeat(DEC[mcen],c)
 
-t    = np.repeat(angles['theta'],c)
-twl  = np.repeat(angles['theta_wlum'],c)
+t     = np.repeat(angles['theta'],c)
+twl   = np.repeat(angles['theta_wlum'],c)
+twd   = np.repeat(angles['theta_wd'],c)
+tp    = np.repeat(angles['theta_pcut'],c)
+tpwl  = np.repeat(angles['theta_pcut_wlum'],c)
+tpwd  = np.repeat(angles['theta_pcut_wd'],c)
 tpwdl = np.repeat(angles['theta_pcut_wdl'],c)
-tp   = np.repeat(angles['theta_pcut'],c)
-tpwl = np.repeat(angles['theta_pcut_wlum'],c)
-tpwd = np.repeat(angles['theta_pcut_wd'],c)
-
-e    = np.repeat(angles['e'],c)
-ewl  = np.repeat(angles['e_wlum'],c)
-epwdl  = np.repeat(angles['e_pcut_wdl'],c)
-ep   = np.repeat(angles['e_pcut'],c)
-epwl = np.repeat(angles['e_pcut_wlum'],c)
-epwd = np.repeat(angles['e_pcut_wd'],c)
+    
+e     = np.repeat(angles['e'],c)
+ewl   = np.repeat(angles['e_wlum'],c)
+ewd   = np.repeat(angles['e_wd'],c)
+ep    = np.repeat(angles['e_pcut'],c)
+epwl  = np.repeat(angles['e_pcut_wlum'],c)
+epwd  = np.repeat(angles['e_pcut_wd'],c)
+epwdl = np.repeat(angles['e_pcut_wdl'],c)
 # '''
 
 dx = (coordinates['X']*KPCSCALE*1.e-3)/R_lambda
@@ -77,8 +79,11 @@ y_t = (-1.*dx*np.sin(t[mask]) + dy*np.cos(t[mask]))
 x_l  = (dx*np.cos(twl[mask]) + dy*np.sin(twl[mask])) 
 y_l = (-1.*dx*np.sin(twl[mask]) + dy*np.cos(twl[mask])) 
 
-x_p  = (dx*np.cos(tpwdl[mask]) + dy*np.sin(tpwdl[mask])) 
-y_p = (-1.*dx*np.sin(tpwdl[mask]) + dy*np.cos(tpwdl[mask])) 
+x_d  = (dx*np.cos(twd[mask]) + dy*np.sin(twd[mask])) 
+y_d = (-1.*dx*np.sin(twd[mask]) + dy*np.cos(twd[mask])) 
+
+x_p  = (dx*np.cos(tp[mask]) + dy*np.sin(tp[mask])) 
+y_p = (-1.*dx*np.sin(tp[mask]) + dy*np.cos(tp[mask])) 
 
 x_pwl  = (dx*np.cos(tpwl[mask]) + dy*np.sin(tpwl[mask])) 
 y_pwl = (-1.*dx*np.sin(tpwl[mask]) + dy*np.cos(tpwl[mask])) 
@@ -86,16 +91,22 @@ y_pwl = (-1.*dx*np.sin(tpwl[mask]) + dy*np.cos(tpwl[mask]))
 x_pwd  = (dx*np.cos(tpwd[mask]) + dy*np.sin(tpwd[mask])) 
 y_pwd = (-1.*dx*np.sin(tpwd[mask]) + dy*np.cos(tpwd[mask])) 
 
+x_pwdl  = (dx*np.cos(tpwdl[mask]) + dy*np.sin(tpwdl[mask])) 
+y_pwdl = (-1.*dx*np.sin(tpwdl[mask]) + dy*np.cos(tpwdl[mask])) 
+
+
 lgrid = 20
 Max = 1800
 
-f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(10,10))
+f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(10,10))
 ax[0,0].hexbin(dx,dy,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[0,1].hexbin(x_t,y_t,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 ax[0,2].hexbin(x_l,y_l,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,0].hexbin(x_pwl,y_pwl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,1].hexbin(x_pwd,y_pwd,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
-ax[1,2].hexbin(x_p,y_p,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[0,3].hexbin(x_d,y_d,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,0].hexbin(x_p,y_p,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,1].hexbin(x_pwl,y_pwl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,2].hexbin(x_pwd,y_pwd,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
+ax[1,3].hexbin(x_pwdl,y_pwdl,gridsize=lgrid,extent=(-0.4,0.4,-0.4,0.4),vmax=Max,cmap='pink')
 f.subplots_adjust(hspace=0,wspace=0)
 
 
@@ -107,37 +118,36 @@ X,Y = np.meshgrid(xcenters,ycenters)
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
 levels = np.linspace(H.min(),10000.,15)
 
-f, ax = plt.subplots(2, 3, sharex=True, sharey=True,figsize=(7,5))
+f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(8,4))
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))
 ax[0,0].contour(X, Y, H.T,levels)
-# ax[0,0].set_xlabel('$x_1/R_{\lambda}$')
 ax[0,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 
 H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges))
 ax[0,1].contour(X, Y, H.T,levels)
-# ax[0,1].set_xlabel('$x_1/R_{\lambda}$')
-# ax[0,1].set_ylabel('$x_2/R_{\lambda}$')
 
 H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges))
 ax[0,2].contour(X, Y, H.T,levels)
-# ax[0,2].set_xlabel('$x_1/R_{\lambda}$')
-# ax[0,2].set_ylabel('$x_2/R_{\lambda}$')
 
-H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))
+H, xedges, yedges = np.histogram2d(x_d,y_d, bins=(xedges, yedges))
+ax[0,3].contour(X, Y, H.T,levels)
+
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))
 ax[1,0].contour(X, Y, H.T,levels)
 ax[1,0].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 ax[1,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 
-H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))
+H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))
 ax[1,1].contour(X, Y, H.T,levels)
 ax[1,1].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
-# ax[1,1].set_ylabel('$x_2/R_{\lambda}$')
 
-H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))
+H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))
 ax[1,2].contour(X, Y, H.T,levels)
 ax[1,2].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
-# ax[1,2].set_ylabel('$x_2/R_{\lambda}$')
 
+H, xedges, yedges = np.histogram2d(x_pwdl,y_pwdl, bins=(xedges, yedges))
+ax[1,3].contour(X, Y, H.T,levels)
+ax[1,3].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 
 f.subplots_adjust(hspace=0,wspace=0)
 plt.savefig(folder+'contours.eps',format='eps',bbox_inches='tight')

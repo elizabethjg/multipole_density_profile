@@ -35,29 +35,33 @@ DEC0 = dec[mcen]
 
 t     = angles['theta']
 twl   = angles['theta_wlum']
-tpwdl = angles['theta_pcut_wdl']
+twd    = angles['theta_wd']
 tp    = angles['theta_pcut']
 tpwl  = angles['theta_pcut_wlum']
 tpwd  = angles['theta_pcut_wd']
+tpwdl = angles['theta_pcut_wdl']
 
 e     = angles['e']
 ewl   = angles['e_wlum']
-epwdl = angles['e_pcut_wdl']
+ewd    = angles['e_wd']
 ep    = angles['e_pcut']
 epwl  = angles['e_pcut_wlum']
 epwd  = angles['e_pcut_wd']
+epwdl = angles['e_pcut_wdl']
 
 
 
 
-mask = (e<0.8)*(ewl<0.8)*(ewl<0.8)*(epwl<0.8)*(epwdl<0.8)
-inc = np.zeros((len(e),5))
+mask = (e<0.8)*(ewl<0.8)*(epwl<0.8)*(epwd<0.8)*(epwdl<0.8)
+inc = np.zeros((len(e),7))
 
 inc[:,0] = e
 inc[:,1] = ewl
-inc[:,2] = epwl
-inc[:,3] = epwd
-inc[:,4] = epwdl
+inc[:,2] = ewd
+inc[:,3] = ep
+inc[:,4] = epwl
+inc[:,5] = epwd
+inc[:,6] = epwdl
 
 truths = np.average(inc,axis=0)
 
@@ -65,30 +69,34 @@ inc = inc[mask]
 
 labels = ['$\epsilon^{(1)}_{sat}$','$\epsilon^{(2)}_{sat}$',
           '$\epsilon^{(3)}_{sat}$','$\epsilon^{(4)}_{sat}$',
-          '$\epsilon^{(5)}_{sat}$']
+          '$\epsilon^{(5)}_{sat}$','$\epsilon^{(6)}_{sat}$',
+          '$\epsilon^{(7)}_{sat}$']
 
-fig = modified_corner.corner(inc,labels = labels,
-                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
+zfig = modified_corner.corner(inc,labels = labels,
+                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
                               plot_contours = False, truths = truths)
 
 plt.savefig(folder+'e_comparison.pdf',format='pdf',bbox_inches='tight')
 
 labels = [r'$\theta^{(1)}_{sat}$',r'$\theta^{(2)}_{sat}$',
           r'$\theta^{(3)}_{sat}$',r'$\theta^{(4)}_{sat}$',
-          r'$\theta^{(5)}_{sat}$']
+          r'$\theta^{(5)}_{sat}$',r'$\theta^{(6)}_{sat}$',
+          r'$\theta^{(7)}_{sat}$']
 
-inc = np.zeros((len(e),5))
+inc = np.zeros((len(e),7))
 inc[:,0] = np.rad2deg(np.abs(t))
 inc[:,1] = np.rad2deg(np.abs(twl))
-inc[:,2] = np.rad2deg(np.abs(tpwl))
-inc[:,3] = np.rad2deg(np.abs(tpwd))
-inc[:,4] = np.rad2deg(np.abs(tpwdl))
+inc[:,2] = np.rad2deg(np.abs(twd))
+inc[:,3] = np.rad2deg(np.abs(tp))
+inc[:,4] = np.rad2deg(np.abs(tpwl))
+inc[:,5] = np.rad2deg(np.abs(tpwd))
+inc[:,6] = np.rad2deg(np.abs(tpwdl))
 
 truths = np.average(inc,axis=0)
 
 
 fig = modified_corner.corner(inc,labels = labels,
-                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
+                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
                               plot_contours = False, truths = truths)
 
 plt.savefig(folder+'theta_comparison.pdf',format='pdf',bbox_inches='tight')
