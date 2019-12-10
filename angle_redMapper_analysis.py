@@ -4,6 +4,12 @@ from astropy.io import fits
 from astropy.cosmology import LambdaCDM
 import modified_corner
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+matplotlib.rcParams.update({'font.size': 12})
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
 
@@ -52,7 +58,7 @@ epwdl = angles['e_pcut_wdl']
 
 
 
-mask = (e<0.8)*(ewl<0.8)*(epwl<0.8)*(epwd<0.8)*(epwdl<0.8)
+# mask = (e<0.8)*(ewl<0.8)*(epwl<0.8)*(epwd<0.8)*(epwdl<0.8)
 inc = np.zeros((len(e),7))
 
 inc[:,0] = e
@@ -64,19 +70,95 @@ inc[:,5] = epwd
 inc[:,6] = epwdl
 
 truths = np.average(inc,axis=0)
+std    = np.std(inc,axis=0)
 
-inc = inc[mask]
 
-labels = ['$\epsilon^{(1)}_{sat}$','$\epsilon^{(2)}_{sat}$',
-          '$\epsilon^{(3)}_{sat}$','$\epsilon^{(4)}_{sat}$',
-          '$\epsilon^{(5)}_{sat}$','$\epsilon^{(6)}_{sat}$',
-          '$\epsilon^{(7)}_{sat}$']
 
-zfig = modified_corner.corner(inc,labels = labels,
+labels = ['$uniform$','$wL$',
+          '$wd$','$uniform$',
+          '$wL$' ,'$wd$', '$wdL$']
+
+f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(10,5))
+
+# ax[0,0].xaxis.set_ticks([0.2, 0.4, 0.6, 0.8])
+# ax[0,0].set_xticklabels([0.2, 0.4, 0.6, 0.8])
+
+ax[0,0].text(0.45,500,labels[0])
+ax[0,1].text(0.6,500,labels[1])
+ax[0,2].text(0.6,500,labels[2])
+ax[1,0].text(0.45,500,labels[3])
+ax[1,1].text(0.6,500,labels[4])
+ax[1,2].text(0.6,500,labels[5])
+ax[1,3].text(0.6,500,labels[6])
+
+ax[0,0].hist(inc[:,0],100,histtype='step',edgecolor='k')
+ax[0,1].hist(inc[:,1],100,histtype='step',edgecolor='k')
+ax[0,2].hist(inc[:,2],100,histtype='step',edgecolor='k')
+ax[1,0].hist(inc[:,3],100,histtype='step',edgecolor='k')
+ax[1,1].hist(inc[:,4],100,histtype='step',edgecolor='k')
+ax[1,2].hist(inc[:,5],100,histtype='step',edgecolor='k')
+ax[1,3].hist(inc[:,6],100,histtype='step',edgecolor='k')
+
+ax[0,0].axvline(truths[0],color='C2')
+ax[0,1].axvline(truths[1],color='C2')
+ax[0,2].axvline(truths[2],color='C2')
+ax[1,0].axvline(truths[3],color='C2')
+ax[1,1].axvline(truths[4],color='C2')
+ax[1,2].axvline(truths[5],color='C2')
+ax[1,3].axvline(truths[6],color='C2')   
+
+ax[0,0].axvline(truths[0]-std[0],c='C2',ls='--')
+ax[0,1].axvline(truths[1]-std[1],c='C2',ls='--')
+ax[0,2].axvline(truths[2]-std[2],c='C2',ls='--')
+ax[1,0].axvline(truths[3]-std[3],c='C2',ls='--')
+ax[1,1].axvline(truths[4]-std[4],c='C2',ls='--')
+ax[1,2].axvline(truths[5]-std[5],c='C2',ls='--')
+ax[1,3].axvline(truths[6]-std[6],c='C2',ls='--')   
+
+ax[0,0].axvline(truths[0]+std[0],c='C2',ls='--')
+ax[0,1].axvline(truths[1]+std[1],c='C2',ls='--')
+ax[0,2].axvline(truths[2]+std[2],c='C2',ls='--')
+ax[1,0].axvline(truths[3]+std[3],c='C2',ls='--')
+ax[1,1].axvline(truths[4]+std[4],c='C2',ls='--')
+ax[1,2].axvline(truths[5]+std[5],c='C2',ls='--')
+ax[1,3].axvline(truths[6]+std[6],c='C2',ls='--')    
+ax[0,3].axis('off')
+
+ax[1,0].set_xlabel('$\epsilon$')
+ax[1,1].set_xlabel('$\epsilon$')
+ax[1,2].set_xlabel('$\epsilon$')
+ax[1,3].set_xlabel('$\epsilon$')
+
+ax[1,0].set_ylabel('$N$')
+ax[0,0].set_ylabel('$N$')
+plt.axis([0,0.89,0,750])
+f.subplots_adjust(hspace=0,wspace=0)
+plt.savefig(folder+'e_comparison.eps',format='eps',bbox_inches='tight')
+
+
+style = ['C3','C4','C5','C3--','C4--','C5--','C6--']
+
+f, ax = plt.subplots(figsize=(4.5,5))
+mask = Lambda < 150
+for j in range(inc.shape[1]):
+    x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
+    ax.plot(x,y,style[j],label=labels[j])
+    
+ax.set_xlabel('$\lambda$')
+ax.set_ylabel('$\epsilon$')
+plt.axis([18,110,0.15,0.4])
+ax.legend(ncol=2,fontsize=12)
+plt.savefig(folder+'e_lambda.eps',format='eps',bbox_inches='tight')
+
+
+
+'''
+fig = modified_corner.corner(inc,labels = labels,
                               range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
                               plot_contours = False, truths = truths)
+'''
 
-plt.savefig(folder+'e_comparison.pdf',format='pdf',bbox_inches='tight')
+
 
 labels = [r'$\theta^{(1)}_{sat}$',r'$\theta^{(2)}_{sat}$',
           r'$\theta^{(3)}_{sat}$',r'$\theta^{(4)}_{sat}$',
@@ -94,9 +176,31 @@ inc[:,6] = np.rad2deg(np.abs(tpwdl))
 
 truths = np.average(inc,axis=0)
 
+f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(10,10))
+ax[0,0].hist(inc[:,0],100,histtype='step',edgecolor='k')
+ax[0,1].hist(inc[:,1],100,histtype='step',edgecolor='k')
+ax[0,2].hist(inc[:,2],100,histtype='step',edgecolor='k')
+ax[0,3].hist(inc[:,3],100,histtype='step',edgecolor='k')
+ax[1,0].hist(inc[:,4],100,histtype='step',edgecolor='k')
+ax[1,1].hist(inc[:,5],100,histtype='step',edgecolor='k')
+ax[1,2].hist(inc[:,6],100,histtype='step',edgecolor='k')
 
-fig = modified_corner.corner(inc,labels = labels,
-                              range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
-                              plot_contours = False, truths = truths)
+plt.savefig(folder+'theta_comparison.eps',format='pdf',bbox_inches='tight')
 
-plt.savefig(folder+'theta_comparison.pdf',format='pdf',bbox_inches='tight')
+f, ax = plt.subplots()
+mask = Lambda < 150
+for j in range(inc.shape[1]):
+    x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
+    ax.plot(x,y)
+    
+ax.set_xlabel('$\lambda$')
+ax.set_ylabel('$\epsilon$')
+
+# plt.savefig(folder+'e_lambda.eps',format='eps',bbox_inches='tight')
+
+
+# fig = modified_corner.corner(inc,labels = labels,
+                              # range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
+                              # plot_contours = False, truths = truths)
+
+# plt.savefig(folder+'theta_comparison.pdf',format='pdf',bbox_inches='tight')
