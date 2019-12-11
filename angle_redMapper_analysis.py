@@ -5,6 +5,7 @@ from astropy.cosmology import LambdaCDM
 import modified_corner
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 from matplotlib import rc
+import medianas
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
@@ -139,17 +140,24 @@ plt.savefig(folder+'e_comparison.eps',format='eps',bbox_inches='tight')
 style = ['C3','C4','C5','C3--','C4--','C5--','C6--']
 
 f, ax = plt.subplots(figsize=(4.5,5))
+f2, ax2 = plt.subplots(figsize=(4.5,5))
 mask = Lambda < 150
 for j in range(inc.shape[1]):
     x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
     ax.plot(x,y,style[j],label=labels[j])
+    ax2.plot(x,d,style[j],label=labels[j])
     
 ax.set_xlabel('$\lambda$')
 ax.set_ylabel('$\epsilon$')
-plt.axis([18,110,0.15,0.4])
+ax.axis([18,110,0.15,0.4])
 ax.legend(ncol=2,fontsize=12)
 plt.savefig(folder+'e_lambda.eps',format='eps',bbox_inches='tight')
 
+ax2.set_xlabel('$\lambda$')
+ax2.set_ylabel('$\sigma_\epsilon$')
+ax2.axis([18,110,0.08,0.19])
+ax2.legend(ncol=2,fontsize=12)
+plt.savefig(folder+'disp_e_lambda.eps',format='eps',bbox_inches='tight')
 
 
 '''
@@ -187,11 +195,13 @@ ax[1,2].hist(inc[:,6],100,histtype='step',edgecolor='k')
 
 plt.savefig(folder+'theta_comparison.eps',format='pdf',bbox_inches='tight')
 
+f2, ax2 = plt.subplots()
 f, ax = plt.subplots()
 mask = Lambda < 150
 for j in range(inc.shape[1]):
     x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
     ax.plot(x,y)
+    ax2.plot(x,d)
     
 ax.set_xlabel('$\lambda$')
 ax.set_ylabel('$\epsilon$')
