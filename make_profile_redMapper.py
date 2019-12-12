@@ -35,13 +35,13 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      cs82     = fits.open(folder+'gx_CS82_redMapper.fits')[1].data
      angles   = fits.open(folder+'angles_redMapper.fits')[1].data
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
+     borderid = np.loadtxt(folder+'redMapperID_border.list')
      
      mkids = ~np.in1d(kids.ID,cfht.ID)
      mcs82 = ~np.in1d(cs82.ID,cfht.ID)
      
      kids = kids[mkids]
      cs82 = cs82[mcs82]
-     
      
      # MATCH ANGLES
      
@@ -66,9 +66,10 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      
      mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
-     mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)
+     mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
      mask = mask_back*mask_lens
      
+     Nclusters = len(np.unique(ID[mask]))
      
      ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
      dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
@@ -149,6 +150,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
      
      f1=open('profile_'+sample+'.cat','w')
+     f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
      f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
      f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
      f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
@@ -171,6 +173,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                                    booterror_flag=True)
           
           f1=open('profile_'+sample+'.cat','w')
+          f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
           f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
           f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
           f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
@@ -192,11 +195,11 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
      write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
 
-profile_redMapper('bin4',39.7,145.)
-profile_redMapper('total',0.,145.)
-profile_redMapper('bin1',20.,23.42)
-profile_redMapper('bin2',23.42,28.3)
-profile_redMapper('bin3',28.3,39.7)
+profile_redMapper('bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('total',0.,145.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=10)
 
 
 
