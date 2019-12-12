@@ -243,8 +243,8 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 	return output
 
 
-def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
-					h=0.7,misscentred=False,s_off=0.4,verbose=True):
+def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
+					misscentred=False,s_off=0.4,verbose=True):
 
 	'''
 	Equations from van Uitert (vU, arXiv:1610.04226) for the 
@@ -303,22 +303,10 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 	
 	# Compute R_200
 	R200 = r200_nfw(M200,roc_mpc)
-	R200 = R200.astype(float128)
-	
+
 	# Scaling sigma_off
 	s_off = s_off/h	
 	
-	############  COMPUTING S_crit
-	
-	Dl    = cosmo.angular_diameter_distance(z).value*1.e6*pc
-	Ds    = cosmo.angular_diameter_distance(zs).value*1.e6*pc
-	Dls   = cosmo.angular_diameter_distance_z1z2(z,zs).value*1.e6*pc
-	
-	Sc = ((((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./(Dls/Ds)))*(pc**2/Msun))
-	sigma_c = np.zeros(len(r))
-	sigma_c.fill(Sc)
-
-
 	#print '##################'
 	#print '      CENTRED     '
 	#print '##################'
@@ -382,9 +370,6 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		if not isinstance(R, (np.ndarray)):
 			R = np.array([R])
 		
-		R = R.astype(float128)
-
-		
 		# m = R == 0.
 		# R[m] = 1.e-8
 		
@@ -396,7 +381,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,zs=0.35,
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
-		c = c.astype(float128)
+
 		x=(R*c)/R200
 		m1 = x <= (1.0-1.e-5)
 		m2 = x >= (1.0+1.e-5)
@@ -622,7 +607,7 @@ def multipole_shear_unpack(minput):
 	return multipole_shear(*minput)
 	
 def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
-							 zs=0.35, h=0.7,misscentred=False,
+							 h=0.7,misscentred=False,
 							 s_off=0.4,verbose = True, ncores=2):
 	
 	slicer = int(round(len(r)/float(ncores), 0))
@@ -635,13 +620,12 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	M200  = np.ones(ncores)*M200
 	ellip = np.ones(ncores)*ellip
 	z     = np.ones(ncores)*z
-	zs    = np.ones(ncores)*zs
 	h     = np.ones(ncores)*h
 	miss  = np.ones(ncores,dtype=bool)*misscentred
 	s_off = np.ones(ncores)*s_off
 	v  = np.ones(ncores,dtype=bool)*verbose
 	
-	entrada = np.array([r_splitted,M200,ellip,z,zs,h,miss,s_off,v]).T
+	entrada = np.array([r_splitted,M200,ellip,z,h,miss,s_off,v]).T
 	
 	pool = Pool(processes=(ncores))
 	salida=np.array(pool.map(multipole_shear_unpack, entrada))
