@@ -27,7 +27,7 @@ save = np.array([r,out['Gt0'],out['Gt2'],out['Gx2'],out['Gt0_off'],
                out['Gt_off'],out['Gt_off_cos'],out['Gx_off_sin']]).T
 # save = np.array([r,out['Gt0'],out['Gt2'],out['Gx2']]).T
 
-np.savetxt('../multipoles_'+str('%2.1f' % q)+'.out',save)
+np.savetxt('../multipoles_bin4.out',save)
 
 
 '''
