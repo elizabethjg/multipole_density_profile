@@ -20,7 +20,7 @@ q = 0.6
      
 ellip = (1.- q)/(1. + q)
      
-out = multipole_shear_parallel(r,M200=M,z=0.2,zs=0.6,
+out = multipole_shear_parallel(r,M200=M,z=0.2,
                               ellip=ellip,misscentred=False,
                               ncores=2)
 

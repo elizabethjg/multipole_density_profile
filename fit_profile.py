@@ -1,15 +1,164 @@
+sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
+# sys.path.append('/home/elizabeth/multipole_density_profile')
 import numpy as np
 from pylab import *
-from astropy.cosmology import LambdaCDM
-from scipy.misc import derivative
-from scipy import integrate
 from multipoles_shear import *
-from scipy.optimize import minimize
 import emcee
-import corner
 import time
 from multiprocessing import Pool
+
+def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True):
     
+    file_name = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_data/profile_bin4.cat'
+    
+    f = open(file_name,'r')
+    lines = f.readlines()
+    j = lines[1].find('=')+1
+    Mguess = (float(lines[1][j:-2])*1.e14)
+    j = lines[2].find('=')+1
+    zmean = float(lines[2][j:-2])
+        
+    
+    def log_likelihood(data_model, r, Gamma, e_Gamma):
+        log_M200 = data_model
+        M200 = 10**log_M200
+        multipoles = multipole_shear(r,M200=M200,misscentred = False,ellip=0,z=zmean,verbose=False)
+        model = model_Gamma(multipoles,'t', misscentred = False)
+        sigma2 = e_Gamma**2
+        return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+    
+    def log_probability(data_model, r, Gamma, e_Gamma):
+        log_M200 = data_model
+        if np.log10(Mguess*0.6) < log_M200 < np.log10(Mguess*1.4):
+            return log_likelihood(data_model, r, Gamma, e_Gamma)
+        return -np.inf
+    
+    pos = np.array([np.random.normal(np.log10(Mguess),0.1,50)]).T
+    # pos = np.array([np.random.uniform(13.5,14.5,50)]).T
+                    
+    # me = pos[:,1]>1.
+    # pos[me,1] = pos[me,1] == 1.
+    nwalkers, ndim = pos.shape
+    
+    pool = Pool(processes=(ncores))
+    
+    profile = np.loadtxt(file_name).T
+    
+    t1 = time.time()
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(profile[0],profile[1],profile[2]),
+                                    pool = pool)
+    sampler.run_mcmc(pos, 200, progress=True)
+    print (time.time()-t1)/60.
+    
+    flat_samples = sampler.get_chain(discard=100, flat=True)
+
+    p1 = np.percentile(flat_samples[:, 0], [16, 50, 84])
+    
+    print p1[1],np.diff(p1)
+
+    
+    if plot:
+     r  = np.logspace(np.log10(min(profile[0])),
+                      np.log10(max(profile[0])),10)
+
+    multipoles = multipole_shear(r,M200=M200,misscentred = False,ellip=0,z=zmean,verbose=False)
+    model = model_Gamma(multipoles,'t', misscentred = False)
+    
+        
+    f, ax = plt.subplots(figsize=(6.5,5))
+    ax.plot(profile[0],profile[1],'C0o')
+    ax.errorbar(profile[0],profile[1],yerr=profile[2])
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('R [mpc]')
+    ax.set_ylim(1,200)
+    ax.set_xlim(0.1,5.2)
+    ax.xaxis.set_ticks([0.1,1,5])
+    ax.set_xticklabels([0.1,1,5])
+    ax.yaxis.set_ticks([1,10,100])
+    ax.set_yticklabels([1,10,100])
+
+def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True):
+    
+    file_name = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_data/profile_bin4.cat'
+    
+    f = open(file_name,'r')
+    lines = f.readlines()
+    j = lines[1].find('=')+1
+    Mguess = (float(lines[1][j:-2])*1.e14*1.3)
+    j = lines[2].find('=')+1
+    zmean = float(lines[2][j:-2])
+    profile = np.loadtxt(file_name).T
+    
+    def log_likelihood(data_model, r, Gamma, e_Gamma):
+        log_M200,pcc = data_model
+        M200 = 10**log_M200
+        multipoles = multipole_shear(r,M200=M200,misscentred = True,
+                                     ellip=0,z=zmean,components = ['t'],
+                                     verbose=True)
+        model = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc)
+        sigma2 = e_Gamma**2
+        return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+    
+    def log_probability(data_model, r, Gamma, e_Gamma):
+        log_M200,pcc = data_model
+        if np.log10(Mguess*0.5) < log_M200 < np.log10(Mguess*1.5) and 0.6 < pcc < 0.9:
+            return log_likelihood(data_model, r, Gamma, e_Gamma)
+        return -np.inf
+    
+    pos = np.array([np.random.normal(np.log10(Mguess),0.1,50),
+                    np.random.normal(0.75,0.4,50)]).T
+    # pos = np.array([np.random.uniform(13.5,14.5,50)]).T
+                    
+    nwalkers, ndim = pos.shape
+    
+    pool = Pool(processes=(ncores))
+    
+    t1 = time.time()
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(profile[0],profile[1],profile[2]),
+                                    pool = pool)
+    sampler.run_mcmc(pos, 200, progress=True)
+    print (time.time()-t1)/60.
+    
+    flat_samples = sampler.get_chain(discard=100, flat=True)
+
+    p1 = np.percentile(flat_samples[:, 0], [16, 50, 84])
+    p2 = np.percentile(flat_samples[:, 1], [16, 50, 84])
+    
+    print p1[1],np.diff(p1)
+    print p1[2],np.diff(p2)
+
+    
+    if plot:
+        r  = np.logspace(np.log10(min(profile[0])),
+                        np.log10(max(profile[0])),20)
+    
+        multipoles = multipole_shear_parallel(r,M200=M200,misscentred = True,
+                                     ellip=0,z=zmean,components = ['t'],
+                                     verbose=True,ncores = ncores)
+        model = model_Gamma(multipoles,'t', misscentred = False)
+        
+            
+        f, ax = plt.subplots(figsize=(6.5,5))
+        ax.plot(profile[0],profile[1],'C0o')
+        ax.errorbar(profile[0],profile[1],yerr=profile[2])
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel('R [mpc]')
+        ax.set_ylim(1,200)
+        ax.set_xlim(0.1,5.2)
+        ax.xaxis.set_ticks([0.1,1,5])
+        ax.set_xticklabels([0.1,1,5])
+        ax.yaxis.set_ticks([1,10,100])
+        ax.set_yticklabels([1,10,100])
+    
+
+
+
 def fit_profile_multipoles():
     
     file_name = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_data/profile_bin4.cat'
@@ -48,7 +197,7 @@ def fit_profile_multipoles():
     
     t1 = time.time()
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(r,Gt2, e_Gt2))
-    sampler.run_mcmc(pos, 500, progress=True);
+    sampler.run_mcmc(pos, 500, progress=True)
     print (time.time()-t1)/60.
     
     
