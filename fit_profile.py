@@ -7,11 +7,13 @@ import emcee
 import time
 from multiprocessing import Pool
 
-def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True):
+def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True,
+                                  folder = './'):
     
-    file_name = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_data/profile_bin4.cat'
+    folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_data/'
+    file_name = 'profile_bin4.cat'
     
-    f = open(file_name,'r')
+    f = open(folder+file_name,'r')
     lines = f.readlines()
     j = lines[1].find('=')+1
     Mguess = (float(lines[1][j:-2])*1.e14)
@@ -22,7 +24,8 @@ def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True):
     def log_likelihood(data_model, r, Gamma, e_Gamma):
         log_M200 = data_model
         M200 = 10**log_M200
-        multipoles = multipole_shear(r,M200=M200,misscentred = False,ellip=0,z=zmean,verbose=False)
+        multipoles = multipole_shear(r,M200=M200,misscentred = False,
+                                     ellip=0,z=zmean,verbose=False)
         model = model_Gamma(multipoles,'t', misscentred = False)
         sigma2 = e_Gamma**2
         return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
@@ -58,27 +61,45 @@ def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True):
     
     print p1[1],np.diff(p1)
 
+    M200 = 10**p1[1]
+    
+    f1=open(folder+'fitted_'+file_name,'w')
+    f1.write('# M200 = '+str('%.2f' % (M200/1.e14))+' \n')
+    profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+    np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+    f1.close()
+
+    f1=open(folder+'fitted_'+file_name,'w')
+    f1.write('# M200 = '+str('%.2f' % (M200/1.e14))+' \n')
+    profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+    np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+    f1.close()
+    sampler.get_chain(flat=True)[:,0]   
     
     if plot:
-     r  = np.logspace(np.log10(min(profile[0])),
-                      np.log10(max(profile[0])),10)
-
-    multipoles = multipole_shear(r,M200=M200,misscentred = False,ellip=0,z=zmean,verbose=False)
-    model = model_Gamma(multipoles,'t', misscentred = False)
+        r  = np.logspace(np.log10(min(profile[0])),
+                        np.log10(max(profile[0])),10)
     
+        multipoles = multipole_shear_parallel(r,M200=M200,
+                                            misscentred = False,
+                                            ellip=0,z=zmean,
+                                            verbose=False,ncores=ncores)
+        model = model_Gamma(multipoles,'t', misscentred = False)
         
-    f, ax = plt.subplots(figsize=(6.5,5))
-    ax.plot(profile[0],profile[1],'C0o')
-    ax.errorbar(profile[0],profile[1],yerr=profile[2])
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_xlabel('R [mpc]')
-    ax.set_ylim(1,200)
-    ax.set_xlim(0.1,5.2)
-    ax.xaxis.set_ticks([0.1,1,5])
-    ax.set_xticklabels([0.1,1,5])
-    ax.yaxis.set_ticks([1,10,100])
-    ax.set_yticklabels([1,10,100])
+            
+        f, ax = plt.subplots(figsize=(6.5,5))
+        ax.plot(profile[0],profile[1],'C0o')
+        ax.plot(r,model,'C1')
+        ax.errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='C0')
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.set_xlabel('R [mpc]')
+        ax.set_ylim(1,300)
+        ax.set_xlim(0.1,5.2)
+        ax.xaxis.set_ticks([0.1,1,5])
+        ax.set_xticklabels([0.1,1,5])
+        ax.yaxis.set_ticks([1,10,100])
+        ax.set_yticklabels([1,10,100])
 
 def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True):
     

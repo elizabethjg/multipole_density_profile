@@ -87,7 +87,172 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL))[mask]
      
      peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
+     
      m    = np.concatenate((cfht.m,kids.m,cs82.m))[mask]
+     
+     KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+     BETA_array = dls/ds
+     beta       = BETA_array.mean()
+     
+     Dl = dl*1.e6*pc
+     sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
+     peso=peso/(sigma_c**2)
+     
+     print 'BETA.mean',beta
+     
+     SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
+     
+     print 'SIGMA_C', SIGMAC
+     
+     
+     rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
+                              np.deg2rad(dec),
+                              np.deg2rad(ALFA0),
+                              np.deg2rad(DELTA0))
+     
+     
+     #Correct polar angle for e1, e2
+     theta = theta+np.pi/2.
+     
+     #get tangential ellipticities 
+     et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
+     #get cross ellipticities
+     ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
+     
+     
+     r=np.rad2deg(rads)*3600*KPCSCALE
+     
+     
+     zmean    = (Z_c).mean()
+     zdisp    = (Z_c).std()
+     H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
+     roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
+     roc_mpc  = roc*((pc*1.0e6)**3.0)
+     D_ang    = cosmo.angular_diameter_distance(zmean)
+     kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+     
+     
+     print '---------------------------------------------------------'
+     print '             COMPUTING THE SHEAR PROFILES                '
+     print '========================================================='
+     
+     
+     profile = shear_profile_log(RIN,ROUT,r,et,ex,peso,m,sigma_c,ndots,
+                              booterror_flag=True)
+                              
+     print 'Now is trying to fit a NFW profile...'
+     
+     try:
+          nfw          = NFW_stack_fit(profile[0]/1.e3,profile[1],profile[5],zmean,roc)
+     except:
+          nfw          = [-999.,0.,-100.,[0.,0.],[0.,0.],-999.,0.]
+                              
+     
+     M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
+     
+     f1=open('profile_'+sample+'.cat','w')
+     f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
+     f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
+     f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
+     f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
+     f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
+     f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+     f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+     f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
+     f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
+     f1.write('# R,shear,err_et,cero,err_ex \n')
+     profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+     np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+     f1.close()
+     
+     def write_profile(angle,sample):
+          
+          print sample
+     
+          profile = quadrupole_profile_log(RIN,ROUT,r,et,ex,
+                                   peso,m,sigma_c,angle,
+                                   ndots,booterror_flag=True)
+          
+          f1=open('profile_'+sample+'.cat','w')
+          f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
+          f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
+          f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
+          f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
+          f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
+          f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+          f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+          f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
+          f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
+          f1.write('# R,shear,err_et,cero,err_ex \n')
+          profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+          np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+          f1.close()
+     
+     write_profile(angles.theta[mask]+np.pi/2.,sample+'_t')
+     write_profile(angles.theta_wlum[mask]+np.pi/2.,sample+'_twl')
+     write_profile(angles.theta_wd[mask]+np.pi/2.,sample+'_twd')
+     write_profile(angles.theta_pcut[mask]+np.pi/2.,sample+'_tp')
+     write_profile(angles.theta_pcut_wlum[mask]+np.pi/2.,sample+'_tpwl')
+     write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
+     write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
+
+def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
+                      z_back = 0.1, odds_min = 0.5,
+                      RIN = 100., ROUT = 10000., ndots = 20.):
+
+     folder = '/mnt/clemente/lensing/redMaPPer/'
+     
+     backgx   = fits.open(folder+name_cat)[1].data
+     angles   = fits.open(folder+'angles_redMapper.fits')[1].data
+     clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
+     borderid = np.loadtxt(folder+'redMapperID_border.list')
+
+     # MATCH ANGLES
+     
+     ID = backgx.ID
+     IDc = clusters.ID
+     
+     ides,index,c = np.unique(ID,return_index=True,return_counts=True)
+     angles_in = angles[np.in1d(IDc,ID)]
+     sindex = np.argsort(index)
+     angles = np.repeat(angles_in[sindex],c[sindex])
+     
+     
+     #-----------------------------------------------
+     
+     lamb = backgx.LAMBDA
+     
+     Z_B  = backgx.Z_B
+     ODDS = backgx.ODDS
+     zlambda = backgx.Z_LAMBDA
+     zspec   = backgx.Z_SPEC
+     Z_c      = zspec
+     Z_c[Z_c<0] = zlambda[Z_c<0]
+     
+     
+     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
+     mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+     mask = mask_back*mask_lens
+     
+     Nclusters = len(np.unique(ID[mask]))
+     
+     ra     = backgx.RAJ2000[mask]
+     dec    = backgx.DECJ2000[mask]
+     Z_c    = Z_c[mask]
+          
+     e1     = backgx.e1[mask]
+     e2     = backgx.e2[mask]
+     
+          
+     ALFA0  = backgx.RA[mask]
+     DELTA0 = backgx.DEC[mask]
+     
+     dls  = backgx.DLS[mask]
+     ds   = backgx.DS[mask]
+     dl   = backgx.DL[mask]
+     
+     peso = backgx.weight[mask]
+     m    = backgx.m[mask]
      
      KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
      BETA_array = dls/ds
@@ -168,9 +333,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           
           print sample
      
-          profile = shear_profile_log(RIN,ROUT,r,et*np.cos(2.*angle),ex*np.sin(2.*angle),
-                                   peso,m,sigma_c,ndots,
-                                   booterror_flag=True)
+          profile = quadrupole_profile_log(RIN,ROUT,r,et,ex,
+                                   peso,m,sigma_c,angle,
+                                   ndots,booterror_flag=True)
           
           f1=open('profile_'+sample+'.cat','w')
           f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
@@ -195,12 +360,36 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
      write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
 
-profile_redMapper('bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('total',0.,145.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=10)
+#profile_redMapper('bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper('total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper('bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper('bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper('bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
 
+profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
+
+
+
+#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
+                                           
+#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
+                                           
+#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
 
 
 '''
