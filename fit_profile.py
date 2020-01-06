@@ -138,7 +138,7 @@ def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True,
 		M200 = 10**log_M200
 		multipoles = multipole_shear(r,M200=M200,misscentred = True,
 									ellip=0,z=zmean,components = ['t'],
-									verbose=False)
+									verbose=True)
 		model = model_Gamma(multipoles,'t', misscentred = True, pcc = pcc)
 		sigma2 = e_Gamma**2
 		return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
@@ -152,8 +152,8 @@ def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True,
 
 	# initializing
 	
-	pos = np.array([np.random.normal(np.log10(Mguess),0.1,50),
-	                np.random.normal(0.8,0.1,50)]).T
+	pos = np.array([np.random.normal(np.log10(Mguess),0.1,20),
+	                np.random.normal(0.8,0.1,20)]).T
 	nwalkers, ndim = pos.shape
 	
 	#-------------------
@@ -167,7 +167,7 @@ def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True,
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
 									args=(profile[0],profile[1],profile[2]),
 									pool = pool)
-	sampler.run_mcmc(pos, 200, progress=True)
+	sampler.run_mcmc(pos, 100, progress=True)
 	print (time.time()-t1)/60.
 	pool.terminate()
 	#-------------------

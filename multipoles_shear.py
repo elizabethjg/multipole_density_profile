@@ -334,6 +334,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 
 			if 't' in components:
 				print 'computing DS_t_off'
+				print R,M200
 				t1 = time.time()
 				argumento = lambda x: DS_t_off(x)
 				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
