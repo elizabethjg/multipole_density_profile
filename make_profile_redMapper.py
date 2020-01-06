@@ -360,16 +360,16 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
      write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
 
-#profile_redMapper('bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper('total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper('bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper('bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper('bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
+profile_redMapper('original_bin4',39.7,145.,RIN=150.,ROUT=10000.,ndots=20)
+profile_redMapper('original_total',0.,145.,RIN=150.,ROUT=10000.,ndots=20)
+profile_redMapper('original_bin1',20.,23.42,RIN=150.,ROUT=10000.,ndots=20)
+profile_redMapper('original_bin2',23.42,28.3,RIN=150.,ROUT=10000.,ndots=20)
+profile_redMapper('original_bin3',28.3,39.7,RIN=150.,ROUT=10000.,ndots=20)
 
-profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
+#profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
+#profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
+#profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
+#profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
 
 
 
