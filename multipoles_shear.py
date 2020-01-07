@@ -392,6 +392,10 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 							 s_off=0.4,components = ['t0','t','tcos','xcos'],
 							 verbose = True, ncores=2):
 	
+	if ncores > len(r):
+		ncores == len(r)
+	
+	
 	slicer = int(round(len(r)/float(ncores), 0))
 	slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
 	slices = slices[(slices <= len(r))]
