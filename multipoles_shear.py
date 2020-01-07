@@ -267,7 +267,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			else:
 				# for larger precission interpolates
 				b = -2*R*np.cos(theta)
-				c = R**2-1.e-5
+				c = R**2-1.e-4
 				R1 = np.round(((-b - np.sqrt(b**2 - 4.*c))*0.5),6)
 				R2 = np.round(((-b + np.sqrt(b**2 - 4.*c))*0.5),6)
 				R1 = min(R1,R2)		
