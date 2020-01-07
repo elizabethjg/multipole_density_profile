@@ -1,5 +1,6 @@
-sys.path.append('/home/eli/Documentos/PostDoc/halo-elongation/multipole_density_profile')
-sys.path.append('/mnt/clemente/lensing/multipole_density_profile')
+# sys.path.append('/home/eli/Documentos/PostDoc/halo-elongation/multipole_density_profile')
+# sys.path.append('/mnt/clemente/lensing/multipole_density_profile')
+sys.path.append('/home/elizabeth/multipole_density_profile')
 #sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 # sys.path.append('/home/elizabeth/multipole_density_profile')
 import numpy as np
@@ -9,12 +10,12 @@ import emcee
 import time
 from multiprocessing import Pool
 
-def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True,
+def fit_profile_monopole_onlymass(file_name,ncores=2,
                                   folder = './'):
     
-	folder = './'
-	file_name = 'profile_original_bin4.cat'
-	ncores    = 30
+	# folder = './'
+	# file_name = 'profile_original_bin4.cat'
+	# ncores    = 30
 	
 	f = open(folder+file_name,'r')
 	lines = f.readlines()
@@ -118,75 +119,77 @@ def fit_profile_monopole_onlymass(file_name,ncores=2,plot=True,
 		ax.yaxis.set_ticks([1,10,100])
 		ax.set_yticklabels([1,10,100])
 '''
-def fit_profile_monopole_misscentred(file_name,ncores=2,plot=True,
+def fit_profile_monopole_misscentred(file_name,ncores=2,
                                   folder = './'):
+       
+    f = open(folder+file_name,'r')
+    lines = f.readlines()
+    j = lines[1].find('=')+1
+    Mguess = (float(lines[1][j:-2])*1.e14)*1.3
+    j = lines[2].find('=')+1
+    zmean = float(lines[2][j:-2])
+        
     
-	folder = './'
-	file_name = 'profile_original_bin4.cat'
-	ncores    = 30
-	
-	f = open(folder+file_name,'r')
-	lines = f.readlines()
-	j = lines[1].find('=')+1
-	Mguess = (float(lines[1][j:-2])*1.e14)*1.3
-	j = lines[2].find('=')+1
-	zmean = float(lines[2][j:-2])
-		
-	
-	def log_likelihood(data_model, r, Gamma, e_Gamma):
-		log_M200,pcc = data_model
-		M200 = 10**log_M200
-		multipoles = multipole_shear(r,M200=M200,misscentred = True,
-									ellip=0,z=zmean,components = ['t'],
-									verbose=True)
-		model = model_Gamma(multipoles,'t', misscentred = True, pcc = pcc)
-		sigma2 = e_Gamma**2
-		return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
-		
-	
-	def log_probability(data_model, r, Gamma, e_Gamma):
-		log_M200, pcc = data_model
-		if np.log10(Mguess*0.6) < log_M200 < np.log10(Mguess*1.4) and 0.6 < pcc < 0.9:
-			return log_likelihood(data_model, r, Gamma, e_Gamma)
-		return -np.inf
-
-	# initializing
-	
-	pos = np.array([np.random.normal(np.log10(Mguess),0.1,20),
-	                np.random.normal(0.8,0.1,20)]).T
-	nwalkers, ndim = pos.shape
-	
-	#-------------------
-	# running emcee
-	
-	pool = Pool(processes=(ncores))
-	
-	profile = np.loadtxt(folder+file_name).T
-	
-	t1 = time.time()
-	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-									args=(profile[0],profile[1],profile[2]),
-									pool = pool)
-	sampler.run_mcmc(pos, 100, progress=True)
-	print (time.time()-t1)/60.
-	pool.terminate()
-	#-------------------
-	
-	flat_samples = sampler.get_chain(discard=100, flat=True)
-	
-	p1 = np.percentile(flat_samples[:, 0], [16, 50, 84])
-	
-	print p1[1],np.diff(p1)
-	
-	# saving mcmc out
-	
-	mcmc_out = sampler.get_chain(flat=True)[:,0]   
-	
-	f1=open(folder+'mcmc_'+file_name,'w')
-	f1.write('# log(M200)  \n')
-	np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
-	f1.close()
+    def log_likelihood(data_model, r, Gamma, e_Gamma):
+        log_M200,pcc = data_model
+        M200 = 10**log_M200
+        multipoles = multipole_shear(r,M200=M200,misscentred = True,
+                                    ellip=0,z=zmean,components = ['t'],
+                                    verbose=True)
+        model = model_Gamma(multipoles,'t', misscentred = True, pcc = pcc)
+        sigma2 = e_Gamma**2
+        return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
     
+    def log_probability(data_model, r, Gamma, e_Gamma):
+        log_M200, pcc = data_model
+        if np.log10(Mguess*0.5) < log_M200 < np.log10(Mguess*1.5) and 0.6 < pcc < 0.9:
+            return log_likelihood(data_model, r, Gamma, e_Gamma)
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.normal(np.log10(Mguess),0.2,20),
+                    np.random.normal(0.8,0.1,20)]).T
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    pool = Pool(processes=(ncores))
+    
+    profile = np.loadtxt(folder+file_name).T
+    
+    t1 = time.time()
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(profile[0],profile[1],profile[2]),
+                                    pool = pool)
+    sampler.run_mcmc(pos, 100, progress=True)
+    print (time.time()-t1)/60.
+    pool.terminate()
+    #-------------------
+    
+    flat_samples = sampler.get_chain(discard=100, flat=True)
+    
+    p1 = np.percentile(flat_samples[:, 0], [16, 50, 84])
+    
+    print p1[1],np.diff(p1)
+    
+    # saving mcmc out
+    
+    mcmc_out = sampler.get_chain(flat=True)[:,0]   
+    
+    f1=open(folder+'mcmc_m200_'+file_name,'w')
+    f1.write('# log(M200)  \n')
+    np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
+    f1.close()
+    
+    mcmc_out = sampler.get_chain(flat=True)[:,1]   
+    
+    f1=open(folder+'mcmc_pcc_'+file_name,'w')
+    f1.write('# pcc  \n')
+    np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
+    f1.close()
 
 
 
@@ -256,4 +259,3 @@ def fit_profile_multipoles():
     print p1[1],np.diff(p1)
     print p2[1],np.diff(p2)
     '''
-print 'END OF PROGRAM'
