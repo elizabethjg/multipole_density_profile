@@ -9,7 +9,7 @@
 #SBATCH --mail-user=ejgonzalez@unc.edu.ar
 
 
-cd /home/elizabeth/
+cd /home/elizabeth/multipole_density_profile
 
 export OMP_NUM_THREADS=30
 
