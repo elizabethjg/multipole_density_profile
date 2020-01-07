@@ -204,7 +204,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		Quadrupole term defined as (d(Sigma)/dr)*r
 		
 		'''		
-		m0p = derivative(monopole,R,dx=1e-6)
+		m0p = derivative(monopole,R,dx=1e-8)
 		return m0p*R
 
 	def psi2(R):
