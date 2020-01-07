@@ -283,7 +283,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		integral20  = integrate.quad(argumento, 0., R)[0]
 		integral30  = integrate.quad(argumento, R, np.inf)[0]
 
-		return integral1 + integral2 + integral3	
+		return integral10 + integral20 + integral30	
 	vec_qoff = np.vectorize(quadrupole_off)
 	
 	def psi2_off(R,theta):
