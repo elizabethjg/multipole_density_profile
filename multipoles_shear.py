@@ -279,9 +279,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				return np.interp(roff,[R1,R2],[q1,q2])
 
 		argumento = lambda x: q_off(x)
-		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R)[0]
-		integral3  = integrate.quad(argumento, R, np.inf)[0]
+		integral10  = integrate.quad(argumento, -1.*np.inf, 0)[0]
+		integral20  = integrate.quad(argumento, 0., R)[0]
+		integral30  = integrate.quad(argumento, R, np.inf)[0]
 
 		return integral1 + integral2 + integral3	
 	vec_qoff = np.vectorize(quadrupole_off)
@@ -338,6 +338,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				t1 = time.time()
 				argumento = lambda x: DS_t_off(x)
 				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+				print integral
 				gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
 			 	print (t2-t1)/60.
