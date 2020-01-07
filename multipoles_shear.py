@@ -327,9 +327,12 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 
 			def DS_t_off(theta):
 				gamma_t0 = Delta_Sigma_off(R,theta)
-				gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
-				            - 2.*monopole_off(R,theta) 
-				            + quadrupole_off(R,theta))
+				if ellip == 0.:
+					gamma_t2 = 0.
+				else:
+					gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
+								- 2.*monopole_off(R,theta) 
+								+ quadrupole_off(R,theta))
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			if 't' in components:
