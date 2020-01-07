@@ -56,8 +56,9 @@ def fit_profile_monopole_onlymass(file_name,ncores=2,
 	
 	t1 = time.time()
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-									args=(profile[0],profile[1],profile[2]),
-									pool = pool)
+					args=(profile[0],profile[1],profile[2]),
+					pool = pool)
+					
 	sampler.run_mcmc(pos, 200, progress=True)
 	print (time.time()-t1)/60.
 	pool.terminate()
