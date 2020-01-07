@@ -204,7 +204,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		Quadrupole term defined as (d(Sigma)/dr)*r
 		
 		'''		
-		m0p = derivative(monopole,R,dx=2e-5)
+		m0p = derivative(monopole,R,dx=1e-5)
 		return m0p*R
 
 	def psi2(R):
@@ -262,7 +262,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			
 		def q_off(roff):
 			
-			if rp(roff) > 1.e-5:
+			if rp(roff) > 1.e-4:
 				return quadrupole(rp(roff))*P_Roff(roff)
 			else:
 				# for larger precission interpolates
