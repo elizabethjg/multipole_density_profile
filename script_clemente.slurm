@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=misscentred
+#SBATCH --job-name=monopole
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=56
 #SBATCH --time=24:00:00
