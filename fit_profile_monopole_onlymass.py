@@ -20,6 +20,7 @@ args = parser.parse_args()
 folder    = args.folder
 file_name = args.file_name
 ncores    = args.ncores
+ncores    = int(ncores)
 
 f = open(folder+file_name,'r')
 lines = f.readlines()
