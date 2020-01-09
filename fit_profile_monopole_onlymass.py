@@ -22,6 +22,11 @@ file_name = args.file_name
 ncores    = args.ncores
 ncores    = int(ncores)
 
+print 'fitting monopole only mass'
+print folder
+print file_name
+
+
 f = open(folder+file_name,'r')
 lines = f.readlines()
 j = lines[1].find('=')+1
