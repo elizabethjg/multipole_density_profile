@@ -31,29 +31,27 @@ zmean = float(lines[2][j:-2])
     
 
 def log_likelihood(data_model, r, Gamma, e_Gamma):
-    log_M200,pcc = data_model
+    log_M200,ellip = data_model
     M200 = 10**log_M200
-    multipoles = multipole_shear(r,M200=M200,misscentred = True,
-                                ellip=0,z=zmean,components = ['t'],
+    multipoles = multipole_shear(r,M200=M200,misscentred = False,
+                                ellip=ellip,z=zmean,components = ['xsin'],
                                 verbose=False)
-    model = model_Gamma(multipoles,'t', misscentred = True, pcc = pcc)
+    model = model_Gamma(multipoles,'xsin', misscentred = False)
     sigma2 = e_Gamma**2
     return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
     
 
 def log_probability(data_model, r, Gamma, e_Gamma):
-    log_M200, pcc = data_model
-    if np.log10(Mguess*0.5) < log_M200 < np.log10(Mguess*1.5) and 0.6 < pcc < 0.9:
+    log_M200, ellip = data_model
+    if np.log10(Mguess*0.5) < log_M200 < np.log10(Mguess*1.5) and 0. < ellip < 0.5:
         return log_likelihood(data_model, r, Gamma, e_Gamma)
     return -np.inf
 
 # initializing
 
-pos = np.array([np.random.normal(np.log10(Mguess),0.2,50),
-                np.random.normal(0.8,0.2,50)]).T
+pos = np.array([np.random.normal(np.log10(Mguess),0.2,30),
+                np.random.uniform(0.,0.5,30)]).T
 
-pccdist = pos[:,1]                
-pos[pccdist > 1.,1] = 1.
 
 nwalkers, ndim = pos.shape
 
@@ -66,9 +64,9 @@ profile = np.loadtxt(folder+file_name).T
 
 t1 = time.time()
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                args=(profile[0],profile[1],profile[2]),
+                                args=(profile[0],profile[3],profile[4]),
                                 pool = pool)
-sampler.run_mcmc(pos, 50, progress=True)
+sampler.run_mcmc(pos, 1000, progress=True)
 print (time.time()-t1)/60.
 pool.terminate()
 #-------------------
@@ -83,7 +81,7 @@ pool.terminate()
 
 mcmc_out = sampler.get_chain(flat=True)
 
-f1=open(folder+'monopole_misscentred_'+file_name,'w')
-f1.write('# log(M200)  pcc \n')
+f1=open(folder+'quadrupole_xsin_'+file_name,'w')
+f1.write('# log(M200)  ellip \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f']*2)
 f1.close()

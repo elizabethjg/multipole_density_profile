@@ -25,7 +25,7 @@ Msun = 1.989e30 # Solar mass (kg)
 
 def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 					misscentred=False,s_off=0.4,
-					components = ['t0','t','tcos','xcos'],
+					components = ['t0','t','tcos','xsin'],
 					verbose=True):
 
 	'''
@@ -355,7 +355,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				t2 = time.time()
 			 	print (t2-t1)/60.
 			
-			if 'xcos' in components:
+			if 'xsin' in components:
 				print 'computing DS_x_off_sin'
 				t1 = time.time()
 				def DS_x_off(theta):
