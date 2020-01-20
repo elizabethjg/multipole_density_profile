@@ -48,7 +48,7 @@ def log_likelihood(data_model, r, Gamma, e_Gamma):
 
 def log_probability(data_model, r, Gamma, e_Gamma):
     log_M200, ellip = data_model
-    if np.log10(12.5) < log_M200 < np.log10(15.5) and 0. < ellip < 0.5:
+    if 12.5 < log_M200 < 15.5 and 0. < ellip < 0.5:
         return log_likelihood(data_model, r, Gamma, e_Gamma)
     return -np.inf
 
