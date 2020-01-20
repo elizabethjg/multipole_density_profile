@@ -22,7 +22,7 @@ os.system('mkdir '+folder+'plots_mcmc/')
 
 mcmc_xsin = (np.loadtxt(folder+file_mcmc_xsin)[3000:]).T
 mcmc_tcos = (np.loadtxt(folder+file_mcmc_tcos)[3000:]).T
-mcmc_combined = np.concatenate((mcmc_tcos,mcmc_tcos),axis=1)
+mcmc_combined = np.concatenate((mcmc_tcos,mcmc_xsin),axis=1)
 
 
 labels = ['M200','e']
