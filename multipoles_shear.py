@@ -213,7 +213,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		
 		'''
 		argumento = lambda x: (x**3)*monopole(x)
-		integral = integrate.quad(argumento, 0, R)[0]
+		integral = integrate.quad(argumento, 0, R, epsabs=1.e-01, epsrel=1.e-01)[0]
 		return integral*(-2./(R**2))
 	
 	vecpsi2 = np.vectorize(psi2)
@@ -237,9 +237,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		def moff(x):
 			return monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
 		argumento = lambda x: moff(x)
-		integral1  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral2  = integrate.quad(argumento, 0., R)[0]
-		integral3  = integrate.quad(argumento, R, np.inf)[0]
+		integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral2  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral3  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
 		return integral1 + integral2 + integral3
 	vec_moff = np.vectorize(monopole_off)
 
@@ -249,7 +249,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		
 		'''						
 		argumento = lambda x: monopole_off(x,theta)*x
-		integral  = integrate.quad(argumento, 0, R)[0]
+		integral  = integrate.quad(argumento, 0, R, epsabs=1.e-01, epsrel=1.e-01)[0]
 		DS_off    = (2./R**2)*integral - monopole_off(R,theta)
 		return DS_off
 
@@ -279,9 +279,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				return np.interp(roff,[R1,R2],[q1,q2])
 
 		argumento = lambda x: q_off(x)
-		integral10  = integrate.quad(argumento, -1.*np.inf, 0)[0]
-		integral20  = integrate.quad(argumento, 0., R)[0]
-		integral30  = integrate.quad(argumento, R, np.inf)[0]
+		integral10  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral20  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral30  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
 
 		return integral10 + integral20 + integral30	
 	vec_qoff = np.vectorize(quadrupole_off)
@@ -290,7 +290,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		def arg(x):
 			return (x**3)*monopole_off(x,theta)
 		argumento = lambda x: arg(x)
-		integral = integrate.quad(argumento, 0, R)[0]
+		integral = integrate.quad(argumento, 0, R, epsabs=1.e-01, epsrel=1.e-01)[0]
 		return integral*(-2./(R**2))
 		
 	vecpsi2_off = np.vectorize(psi2_off)	
@@ -320,7 +320,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 					gamma_t0 = Delta_Sigma_off(R,theta)
 					return gamma_t0
 				argumento = lambda x: DS_t_off0(x)
-				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
 				gamma_t0_off = np.append(gamma_t0_off,integral/(2.*np.pi))
 				t2 = time.time()
 				print (t2-t1)/60.			
@@ -340,9 +340,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				print R,M200
 				t1 = time.time()
 				argumento = lambda x: DS_t_off(x)
-				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
 				print integral
-				gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
+				#gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
 			 	print (t2-t1)/60.
 			
@@ -350,7 +350,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				print 'computing DS_t_off_cos'
 				t1 = time.time()
 				argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
 				gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 				t2 = time.time()
 			 	print (t2-t1)/60.
@@ -363,7 +363,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 								- 4.*monopole_off(R,theta))
 					return ellip*gamma_x2*np.sin(2.*theta)
 				argumento = lambda x: DS_x_off(x)*np.sin(2.*x)
-				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-04, epsrel=1.e-04)[0]
+				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
 				gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
 				t2 = time.time()
 				print (t2-t1)/60.

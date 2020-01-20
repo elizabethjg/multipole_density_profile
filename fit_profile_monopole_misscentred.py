@@ -72,7 +72,7 @@ t1 = time.time()
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
                                 args=(profile[0],profile[1],profile[2]),
                                 pool = pool)
-sampler.run_mcmc(pos, 1000, progress=True)
+sampler.run_mcmc(pos, 300, progress=True)
 print (time.time()-t1)/60.
 pool.terminate()
 #-------------------

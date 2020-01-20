@@ -47,7 +47,7 @@ m200t   = 10**(m200_t[1])/1.e14
 e_m200t = (10**(m200_t[1])*np.log(10.)*np.diff(m200_t))/1.e14
 
 fig = corner.corner(mcmc_tcos.T)
-plt.savefig(folder+'plots_mcmc/'+file_mcmc_xsin[:-3]+'png')
+plt.savefig(folder+'plots_mcmc/'+file_mcmc_tcos[:-3]+'png')
 
 #/////// both ///////
 
@@ -58,7 +58,7 @@ m200   = 10**(m200_total[1])/1.e14
 e_m200 = (10**(m200_total[1])*np.log(10.)*np.diff(m200_total))/1.e14
 
 fig = corner.corner(mcmc_combined.T)
-plt.savefig(folder+'plots_mcmc/'+file_mcmc_xsin[:-3]+'png')
+plt.savefig(folder+'plots_mcmc/'+'quadrupole_combined_'+file_profile[:-3]+'png')
 
 #/////// save file ///////
 
@@ -128,6 +128,7 @@ ax.set_xticklabels([0.1,1,5])
 ax.yaxis.set_ticks([1,10,100])
 ax.set_yticklabels([1,10,100])
 plt.legend()
+plt.savefig(folder+'plots_mcmc/'+'tcos_'+file_profile[:-3]+'png')
 
 f, ax = plt.subplots(figsize=(6.5,5))
 ax.plot(profile[0],profile[3],'C0o')
@@ -145,3 +146,4 @@ ax.set_xticklabels([0.1,1,5])
 ax.yaxis.set_ticks([1,10,100])
 ax.set_yticklabels([1,10,100])
 plt.legend()
+plt.savefig(folder+'plots_mcmc/'+'xsin_'+file_profile[:-3]+'png')
