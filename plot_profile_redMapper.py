@@ -70,7 +70,7 @@ def make_plot(file_name,folder):
      f.subplots_adjust(hspace=0,wspace=0)
      plt.savefig(folder+'plots/'+file_name[:-4]+'.png')
 
-folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_newbins/'
+folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_data/'
      
 f = open(folder+'list_names','r')
 lines = f.readlines()

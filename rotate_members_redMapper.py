@@ -9,7 +9,8 @@ matplotlib.rcParams.update({'font.size': 12})
 
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 
-folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
+#folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
+folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/'
 
 members       = fits.open(folder+'redmapper_dr8_public_v6.3_members.fits')
 clusters      = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')

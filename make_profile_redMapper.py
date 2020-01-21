@@ -239,7 +239,7 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      ra     = backgx.RAJ2000[mask]
      dec    = backgx.DECJ2000[mask]
      Z_c    = Z_c[mask]
-          
+     lamb   = lamb[mask]     
      e1     = backgx.e1[mask]
      e2     = backgx.e2[mask]
      
@@ -320,8 +320,9 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
      f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
      f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-     f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-     f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+     f1.write('# l_min  = '+str('%.1f' % lmin)+' \n')
+     f1.write('# l_max  = '+str('%.1f' % lmax)+' \n')
+     f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
      f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
      f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
      f1.write('# R,shear,err_et,cero,err_ex \n')
@@ -343,8 +344,9 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
           f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
           f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-          f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-          f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+          f1.write('# l_min  = '+str('%.1f' % lmin)+' \n')
+          f1.write('# l_max  = '+str('%.1f' % lmax)+' \n')
+          f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
           f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
           f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
           f1.write('# R,shear,err_et,cero,err_ex \n')
@@ -366,10 +368,10 @@ profile_redMapper('original_bin1',20.,23.42,RIN=150.,ROUT=10000.,ndots=20)
 profile_redMapper('original_bin2',23.42,28.3,RIN=150.,ROUT=10000.,ndots=20)
 profile_redMapper('original_bin3',28.3,39.7,RIN=150.,ROUT=10000.,ndots=20)
 
-#profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
-#profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
-#profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
-#profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
+profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
 
 
 
