@@ -1,4 +1,4 @@
-import sys
+import sys, os
 sys.path.append('/mnt/clemente/lensing/python_codes')
 import numpy as np
 from pylab import *
@@ -9,7 +9,7 @@ from profiles_fit import *
 from multiprocessing import Pool
 from multiprocessing import Process
 import time
-import sys, os
+
 
 # Disable
 def blockPrint():
@@ -111,7 +111,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		
 		M=((800.0*np.pi*roc_mpc*(R200**3))/(3.0*Msun))*h
 		c=5.71*((M/2.e12)**-0.084)*((1.+z)**-0.47)
-		# c = 5.0
+		c = 4.96368325
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
@@ -167,7 +167,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		
 		M=((800.0*np.pi*roc_mpc*(R200**3))/(3.0*Msun))*h
 		c=5.71*((M/2.e12)**-0.084)*((1.+z)**-0.47)
-		# c = 5.0
+		c = 4.96368325
 		####################################################
 		
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
@@ -237,7 +237,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		
 		'''				
 		def moff(x):
-			return monopole(R**2+x**2-2*x*R*np.cos(theta))*P_Roff(x)
+			return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)
 		argumento = lambda x: moff(x)
 		integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
 		integral2  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
@@ -255,31 +255,41 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		DS_off    = (2./R**2)*integral - monopole_off(R,theta)
 		return DS_off
 
-	vec_DSoff = np.vectorize(Delta_Sigma_off)
+
+	def monopole_off0(R):
+		'''
+		F_Eq12
+		
+		'''						
+		def DS_RRs(Rs,R):
+			# F_Eq13
+			#argumento = lambda x: monopole(np.sqrt(R**2+Rs**2-2.*Rs*R*np.cos(x)))
+			#integral  = integrate.quad(argumento, 0, 2.*np.pi, epsabs=1.e-01, epsrel=1.e-01)[0]
+			x = np.linspace(1.e-5,2.*np.pi-1.e-5,200)
+			integral  = integrate.simps(monopole(np.sqrt(R**2+Rs**2-2.*Rs*R*np.cos(x))),x,even='first')
+			return integral/(2.*np.pi)
+
+		argumento = lambda x: DS_RRs(x,R)*P_Roff(x)*2.
+		integral  = integrate.quad(argumento, 0, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+		return integral
+
+	def Delta_Sigma_off0(R):
+		'''
+		F_Eq14
+		
+		'''						
+		argumento = lambda x: monopole_off0(x)*x
+		integral  = integrate.quad(argumento, 0, R, epsabs=1.e-01, epsrel=1.e-01)[0]
+		DS_off    = (2./R**2)*integral - monopole_off0(R)
+		return DS_off
+	
+	vec_DSoff0 = np.vectorize(Delta_Sigma_off0)
+	
 	
 	def quadrupole_off(R,theta):
-
-		def rp(roff):
-			return R**2+roff**2-2*roff*R*np.cos(theta)
-			
 		def q_off(roff):
-			
-			if rp(roff) > 1.e-4:
-				return quadrupole(rp(roff))*P_Roff(roff)
-			else:
-				# for larger precission interpolates
-				b = -2*R*np.cos(theta)
-				c = R**2-1.e-4
-				R1 = np.round(((-b - np.sqrt(b**2 - 4.*c))*0.5),6)
-				R2 = np.round(((-b + np.sqrt(b**2 - 4.*c))*0.5),6)
-				R1 = min(R1,R2)		
-				R2 = max(R1,R2)
-
-				q1 = (quadrupole(rp(R1))*P_Roff(R1))[0]
-				q2 = (quadrupole(rp(R2))*P_Roff(R2))[0]
-				
-				return np.interp(roff,[R1,R2],[q1,q2])
-
+			rp = np.sqrt(R**2+roff**2-2*roff*R*np.cos(theta))
+			return quadrupole(rp)*P_Roff(roff)
 		argumento = lambda x: q_off(x)
 		integral10  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
 		integral20  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
@@ -339,11 +349,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 
 			if 't' in components:
 				print 'computing DS_t_off'
-				print R,M200
 				t1 = time.time()
 				argumento = lambda x: DS_t_off(x)
 				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
-				print integral
 				gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
 			 	print (t2-t1)/60.

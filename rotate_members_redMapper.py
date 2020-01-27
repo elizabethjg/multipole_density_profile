@@ -34,7 +34,7 @@ zlambda = clusters[1].data['Z_LAMBDA']
 zc = zspec
 zc[zc<0] = zlambda[zc<0]
 Lambda = np.repeat(clusters[1].data['LAMBDA'],c)
-R_lambda = (Lambda/100.)**(0.2)
+R_lambda = ((Lambda/100.)**(0.2))/0.7
 
 D_ang    = np.array(cosmo.angular_diameter_distance(zc))
 kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
@@ -57,6 +57,37 @@ tp    = np.repeat(angles['theta_pcut'],c)
 tpwl  = np.repeat(angles['theta_pcut_wlum'],c)
 tpwd  = np.repeat(angles['theta_pcut_wd'],c)
 tpwdl = np.repeat(angles['theta_pcut_wdl'],c)
+
+# --------------------------
+# change angle for profile
+# --------------------------
+
+at = angles.theta
+angles.theta[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_wlum
+angles.theta_wlum[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_wd
+angles.theta_wd[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_pcut
+angles.theta_pcut[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_pcut_wlum
+angles.theta_pcut_wlum[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_pcut_wd
+angles.theta_pcut_wd[at<0.] = np.pi + at[at<0.]
+
+at = angles.theta_pcut_wdl
+angles.theta_pcut_wdl[at<0.] = np.pi + at[at<0.]
+
+hdu = fits.BinTableHDU(angles)
+hdu.writeto(folder+'angles_redMapper_forprofile.fits',overwrite=True)
+
+
+# --------------------------
     
 e     = np.repeat(angles['e'],c)
 ewl   = np.repeat(angles['e_wlum'],c)
@@ -172,3 +203,5 @@ ax[1,2].contour(X, Y, H.T,levels)
 f.subplots_adjust(hspace=0,wspace=0)
 
 '''
+
+

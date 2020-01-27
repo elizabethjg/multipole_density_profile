@@ -33,7 +33,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
      kids     = fits.open(folder+'gx_KiDS_redMapper.fits')[1].data
      cs82     = fits.open(folder+'gx_CS82_redMapper.fits')[1].data
-     angles   = fits.open(folder+'angles_redMapper.fits')[1].data
+     angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
      borderid = np.loadtxt(folder+'redMapperID_border.list')
      
@@ -110,7 +110,10 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                               np.deg2rad(ALFA0),
                               np.deg2rad(DELTA0))
      
-     
+     theta2 = (2.*np.pi - theta) +np.pi/2.
+     theta_ra = theta2
+     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
+
      #Correct polar angle for e1, e2
      theta = theta+np.pi/2.
      
@@ -188,13 +191,24 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           np.savetxt(f1,profile,fmt = ['%12.6f']*5)
           f1.close()
      
-     write_profile(angles.theta[mask]+np.pi/2.,sample+'_t')
-     write_profile(angles.theta_wlum[mask]+np.pi/2.,sample+'_twl')
-     write_profile(angles.theta_wd[mask]+np.pi/2.,sample+'_twd')
-     write_profile(angles.theta_pcut[mask]+np.pi/2.,sample+'_tp')
-     write_profile(angles.theta_pcut_wlum[mask]+np.pi/2.,sample+'_tpwl')
-     write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
-     write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
+     at     = theta_ra - angles.theta[mask]
+     atwl   = theta_ra - angles.theta_wlum[mask]
+     atwd   = theta_ra - angles.theta_wd[mask]
+     atp    = theta_ra - angles.theta_pcut[mask]
+     atpwl  = theta_ra - angles.theta_pcut_wlum[mask]
+     atpwd  = theta_ra - angles.theta_pcut_wd[mask]
+     atpwdl = theta_ra - angles.theta_pcut_wdl[mask]
+     
+     write_profile(at,sample+'_t')
+     write_profile(atwl,sample+'_twl')
+     write_profile(atwd,sample+'_twd')
+     write_profile(atp,sample+'_tp')
+     write_profile(atpwl,sample+'_tpwl')
+     write_profile(atpwd,sample+'_tpwd')
+     write_profile(atpwdl,sample+'_tpwdl')
+     write_profile(theta_ra,sample+'_control1')
+     write_profile(theta,sample+'_control2')
+
 
 def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
@@ -203,7 +217,7 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
      backgx   = fits.open(folder+name_cat)[1].data
-     angles   = fits.open(folder+'angles_redMapper.fits')[1].data
+     angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
      borderid = np.loadtxt(folder+'redMapperID_border.list')
 
@@ -275,7 +289,13 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                               np.deg2rad(DELTA0))
      
      
+     
+     theta2 = (2.*np.pi - theta) +np.pi/2.
+     theta_ra = theta2
+     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
+
      #Correct polar angle for e1, e2
+     
      theta = theta+np.pi/2.
      
      #get tangential ellipticities 
@@ -354,13 +374,23 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           np.savetxt(f1,profile,fmt = ['%12.6f']*5)
           f1.close()
      
-     write_profile(angles.theta[mask]+np.pi/2.,sample+'_t')
-     write_profile(angles.theta_wlum[mask]+np.pi/2.,sample+'_twl')
-     write_profile(angles.theta_wd[mask]+np.pi/2.,sample+'_twd')
-     write_profile(angles.theta_pcut[mask]+np.pi/2.,sample+'_tp')
-     write_profile(angles.theta_pcut_wlum[mask]+np.pi/2.,sample+'_tpwl')
-     write_profile(angles.theta_pcut_wd[mask]+np.pi/2.,sample+'_tpwd')
-     write_profile(angles.theta_pcut_wdl[mask]+np.pi/2.,sample+'_tpwdl')
+     at     = theta_ra - angles.theta[mask]
+     atwl   = theta_ra - angles.theta_wlum[mask]
+     atwd   = theta_ra - angles.theta_wd[mask]
+     atp    = theta_ra - angles.theta_pcut[mask]
+     atpwl  = theta_ra - angles.theta_pcut_wlum[mask]
+     atpwd  = theta_ra - angles.theta_pcut_wd[mask]
+     atpwdl = theta_ra - angles.theta_pcut_wdl[mask]
+     
+     write_profile(at,sample+'_t')
+     write_profile(atwl,sample+'_twl')
+     write_profile(atwd,sample+'_twd')
+     write_profile(atp,sample+'_tp')
+     write_profile(atpwl,sample+'_tpwl')
+     write_profile(atpwd,sample+'_tpwd')
+     write_profile(atpwdl,sample+'_tpwdl')
+     write_profile(theta_ra,sample+'_control1')
+     write_profile(theta,sample+'_control2')
 
 profile_redMapper('original_bin4',39.7,145.,RIN=150.,ROUT=10000.,ndots=20)
 profile_redMapper('original_total',0.,145.,RIN=150.,ROUT=10000.,ndots=20)
