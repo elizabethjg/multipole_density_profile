@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=parallelr
+#SBATCH --job-name=monopole_miss
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=56
+#SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
 ## An email is sent when the job is canceled or finished
 ## Change "root" for your e-mail address
@@ -11,12 +11,12 @@
 
 cd /mnt/clemente/lensing/multipole_density_profile
 
-export OMP_NUM_THREADS=56
-export MKL_NUM_THREADS=56
+export OMP_NUM_THREADS=20
+export MKL_NUM_THREADS=20
 
 source activate py2env
 
-srun python -u fit_profile_monopole_misscentred_parallelr.py -folder '/mnt/clemente/lensing/redMaPPer/mirta3/' -file 'profile_original_bin4.cat' -ncores 56
+srun python -u fit_profile_monopole_misscentred_parallelr.py -folder '/mnt/clemente/lensing/redMaPPer/mirta3/' -file 'profile_original_bin4.cat' -ncores 20
 
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_t.cat' -ncores 56
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_tp.cat' -ncores 56
