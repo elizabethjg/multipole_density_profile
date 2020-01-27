@@ -16,4 +16,4 @@ export MKL_NUM_THREADS=30
 
 source activate py2env
 
-srun python -u run_parallel
+srun python -u run_parallel.py
