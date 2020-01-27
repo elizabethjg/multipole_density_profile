@@ -335,12 +335,9 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 
 			def DS_t_off(theta):
 				gamma_t0 = Delta_Sigma_off(R,theta)
-				if ellip == 0.:
-					gamma_t2 = 0.
-				else:
-					gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
-								- 2.*monopole_off(R,theta) 
-								+ quadrupole_off(R,theta))
+				gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
+							- 2.*monopole_off(R,theta) 
+							+ quadrupole_off(R,theta))
 				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
 
 			if 't' in components:
@@ -403,7 +400,7 @@ def multipole_shear_unpack(minput):
 	
 def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 							 h=0.7,misscentred=False,
-							 s_off=0.4,components = ['t0','t','tcos','xcos'],
+							 s_off=0.4,components = ['t0','t','tcos','xsin'],
 							 verbose = True, ncores=2):
 	
 	if ncores > len(r):
@@ -456,7 +453,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	
 	if misscentred:
 		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
-
+	print output
 	return output
 
 
