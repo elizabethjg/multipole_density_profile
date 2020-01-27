@@ -328,12 +328,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			if 't0' in components:
 				print 'computing DS_t0_off'
 				t1 = time.time()
-				def DS_t_off0(theta):
-					gamma_t0 = Delta_Sigma_off(R,theta)
-					return gamma_t0
-				argumento = lambda x: DS_t_off0(x)
-				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
-				gamma_t0_off = np.append(gamma_t0_off,integral/(2.*np.pi))
+				DSoff = Delta_Sigma_off0(R)
+				gamma_t0_off = np.append(gamma_t0_off,DSoff)
 				t2 = time.time()
 				print (t2-t1)/60.			
 
@@ -350,9 +346,13 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			if 't' in components:
 				print 'computing DS_t_off'
 				t1 = time.time()
-				argumento = lambda x: DS_t_off(x)
-				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
-				gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
+				if ellip == 0.:
+					DSoff = Delta_Sigma_off0(R)
+					gamma_t_off0 = np.append(gamma_t_off0,DSoff)
+				else:
+					argumento = lambda x: DS_t_off(x)
+					integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+					gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
 			 	print (t2-t1)/60.
 			
