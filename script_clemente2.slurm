@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=monopole_miss_bin3
+#SBATCH --job-name=bin3monopole_miss
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
