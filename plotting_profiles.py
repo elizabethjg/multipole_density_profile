@@ -74,7 +74,7 @@ f, ax2 = plt.subplots()
 f, ax3 = plt.subplots()
 q = 0.
 
-for logM in np.arange(12.5,14,0.5):
+for logM in np.arange(12.5,15.5,0.5):
 
     out = np.loadtxt('multipoles_'+str(logM)+'.out')
     

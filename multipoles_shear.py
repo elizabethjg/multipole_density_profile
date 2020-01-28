@@ -453,7 +453,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	
 	if misscentred:
 		output.update({'Gt0_off':gt0_off,'Gt_off':gt_off0,'Gt_off_cos':gt_off,'Gx_off_sin':gx_off})
-	print output
+
 	return output
 
 

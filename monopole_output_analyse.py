@@ -10,7 +10,7 @@ import time
 import corner
 import os
 
-folder         = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_data/'
+folder         = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
 file_profile   = 'profile_original_bin4.cat'
 out_file       = 'out_mcmc_table'
 

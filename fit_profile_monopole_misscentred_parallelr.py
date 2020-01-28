@@ -47,14 +47,14 @@ def log_likelihood(data_model, r, Gamma, e_Gamma):
 
 def log_probability(data_model, r, Gamma, e_Gamma):
     log_M200, pcc = data_model
-    if 12.5 < log_M200 < 15.5 and 0.6 < pcc < 1.0:
+    if 12.5 < log_M200 < 15.5 and 0.3 < pcc < 1.0:
         return log_likelihood(data_model, r, Gamma, e_Gamma)
     return -np.inf
 
 # initializing
 
-pos = np.array([np.random.uniform(12.5,15.5,10),
-                np.random.normal(0.8,0.2,10)]).T
+pos = np.array([np.random.uniform(12.5,15.5,15),
+                np.random.normal(0.8,0.3,15)]).T
 
 pccdist = pos[:,1]                
 pos[pccdist > 1.,1] = 1.
