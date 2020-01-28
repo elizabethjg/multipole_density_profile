@@ -37,11 +37,13 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
      borderid = np.loadtxt(folder+'redMapperID_border.list')
      
-     mkids = ~np.in1d(kids.ID,cfht.ID)
-     mcs82 = ~np.in1d(cs82.ID,cfht.ID)
+     mkids = (~np.in1d(kids.ID,cfht.ID))*(kids.Z_B < 0.9)
+     mcs82 = (~np.in1d(cs82.ID,cfht.ID))*(cs82.Z_B < 1.3)
+     mcfht = (cfht.Z_B < 1.3)
      
      kids = kids[mkids]
      cs82 = cs82[mcs82]
+     cfht = cfht[mcfht]
      
      # MATCH ANGLES
      
@@ -74,7 +76,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
      dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
      Z_c    = Z_c[mask]
-          
+     lamb   = lamb[mask]     
      e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1))[mask]
      e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2))[mask]
      
@@ -161,6 +163,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
      f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
      f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+     f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
      f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
      f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
      f1.write('# R,shear,err_et,cero,err_ex \n')
@@ -184,6 +187,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
           f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
           f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+          f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
           f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
           f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
           f1.write('# R,shear,err_et,cero,err_ex \n')
@@ -207,12 +211,12 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(atpwd,sample+'_tpwd')
      write_profile(atpwdl,sample+'_tpwdl')
      write_profile(theta_ra,sample+'_control1')
-     write_profile(theta,sample+'_control2')
+
 
 
 def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
-                      RIN = 100., ROUT = 10000., ndots = 20.):
+                      RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
@@ -244,7 +248,7 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Z_c[Z_c<0] = zlambda[Z_c<0]
      
      
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
+     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)#*(Z_B > (Z_c + s95/2.))
      mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
      mask = mask_back*mask_lens
      
@@ -288,14 +292,11 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                               np.deg2rad(ALFA0),
                               np.deg2rad(DELTA0))
      
-     
-     
      theta2 = (2.*np.pi - theta) +np.pi/2.
      theta_ra = theta2
      theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
 
      #Correct polar angle for e1, e2
-     
      theta = theta+np.pi/2.
      
      #get tangential ellipticities 
@@ -340,8 +341,8 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
      f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
      f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-     f1.write('# l_min  = '+str('%.1f' % lmin)+' \n')
-     f1.write('# l_max  = '+str('%.1f' % lmax)+' \n')
+     f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+     f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
      f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
      f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
      f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
@@ -364,8 +365,8 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
           f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
           f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-          f1.write('# l_min  = '+str('%.1f' % lmin)+' \n')
-          f1.write('# l_max  = '+str('%.1f' % lmax)+' \n')
+          f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+          f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
           f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
           f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
           f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
@@ -390,126 +391,49 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(atpwd,sample+'_tpwd')
      write_profile(atpwdl,sample+'_tpwdl')
      write_profile(theta_ra,sample+'_control1')
-     write_profile(theta,sample+'_control2')
-
-profile_redMapper('original_bin4',39.7,145.,RIN=150.,ROUT=10000.,ndots=20)
-profile_redMapper('original_total',0.,145.,RIN=150.,ROUT=10000.,ndots=20)
-profile_redMapper('original_bin1',20.,23.42,RIN=150.,ROUT=10000.,ndots=20)
-profile_redMapper('original_bin2',23.42,28.3,RIN=150.,ROUT=10000.,ndots=20)
-profile_redMapper('original_bin3',28.3,39.7,RIN=150.,ROUT=10000.,ndots=20)
-
-profile_redMapper('bin1',22.,40.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('total',0.,150.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin2',40.,70.,RIN=100.,ROUT=5000.,ndots=10)
-profile_redMapper('bin3',70.,150.,RIN=100.,ROUT=5000.,ndots=10)
 
 
 
-#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CFHT_redMapper.fits','cfht_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
-                                           
-#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_KiDS_redMapper.fits','KiDS_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
-                                           
-#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin4',39.7,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_total',0.,145.,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin1',20.,23.42,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin2',23.42,28.3,RIN=100.,ROUT=5000.,ndots=15)
-#profile_redMapper_indcat('gx_CS82_redMapper.fits','CS82_bin3',28.3,39.7,RIN=100.,ROUT=5000.,ndots=15)
+#profile_redMapper('original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+#profile_redMapper('original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+#profile_redMapper('original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+#profile_redMapper('original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
 
 
-'''
-print 'Now is trying to fit a NFW profile...'
-
-try:
-	nfw          = NFW_stack_fit(R[:BIN],shear[:BIN],err_et[:BIN],zmean,roc)
-except:
-	nfw          = [-999.,0.,-100.,[0.,0.],[0.,0.],-999.,0.]
-
-c          = nfw[5]
-CHI_nfw    = nfw[2]
-R200       = nfw[0]
-error_R200 = nfw[1]
-x2         = nfw[3]
-y2         = nfw[4]
+profile_redMapper('terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper('terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper('terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper('terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
 
 
-fig = plt.figure(figsize=(8, 6))  #tamano del plot
-gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1]) #divide en 2 el eje x, en 1 el eje y y da la razon de alturas
+profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
 
-#asigna los sublots
+profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
+profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
 
-ax = plt.subplot(gs[0])
-ax2 = plt.subplot(gs[1])
+profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
 
-#grafica
+profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
 
+profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
+profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
 
-blancox=5000.
-blancoy=5000.
-
-name_label = 'redMapper'
-
-x    = np.zeros(2,float)
-y    = np.zeros(2,float)
-x[1] = R.max()
-
-
-
-ax.plot(R,shear,'ko')
-ax.plot(blancox,blancoy,'w.',label=name_label)#
-
-ax.legend(loc=1,frameon=False, scatterpoints = 1)
-ax.plot(x2,y2,'C0-',label='NFW: c='+str('%.1f' % c)+', $R_{200}$ = '+str('%.2f' % R200)+' $\pm$ '+str('%.2f' % error_R200)+' Mpc$\,h^{-1}_{70}$, $\chi_{red}^{2} =$'+str('%.1f' % CHI_nfw)) #, c='+str(round(c)))
-ax.errorbar(R, shear, yerr=err_et, fmt='None', ecolor='k')
-
-
-#legend
-matplotlib.rcParams['legend.fontsize'] = 11.
-ax.legend(loc=1,frameon=False, scatterpoints = 1)
+profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
+profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
 
 
-# axis detail
-ax.axis([RIN/1000.,ROUT/1000.,1.,5000.])
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.xaxis.set_ticks(np.arange(RIN/1000., ROUT/1000., 300.))
-ax.set_xticklabels(np.arange(RIN/1000., ROUT/1000., 300.))
-ax.yaxis.set_ticks(np.arange(10., 200., 100.))
-ax.set_yticklabels(np.arange(10., 200., 100.))
-
-#label					
-ax.set_ylabel(u'$\Delta\Sigma_{\parallel} (M_{\odot}\,pc^{-2})$',fontsize=15)
-
-#-----------------------------
-
-ax2.plot(x,y,'k')
-ax2.plot(R,cero,'kx')
-ax2.errorbar(R,cero, yerr=err_ex, fmt='None', ecolor='k')
-
-#axis details
-ax2.axis([RIN/1000.,ROUT/1000.,-25.,30.])
-ax2.yaxis.set_ticks(np.arange(-20., 20.,15.))
-ax2.set_yticklabels(np.arange(-20., 20., 15.))
-ax2.set_xscale('log')
-ax2.xaxis.set_ticks(np.arange(RIN/1000.,ROUT/1000., 0.5))
-ax2.set_xticklabels(np.arange(RIN/1000.,ROUT/1000., 0.5))
-
-
-
-#labels
-ax2.set_ylabel(r'$\Delta\Sigma_{\times} $',fontsize=15)
-ax2.set_xlabel('r [$h^{-1}_{70}\,$Mpc]',fontsize=15)
-
-#to join the plots
-fig.subplots_adjust(hspace=0)
-plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
-
-plt.subplots_adjust(left=0.15, right=0.95, top=0.85, bottom=0.1)
-'''

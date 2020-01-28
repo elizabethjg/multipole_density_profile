@@ -10,136 +10,108 @@ import time
 import corner
 import os
 
-folder         = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
-file_profile   = 'profile_original_bin4.cat'
-out_file       = 'out_mcmc_table'
 
-file_mcmc = 'monopole_misscentred_'+file_profile
+def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
+	
+	print file_profile
+	
+	file_mcmc = 'monopole_misscentred_'+file_profile
+	
+	os.system('mkdir '+folder+'plots_mcmc/')
+	
+	mcmc = (np.loadtxt(folder+file_mcmc)).T
+	
+	
+	f, ax = plt.subplots(2, 1, figsize=(10,5))
+	ax[0].plot(mcmc[0],'k.',alpha=0.3)
+	ax[0].axvline(1500)
+	ax[0].axhline(np.log10(m200_maria*1.e14))
+	ax[1].plot(mcmc[1],'k.',alpha=0.3)
+	ax[1].axvline(1500)
+	ax[1].axhline(pcc_maria)
+	plt.savefig(folder+'plots_mcmc/out_'+file_mcmc[:-3]+'png')
+	
+	mcmc = mcmc[:,1500:]
+	
+	labels = ['M200','pcc']
+	
+	
+	
+	m200 = np.percentile(mcmc[0], [16, 50, 84])
+	pcc    = np.percentile(mcmc[1], [16, 50, 84])
+	
+	M200   = 10**(m200[1])/1.e14
+	e_M200 = (10**(m200[1])*np.log(10.)*np.diff(m200))/1.e14
+	
+	print ' M200 ',M200,' +/- ',e_M200
+	print ' pcc ',pcc[1],' +/- ',np.diff(pcc)
+	
+	
+	fig = corner.corner(mcmc.T, labels=labels)
+	plt.savefig(folder+'plots_mcmc/'+file_mcmc[:-3]+'png')
+	
+	
+	#/////// save file ///////
+	
+	f1=open(folder+out_file,'a')
+	f1.write(str('%.2f' % (M200))+'   '+str('%.2f' % (e_M200[0]))+'   '+str('%.2f' % (e_M200[1]))+'   ')
+	f1.write(str('%.2f' % (pcc[1]))+'   '+str('%.2f' % (np.diff(pcc)[0]))+'   '+str('%.2f' % (np.diff(pcc)[1]))+'   \n')
+	f1.close()
+	
+	
+	profile = np.loadtxt(folder+file_profile).T
+	
+	f = open(folder+file_profile,'r')
+	lines = f.readlines()
+	j = lines[1].find('=')+1
+	Mguess = (float(lines[1][j:-2])*1.e14)
+	j = lines[2].find('=')+1
+	zmean = float(lines[2][j:-2])
+	
+	r  = np.logspace(np.log10(min(profile[0])),
+					np.log10(max(profile[0])),10)
+	
+	multipoles = multipole_shear_parallel(r,M200=M200*1.e14,components = ['t'],
+										misscentred = True,
+										ellip=0.,z=zmean,
+										verbose=True,ncores=4)
+	
+	model_t = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc[1])
 
-os.system('mkdir '+folder+'plots_mcmc/')
+	multipoles = multipole_shear_parallel(r,M200=m200_maria*1.e14,components = ['t'],
+										misscentred = True,
+										ellip=0.,z=zmean,
+										verbose=True,ncores=4)
+	
+	model_maria = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc_maria)
+	
+	
+	f, ax = plt.subplots(figsize=(6.5,5))
+	ax.plot(profile[0],profile[1],'C0o')
+	ax.plot(r,model_t,'C1',label = 'mcmc result')
+	ax.plot(r,model_maria,'C2',label = 'maria')
+	ax.errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='C0')
+	ax.set_xscale('log')
+	ax.set_yscale('log')
+	ax.set_xlabel('R [mpc]')
+	ax.set_ylim(1,300)
+	ax.set_xlim(0.1,5.2)
+	ax.xaxis.set_ticks([0.1,1,5])
+	ax.set_xticklabels([0.1,1,5])
+	ax.yaxis.set_ticks([1,10,100])
+	ax.set_yticklabels([1,10,100])
+	plt.legend()
+	plt.savefig(folder+'plots_mcmc/'+'t'+file_profile[:-3]+'png')
 
-mcmc = (np.loadtxt(folder+file_mcmc)).T
+folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
 
+maria_result = np.loadtxt(folder+'maria_result').T
+m200_maria   = maria_result[0]/0.7
+pcc_maria    = maria_result[2]
 
-labels = ['M200','e']
+plot_monopole_miss(folder,'profile_original_bin1.cat','out_original_table',m200_maria[0],pcc_maria[0])
+plot_monopole_miss(folder,'profile_original_bin2.cat','out_original_table',m200_maria[1],pcc_maria[1])
+plot_monopole_miss(folder,'profile_original_bin3.cat','out_original_table',m200_maria[2],pcc_maria[2])
+plot_monopole_miss(folder,'profile_original_bin4.cat','out_original_table',m200_maria[3],pcc_maria[3])
 
-#/////// xsin ///////
-
-m200_x = np.percentile(mcmc_xsin[0], [16, 50, 84])
-e_x    = np.percentile(mcmc_xsin[1], [16, 50, 84])
-
-m200x   = 10**(m200_x[1])/1.e14
-e_m200x = (10**(m200_x[1])*np.log(10.)*np.diff(m200_x))/1.e14
-
-fig = corner.corner(mcmc_xsin.T, labels=labels)
-plt.savefig(folder+'plots_mcmc/'+file_mcmc_xsin[:-3]+'png')
-
-#/////// tcos ///////
-
-m200_t = np.percentile(mcmc_tcos[0], [16, 50, 84])
-e_t    = np.percentile(mcmc_tcos[1], [16, 50, 84])
-
-m200t   = 10**(m200_t[1])/1.e14
-e_m200t = (10**(m200_t[1])*np.log(10.)*np.diff(m200_t))/1.e14
-
-fig = corner.corner(mcmc_tcos.T)
-plt.savefig(folder+'plots_mcmc/'+file_mcmc_tcos[:-3]+'png')
-
-#/////// both ///////
-
-m200_total   = np.percentile(mcmc_combined[0], [16, 50, 84])
-e      = np.percentile(mcmc_combined[1], [16, 50, 84])
-
-m200   = 10**(m200_total[1])/1.e14
-e_m200 = (10**(m200_total[1])*np.log(10.)*np.diff(m200_total))/1.e14
-
-fig = corner.corner(mcmc_combined.T)
-plt.savefig(folder+'plots_mcmc/'+'quadrupole_combined_'+file_profile[:-3]+'png')
-
-#/////// save file ///////
-
-f1=open(folder+out_file,'a')
-f1.write(file_profile+'  '+'  tcos  ') 
-f1.write(str('%.2f' % (m200t))+'   '+str('%.2f' % (e_m200t[0]))+'   '+str('%.2f' % (e_m200t[1]))+'   ')
-f1.write(str('%.2f' % (e_t[1]))+'   '+str('%.2f' % (np.diff(e_t)[0]))+'   '+str('%.2f' % (np.diff(e_t)[1]))+'   ')
-f1.write('  xsin  ') 
-f1.write(str('%.2f' % (m200x))+'   '+str('%.2f' % (e_m200x[0]))+'   '+str('%.2f' % (e_m200x[1]))+'   ')
-f1.write(str('%.2f' % (e_x[1]))+'   '+str('%.2f' % (np.diff(e_x)[0]))+'   '+str('%.2f' % (np.diff(e_x)[1]))+'   ')
-f1.write('  both  ') 
-f1.write(str('%.2f' % (m200))+'   '+str('%.2f' % (e_m200[0]))+'   '+str('%.2f' % (e_m200[1]))+'   ')
-f1.write(str('%.2f' % (e[1]))+'   '+str('%.2f' % (np.diff(e)[0]))+'   '+str('%.2f' % (np.diff(e)[1]))+'   \n')
-f1.close()
-
-
-profile = np.loadtxt(folder+file_profile).T
-
-f = open(folder+file_profile,'r')
-lines = f.readlines()
-j = lines[1].find('=')+1
-Mguess = (float(lines[1][j:-2])*1.e14)
-j = lines[2].find('=')+1
-zmean = float(lines[2][j:-2])
-
-r  = np.logspace(np.log10(min(profile[0])),
-				np.log10(max(profile[0])),10)
-
-multipoles = multipole_shear_parallel(r,M200=m200t*1.e14,components = ['tcos','xsin'],
-									misscentred = False,
-									ellip=e_t[1],z=zmean,
-									verbose=True,ncores=4)
-
-modelt_t = model_Gamma(multipoles,'tcos', misscentred = False)
-modelt_x = model_Gamma(multipoles,'xsin', misscentred = False)
-
-multipoles = multipole_shear_parallel(r,M200=m200x*1.e14,components = ['tcos','xsin'],
-									misscentred = False,
-									ellip=e_x[1],z=zmean,
-									verbose=True,ncores=4)
-
-modelx_t = model_Gamma(multipoles,'tcos', misscentred = False)
-modelx_x = model_Gamma(multipoles,'xsin', misscentred = False)
-
-
-multipoles = multipole_shear_parallel(r,M200=m200*1.e14,components = ['tcos','xsin'],
-									misscentred = False,
-									ellip=e[1],z=zmean,
-									verbose=True,ncores=4)
-
-model_t = model_Gamma(multipoles,'tcos', misscentred = False)
-model_x = model_Gamma(multipoles,'xsin', misscentred = False)
-
-f, ax = plt.subplots(figsize=(6.5,5))
-ax.plot(profile[0],profile[1],'C0o')
-ax.plot(r,model_t,'C1',label = 'combined')
-ax.plot(r,modelt_t,'C2',label = 'tcos')
-ax.plot(r,modelx_t,'C3',label = 'xsin')
-ax.errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='C0')
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.set_xlabel('R [mpc]')
-ax.set_ylim(1,300)
-ax.set_xlim(0.1,5.2)
-ax.xaxis.set_ticks([0.1,1,5])
-ax.set_xticklabels([0.1,1,5])
-ax.yaxis.set_ticks([1,10,100])
-ax.set_yticklabels([1,10,100])
-plt.legend()
-plt.savefig(folder+'plots_mcmc/'+'tcos_'+file_profile[:-3]+'png')
-
-f, ax = plt.subplots(figsize=(6.5,5))
-ax.plot(profile[0],profile[3],'C0o')
-ax.plot(r,model_x,'C1',label = 'combined')
-ax.plot(r,modelt_x,'C2',label = 'tcos')
-ax.plot(r,modelx_x,'C3',label = 'xsin')
-ax.errorbar(profile[0],profile[3],yerr=profile[4],fmt = 'none',ecolor='C0')
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.set_xlabel('R [mpc]')
-ax.set_ylim(1,300)
-ax.set_xlim(0.1,5.2)
-ax.xaxis.set_ticks([0.1,1,5])
-ax.set_xticklabels([0.1,1,5])
-ax.yaxis.set_ticks([1,10,100])
-ax.set_yticklabels([1,10,100])
-plt.legend()
-plt.savefig(folder+'plots_mcmc/'+'xsin_'+file_profile[:-3]+'png')
+lmean = [21.75,25.76,32.91,57.59]
