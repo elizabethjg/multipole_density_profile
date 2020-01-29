@@ -16,4 +16,4 @@ export MKL_NUM_THREADS=24
 
 source activate py2env
 
-srun python -u run_makeprofile
+srun python -u run_makeprofile.py
