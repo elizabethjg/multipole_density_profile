@@ -439,8 +439,8 @@ def makeindprofile_parallel(name_cat,samples,lmin,lmax,zmin,zmax,
      	
      ncores = len(lmin)
           
-     entrada = [name_cat,samples,lmin,lmax,zmin,zmax,
-                         z_back,odds_min,RIN,ROUT,ndots,zlim].T
+     entrada = np.array([name_cat,samples,lmin,lmax,zmin,zmax,
+                         z_back,odds_min,RIN,ROUT,ndots,zlim]).T
                          
      pool = Pool(processes=(ncores))
      salida=np.array(pool.map(makeindprofile_unpack, entrada))
