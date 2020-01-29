@@ -103,10 +103,11 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	plt.legend()
 	plt.savefig(folder+'plots_mcmc/'+'t'+file_profile[:-3]+'png')
 
-folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
+folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_original/'
 
 maria_result = np.loadtxt(folder+'maria_result').T
 m200_maria   = maria_result[0]/0.7
+em200_maria  = maria_result[1]/0.7
 pcc_maria    = maria_result[2]
 
 plot_monopole_miss(folder,'profile_original_bin1.cat','out_original_table',m200_maria[0],pcc_maria[0])
