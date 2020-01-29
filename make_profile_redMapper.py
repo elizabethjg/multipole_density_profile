@@ -13,7 +13,7 @@ cvel = 299792458;   # Speed of light (m.s-1)
 G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
 pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
-'''
+# '''
 z_back   = 0.1
 odds_min = 0.5
 zmin     = 0.1
@@ -21,24 +21,27 @@ zmax     = 0.33
 RIN      = 100.
 ROUT     = 10000.
 ndots    = 20.
-sample   = 'bin4'
-lmin     = 39.7
+sample   = 'pru'
+lmin     = 20.
 lmax     = 145.
-'''
+# '''
 
 def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.):
-
-     lmin     = lmin.astype(float)
-     lmax     = lmax.astype(float)
-     zmin     = zmin.astype(float)
-     zmax     = zmax.astype(float)
-     z_back   = z_back.astype(float)
-     odds_min = odds_min.astype(float)
-     RIN      = RIN.astype(float)
-     ROUT     = ROUT.astype(float)
-     ndots    = int(ndots.astype(float))
+     
+     try:
+          lmin     = lmin.astype(float)
+          lmax     = lmax.astype(float)
+          zmin     = zmin.astype(float)
+          zmax     = zmax.astype(float)
+          z_back   = z_back.astype(float)
+          odds_min = odds_min.astype(float)
+          RIN      = RIN.astype(float)
+          ROUT     = ROUT.astype(float)
+          ndots    = int(ndots.astype(float))
+     except:
+          print 'not running in parallel'
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
@@ -85,61 +88,19 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      Nclusters = len(np.unique(ID[mask]))
      
-     ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
-     dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
-     Z_c    = Z_c[mask]
-     lamb   = lamb[mask]     
-     e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1))[mask]
-     e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2))[mask]
+     del(mask_back)
+     del(mask_lens)
+     del(ODDS)
+     del(zlambda)
+     del(zspec)
+     del(Z_B)     
+     del(ID)
      
-          
-     ALFA0  = np.concatenate((cfht.RA,kids.RA,cs82.RA))[mask]
-     DELTA0 = np.concatenate((cfht.DEC,kids.DEC,cs82.DEC))[mask]
-     
-     dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS))[mask]
-     ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS))[mask]
-     dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL))[mask]
-     
-     peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
-     
-     m    = np.concatenate((cfht.m,kids.m,cs82.m))[mask]
-     
-     KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-     BETA_array = dls/ds
-     beta       = BETA_array.mean()
-     
-     Dl = dl*1.e6*pc
-     sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
-     peso=peso/(sigma_c**2)
-     
-     print 'BETA.mean',beta
-     
-     SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
-     
-     print 'SIGMA_C', SIGMAC
-     
-     
-     rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
-                              np.deg2rad(dec),
-                              np.deg2rad(ALFA0),
-                              np.deg2rad(DELTA0))
-     
-     theta2 = (2.*np.pi - theta) +np.pi/2.
-     theta_ra = theta2
-     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
 
-     #Correct polar angle for e1, e2
-     theta = theta+np.pi/2.
-     
-     #get tangential ellipticities 
-     et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
-     #get cross ellipticities
-     ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
-     
-     
-     r=np.rad2deg(rads)*3600*KPCSCALE
-     
-     
+     # Cosmological distances
+
+     Z_c    = Z_c[mask]
+     lamb   = lamb[mask]              
      zmean    = (Z_c).mean()
      zdisp    = (Z_c).std()
      H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
@@ -147,6 +108,75 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      roc_mpc  = roc*((pc*1.0e6)**3.0)
      D_ang    = cosmo.angular_diameter_distance(zmean)
      kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+
+     del(Z_c)
+     
+     dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS))[mask]
+     ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS))[mask]
+     dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL))[mask]
+     
+     
+     KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+     BETA_array = dls/ds
+     beta       = BETA_array.mean()
+     
+     Dl = dl*1.e6*pc
+     sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
+     
+     del(dls)
+     del(dl)
+     del(ds)
+     
+     print 'BETA.mean',beta
+     
+     SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
+     
+     print 'SIGMA_C', SIGMAC
+     
+     # Compute tangential and cross components
+     
+     ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
+     dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
+          
+     ALFA0  = np.concatenate((cfht.RA,kids.RA,cs82.RA))[mask]
+     DELTA0 = np.concatenate((cfht.DEC,kids.DEC,cs82.DEC))[mask]
+     
+     rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
+                              np.deg2rad(dec),
+                              np.deg2rad(ALFA0),
+                              np.deg2rad(DELTA0))
+     
+     del(ra)
+     del(dec)
+     del(ALFA0)
+     del(DELTA0)
+     
+     
+     theta2 = (2.*np.pi - theta) +np.pi/2.
+     theta_ra = theta2
+     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
+
+     #Correct polar angle for e1, e2
+     theta = theta+np.pi/2.
+
+     e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1))[mask]
+     e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2))[mask]
+     
+     #get tangential ellipticities 
+     et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
+     #get cross ellipticities
+     ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
+     
+     del(e1)
+     del(e2)
+     
+     r=np.rad2deg(rads)*3600*KPCSCALE
+     del(rads)
+     
+     peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
+     peso = peso/(sigma_c**2) 
+     m    = np.concatenate((cfht.m,kids.m,cs82.m))[mask]
+    
      
      
      print '---------------------------------------------------------'
@@ -230,16 +260,18 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 
-     lmin     = lmin.astype(float)
-     lmax     = lmax.astype(float)
-     zmin     = zmin.astype(float)
-     zmax     = zmax.astype(float)
-     z_back   = z_back.astype(float)
-     odds_min = odds_min.astype(float)
-     RIN      = RIN.astype(float)
-     ROUT     = ROUT.astype(float)
-     ndots    = int(ndots.astype(float))
-     zlim     = zlim.astype(float)
+     try:
+          lmin     = lmin.astype(float)
+          lmax     = lmax.astype(float)
+          zmin     = zmin.astype(float)
+          zmax     = zmax.astype(float)
+          z_back   = z_back.astype(float)
+          odds_min = odds_min.astype(float)
+          RIN      = RIN.astype(float)
+          ROUT     = ROUT.astype(float)
+          ndots    = int(ndots.astype(float))
+     except:
+          print 'not running in parallel'
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
@@ -277,23 +309,35 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      Nclusters = len(np.unique(ID[mask]))
      
-     ra     = backgx.RAJ2000[mask]
-     dec    = backgx.DECJ2000[mask]
-     Z_c    = Z_c[mask]
-     lamb   = lamb[mask]     
-     e1     = backgx.e1[mask]
-     e2     = backgx.e2[mask]
+     Nclusters = len(np.unique(ID[mask]))
      
-          
-     ALFA0  = backgx.RA[mask]
-     DELTA0 = backgx.DEC[mask]
+     del(mask_back)
+     del(mask_lens)
+     del(ODDS)
+     del(zlambda)
+     del(zspec)
+     del(Z_B)     
+     del(ID)
+     
+
+     # Cosmological distances
+
+     Z_c    = Z_c[mask]
+     lamb   = lamb[mask]              
+     zmean    = (Z_c).mean()
+     zdisp    = (Z_c).std()
+     H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
+     roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
+     roc_mpc  = roc*((pc*1.0e6)**3.0)
+     D_ang    = cosmo.angular_diameter_distance(zmean)
+     kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+
+     del(Z_c)
      
      dls  = backgx.DLS[mask]
      ds   = backgx.DS[mask]
      dl   = backgx.DL[mask]
      
-     peso = backgx.weight[mask]
-     m    = backgx.m[mask]
      
      KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
      BETA_array = dls/ds
@@ -302,6 +346,9 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Dl = dl*1.e6*pc
      sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
      
+     del(dls)
+     del(dl)
+     del(ds)
      
      print 'BETA.mean',beta
      
@@ -309,11 +356,24 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      print 'SIGMA_C', SIGMAC
      
+     # Compute tangential and cross components
+     
+     ra     = backgx.RAJ2000[mask]
+     dec    = backgx.DECJ2000[mask]
+          
+     ALFA0  = backgx.RA[mask]
+     DELTA0 = backgx.DEC[mask]
      
      rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
                               np.deg2rad(dec),
                               np.deg2rad(ALFA0),
                               np.deg2rad(DELTA0))
+     
+     del(ra)
+     del(dec)
+     del(ALFA0)
+     del(DELTA0)
+     
      
      theta2 = (2.*np.pi - theta) +np.pi/2.
      theta_ra = theta2
@@ -321,24 +381,24 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 
      #Correct polar angle for e1, e2
      theta = theta+np.pi/2.
+
+     e1     = backgx.e1[mask]
+     e2     = backgx.e2[mask]
      
      #get tangential ellipticities 
      et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
      #get cross ellipticities
      ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
      
+     del(e1)
+     del(e2)
      
      r=np.rad2deg(rads)*3600*KPCSCALE
+     del(rads)
      
-     
-     zmean    = (Z_c).mean()
-     zdisp    = (Z_c).std()
-     H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
-     roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
-     roc_mpc  = roc*((pc*1.0e6)**3.0)
-     D_ang    = cosmo.angular_diameter_distance(zmean)
-     kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-     
+     peso = backgx.weight[mask]
+     peso = peso/(sigma_c**2) 
+     m    = backgx.m[mask]
      
      print '---------------------------------------------------------'
      print '             COMPUTING THE SHEAR PROFILES                '
