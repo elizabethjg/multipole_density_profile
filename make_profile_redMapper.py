@@ -6,6 +6,8 @@ from astropy.cosmology import LambdaCDM
 from maria_func import *
 from make_profile import *
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
+from multiprocessing import Pool
+from multiprocessing import Process
 #parameters
 cvel = 299792458;   # Speed of light (m.s-1)
 G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
@@ -27,6 +29,16 @@ lmax     = 145.
 def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.):
+
+     lmin     = lmin.astype(float)
+     lmax     = lmax.astype(float)
+     zmin     = zmin.astype(float)
+     zmax     = zmax.astype(float)
+     z_back   = z_back.astype(float)
+     odds_min = odds_min.astype(float)
+     RIN      = RIN.astype(float)
+     ROUT     = ROUT.astype(float)
+     ndots    = int(ndots.astype(float))
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
@@ -155,7 +167,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
      
-     f1=open('profile_'+sample+'.cat','w')
+     f1=open(folder+'profile_'+sample+'.cat','w')
      f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
      f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
      f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
@@ -179,7 +191,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                                    peso,m,sigma_c,angle,
                                    ndots,booterror_flag=True)
           
-          f1=open('profile_'+sample+'.cat','w')
+          f1=open(folder+'profile_'+sample+'.cat','w')
           f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
           f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
           f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
@@ -210,13 +222,24 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(atpwl,sample+'_tpwl')
      write_profile(atpwd,sample+'_tpwd')
      write_profile(atpwdl,sample+'_tpwdl')
-     write_profile(theta_ra,sample+'_control1')
+     write_profile(theta_ra,sample+'_control')
 
 
 
 def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
+
+     lmin     = lmin.astype(float)
+     lmax     = lmax.astype(float)
+     zmin     = zmin.astype(float)
+     zmax     = zmax.astype(float)
+     z_back   = z_back.astype(float)
+     odds_min = odds_min.astype(float)
+     RIN      = RIN.astype(float)
+     ROUT     = ROUT.astype(float)
+     ndots    = int(ndots.astype(float))
+     zlim     = zlim.astype(float)
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
@@ -335,7 +358,7 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
      
-     f1=open('profile_'+sample+'.cat','w')
+     f1=open(folder+'profile_'+sample+'.cat','w')
      f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
      f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
      f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
@@ -359,7 +382,7 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                                    peso,m,sigma_c,angle,
                                    ndots,booterror_flag=True)
           
-          f1=open('profile_'+sample+'.cat','w')
+          f1=open(folder+'profile_'+sample+'.cat','w')
           f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
           f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
           f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
@@ -390,9 +413,38 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      write_profile(atpwl,sample+'_tpwl')
      write_profile(atpwd,sample+'_tpwd')
      write_profile(atpwdl,sample+'_tpwdl')
-     write_profile(theta_ra,sample+'_control1')
+     write_profile(theta_ra,sample+'_control')
 
 
+def makeprofile_unpack(pinput):
+	return profile_redMapper(*pinput)
+
+def makeindprofile_unpack(pinput):
+	return profile_redMapper_indcat(*pinput)
+
+def makeprofile_parallel(samples,lmin,lmax,zmin,zmax,
+                         z_back, odds_min,RIN, ROUT, ndots):
+     	
+     ncores = len(lmin)
+          
+     entrada = np.array([samples,lmin,lmax,zmin,zmax,
+                         z_back,odds_min,RIN,ROUT,ndots]).T
+                         
+     pool = Pool(processes=(ncores))
+     salida=np.array(pool.map(makeprofile_unpack, entrada))
+     pool.terminate()
+
+def makeindprofile_parallel(name_cat,samples,lmin,lmax,zmin,zmax,
+                         z_back, odds_min,RIN, ROUT, ndots,zlim):
+     	
+     ncores = len(lmin)
+          
+     entrada = [name_cat,samples,lmin,lmax,zmin,zmax,
+                         z_back,odds_min,RIN,ROUT,ndots,zlim].T
+                         
+     pool = Pool(processes=(ncores))
+     salida=np.array(pool.map(makeindprofile_unpack, entrada))
+     pool.terminate()
 
 #profile_redMapper('original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
 #profile_redMapper('original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
@@ -400,40 +452,5 @@ def profile_redMapper_indcat(name_cat,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 #profile_redMapper('original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
 
 
-profile_redMapper('terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper('terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper('terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper('terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
-
-
-profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CFHT_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-
-profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-profile_redMapper_indcat('gx_CS82_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20)
-
-profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin1',20.,23.42,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin2',23.42,28.3,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin3',28.3,39.7,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS_redMapper.fits','original_bin4',39.7,145.,RIN=100./0.7,ROUT=10000./0.7,ndots=20,zlim = 0.9)
-
-profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CFHT,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
-
-profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10)
-profile_redMapper_indcat('gx_CS82,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10)
-
-profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_total',20.,150.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin1',20.,28.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin2',28.,40.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
-profile_redMapper_indcat('gx_KiDS,redMapper.fits','terciles_bin3',40.,150.,RIN=200.,ROUT=5000.,ndots=10,zlim = 0.9)
 
 
