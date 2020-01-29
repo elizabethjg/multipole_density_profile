@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=make_profiles_rM
+#SBATCH --job-name=2make_profiles_rM
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=24:00:00
