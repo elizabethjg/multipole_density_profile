@@ -5,7 +5,7 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-# '''
+'''
 samples  = ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']
 lmin     = np.array([20.,20.,28.,40.])
 lmax     = np.array([150.,28.,40.,150.])
@@ -25,7 +25,7 @@ for j in range(len(entrada)):
 
 '''
 
-name_cat = ['gx_CFHT_redMapper.fits']*4 + ['gx_CS82_redMapper.fits']*4 + ['gx_KiDS_redMapper.fits']*4
+name_cat = ['CFHT']*4 + ['CS82']*4 + ['KiDS']*4
 samples  = ['original_bin1','original_bin2','original_bin3','original_bin4']*3
 lmin     = np.tile(np.array([20.,23.42,28.3,39.7]),3)
 lmax     = np.tile(np.array([23.42,28.3,39.7,145.]),3)
@@ -39,7 +39,7 @@ ndots    = np.ones(len(lmin))*20
 zlim     = np.append(np.ones(8)*1.3,np.ones(4)*0.9)
 
 
-name_cat = name_cat + ['gx_CFHT_redMapper.fits']*4 + ['gx_CS82_redMapper.fits']*4 + ['gx_KiDS_redMapper.fits']*4
+name_cat = name_cat + ['CFHT']*4 + ['CS82']*4 + ['KiDS']*4
 samples  = samples +  ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']*3
 lmin     = np.append(lmin,np.tile(np.array([20.,20.,28.,40.]),3))
 lmax     = np.append(lmax,np.tile(np.array([150.,28.,40.,150.]),3))
@@ -59,4 +59,4 @@ for j in range(3):
                             lmax[ini:fin],zmin[ini:fin],zmax[ini:fin],
                             z_back[ini:fin],odds_min[ini:fin],RIN[ini:fin],
                             ROUT[ini:fin],ndots[ini:fin],zlim[ini:fin])
-'''
+#'''
