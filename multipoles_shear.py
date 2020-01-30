@@ -173,8 +173,8 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		deltac=(200./3.)*( (c**3) / ( np.log(1.+c)- (c/(1+c)) ))
 
 		x=(R*c)/R200
-		m1 = x <= (1.0-1.e-4)
-		m2 = x >= (1.0+1.e-4)
+		m1 = x <= (1.0-1.e-12)
+		m2 = x >= (1.0+1.e-12)
 		m3 = (x == 1.0)
 		m4 = (~m1)*(~m2)*(~m3)
 	
@@ -265,7 +265,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			# F_Eq13
 			#argumento = lambda x: monopole(np.sqrt(R**2+Rs**2-2.*Rs*R*np.cos(x)))
 			#integral  = integrate.quad(argumento, 0, 2.*np.pi, epsabs=1.e-01, epsrel=1.e-01)[0]
-			x = np.linspace(1.e-6,2.*np.pi-1.e-6,500)
+			x = np.linspace(0.,2.*np.pi,1000)
 			integral  = integrate.simps(monopole(np.sqrt(R**2+Rs**2-2.*Rs*R*np.cos(x))),x,even='first')
 			return integral/(2.*np.pi)
 
