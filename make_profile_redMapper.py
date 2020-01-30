@@ -260,222 +260,222 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 
-	 sample = survey+'_'+sample
-	 
-     try:
-          lmin     = lmin.astype(float)
-          lmax     = lmax.astype(float)
-          zmin     = zmin.astype(float)
-          zmax     = zmax.astype(float)
-          z_back   = z_back.astype(float)
-          odds_min = odds_min.astype(float)
-          RIN      = RIN.astype(float)
-          ROUT     = ROUT.astype(float)
-          ndots    = int(ndots.astype(float))
-     except:
-          print 'not running in parallel'
-
-     folder = '/mnt/clemente/lensing/redMaPPer/'
-     
-     backgx   = fits.open(folder++'gx_'+survey+'_redMapper.fits')[1].data
-     angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
-     clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
-     borderid = np.loadtxt(folder+'redMapperID_border.list')
-
-     # MATCH ANGLES
-     
-     ID = backgx.ID
-     IDc = clusters.ID
-     
-     ides,index,c = np.unique(ID,return_index=True,return_counts=True)
-     angles_in = angles[np.in1d(IDc,ID)]
-     sindex = np.argsort(index)
-     angles = np.repeat(angles_in[sindex],c[sindex])
-     
-     
-     #-----------------------------------------------
-     
-     lamb = backgx.LAMBDA
-     
-     Z_B  = backgx.Z_B
-     ODDS = backgx.ODDS
-     zlambda = backgx.Z_LAMBDA
-     zspec   = backgx.Z_SPEC
-     Z_c      = zspec
-     Z_c[Z_c<0] = zlambda[Z_c<0]
-     
-     
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)#*(Z_B > (Z_c + s95/2.))
-     mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
-     mask = mask_back*mask_lens
-     
-     Nclusters = len(np.unique(ID[mask]))
-     
-     Nclusters = len(np.unique(ID[mask]))
-     
-     del(mask_back)
-     del(mask_lens)
-     del(ODDS)
-     del(zlambda)
-     del(zspec)
-     del(Z_B)     
-     del(ID)
-     
-
-     # Cosmological distances
-
-     Z_c    = Z_c[mask]
-     lamb   = lamb[mask]              
-     zmean    = (Z_c).mean()
-     zdisp    = (Z_c).std()
-     H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
-     roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
-     roc_mpc  = roc*((pc*1.0e6)**3.0)
-     D_ang    = cosmo.angular_diameter_distance(zmean)
-     kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-
-     del(Z_c)
-     
-     dls  = backgx.DLS[mask]
-     ds   = backgx.DS[mask]
-     dl   = backgx.DL[mask]
-     
-     
-     KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-     BETA_array = dls/ds
-     beta       = BETA_array.mean()
-     
-     Dl = dl*1.e6*pc
-     sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
-     
-     del(dls)
-     del(dl)
-     del(ds)
-     
-     print 'BETA.mean',beta
-     
-     SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
-     
-     print 'SIGMA_C', SIGMAC
-     
-     # Compute tangential and cross components
-     
-     ra     = backgx.RAJ2000[mask]
-     dec    = backgx.DECJ2000[mask]
-          
-     ALFA0  = backgx.RA[mask]
-     DELTA0 = backgx.DEC[mask]
-     
-     rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
-                              np.deg2rad(dec),
-                              np.deg2rad(ALFA0),
-                              np.deg2rad(DELTA0))
-     
-     del(ra)
-     del(dec)
-     del(ALFA0)
-     del(DELTA0)
-     
-     
-     theta2 = (2.*np.pi - theta) +np.pi/2.
-     theta_ra = theta2
-     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
-
-     #Correct polar angle for e1, e2
-     theta = theta+np.pi/2.
-
-     e1     = backgx.e1[mask]
-     e2     = backgx.e2[mask]
-     
-     #get tangential ellipticities 
-     et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
-     #get cross ellipticities
-     ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
-     
-     del(e1)
-     del(e2)
-     
-     r=np.rad2deg(rads)*3600*KPCSCALE
-     del(rads)
-     
-     peso = backgx.weight[mask]
-     peso = peso/(sigma_c**2) 
-     m    = backgx.m[mask]
-     
-     print '---------------------------------------------------------'
-     print '             COMPUTING THE SHEAR PROFILES                '
-     print '========================================================='
-     
-     
-     profile = shear_profile_log(RIN,ROUT,r,et,ex,peso,m,sigma_c,ndots,
-                              booterror_flag=True)
-                              
-     print 'Now is trying to fit a NFW profile...'
-     
-     try:
-          nfw          = NFW_stack_fit(profile[0]/1.e3,profile[1],profile[5],zmean,roc)
-     except:
-          nfw          = [-999.,0.,-100.,[0.,0.],[0.,0.],-999.,0.]
-                              
-     
-     M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
-     
-     f1=open(folder+'profile_'+sample+'.cat','w')
-     f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
-     f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
-     f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
-     f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
-     f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-     f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-     f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
-     f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
-     f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
-     f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
-     f1.write('# R,shear,err_et,cero,err_ex \n')
-     profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
-     np.savetxt(f1,profile,fmt = ['%12.6f']*5)
-     f1.close()
-     
-     def write_profile(angle,sample):
-          
-          print sample
-     
-          profile = quadrupole_profile_log(RIN,ROUT,r,et,ex,
-                                   peso,m,sigma_c,angle,
-                                   ndots,booterror_flag=True)
-          
-          f1=open(folder+'profile_'+sample+'.cat','w')
-          f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
-          f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
-          f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
-          f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
-          f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-          f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-          f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
-          f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
-          f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
-          f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
-          f1.write('# R,shear,err_et,cero,err_ex \n')
-          profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
-          np.savetxt(f1,profile,fmt = ['%12.6f']*5)
-          f1.close()
-     
-     at     = theta_ra - angles.theta[mask]
-     atwl   = theta_ra - angles.theta_wlum[mask]
-     atwd   = theta_ra - angles.theta_wd[mask]
-     atp    = theta_ra - angles.theta_pcut[mask]
-     atpwl  = theta_ra - angles.theta_pcut_wlum[mask]
-     atpwd  = theta_ra - angles.theta_pcut_wd[mask]
-     atpwdl = theta_ra - angles.theta_pcut_wdl[mask]
-     
-     write_profile(at,sample+'_t')
-     write_profile(atwl,sample+'_twl')
-     write_profile(atwd,sample+'_twd')
-     write_profile(atp,sample+'_tp')
-     write_profile(atpwl,sample+'_tpwl')
-     write_profile(atpwd,sample+'_tpwd')
-     write_profile(atpwdl,sample+'_tpwdl')
-     write_profile(theta_ra,sample+'_control')
+	sample = survey+'_'+sample
+	
+	try:
+		lmin     = lmin.astype(float)
+		lmax     = lmax.astype(float)
+		zmin     = zmin.astype(float)
+		zmax     = zmax.astype(float)
+		z_back   = z_back.astype(float)
+		odds_min = odds_min.astype(float)
+		RIN      = RIN.astype(float)
+		ROUT     = ROUT.astype(float)
+		ndots    = int(ndots.astype(float))
+	except:
+		print 'not running in parallel'
+	
+	folder = '/mnt/clemente/lensing/redMaPPer/'
+	
+	backgx   = fits.open(folder++'gx_'+survey+'_redMapper.fits')[1].data
+	angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
+	clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
+	borderid = np.loadtxt(folder+'redMapperID_border.list')
+	
+	# MATCH ANGLES
+	
+	ID = backgx.ID
+	IDc = clusters.ID
+	
+	ides,index,c = np.unique(ID,return_index=True,return_counts=True)
+	angles_in = angles[np.in1d(IDc,ID)]
+	sindex = np.argsort(index)
+	angles = np.repeat(angles_in[sindex],c[sindex])
+	
+	
+	#-----------------------------------------------
+	
+	lamb = backgx.LAMBDA
+	
+	Z_B  = backgx.Z_B
+	ODDS = backgx.ODDS
+	zlambda = backgx.Z_LAMBDA
+	zspec   = backgx.Z_SPEC
+	Z_c      = zspec
+	Z_c[Z_c<0] = zlambda[Z_c<0]
+	
+	
+	mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)#*(Z_B > (Z_c + s95/2.))
+	mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+	mask = mask_back*mask_lens
+	
+	Nclusters = len(np.unique(ID[mask]))
+	
+	Nclusters = len(np.unique(ID[mask]))
+	
+	del(mask_back)
+	del(mask_lens)
+	del(ODDS)
+	del(zlambda)
+	del(zspec)
+	del(Z_B)     
+	del(ID)
+	
+	
+	# Cosmological distances
+	
+	Z_c    = Z_c[mask]
+	lamb   = lamb[mask]              
+	zmean    = (Z_c).mean()
+	zdisp    = (Z_c).std()
+	H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
+	roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
+	roc_mpc  = roc*((pc*1.0e6)**3.0)
+	D_ang    = cosmo.angular_diameter_distance(zmean)
+	kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+	
+	del(Z_c)
+	
+	dls  = backgx.DLS[mask]
+	ds   = backgx.DS[mask]
+	dl   = backgx.DL[mask]
+	
+	
+	KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+	BETA_array = dls/ds
+	beta       = BETA_array.mean()
+	
+	Dl = dl*1.e6*pc
+	sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
+	
+	del(dls)
+	del(dl)
+	del(ds)
+	
+	print 'BETA.mean',beta
+	
+	SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
+	
+	print 'SIGMA_C', SIGMAC
+	
+	# Compute tangential and cross components
+	
+	ra     = backgx.RAJ2000[mask]
+	dec    = backgx.DECJ2000[mask]
+		
+	ALFA0  = backgx.RA[mask]
+	DELTA0 = backgx.DEC[mask]
+	
+	rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
+							np.deg2rad(dec),
+							np.deg2rad(ALFA0),
+							np.deg2rad(DELTA0))
+	
+	del(ra)
+	del(dec)
+	del(ALFA0)
+	del(DELTA0)
+	
+	
+	theta2 = (2.*np.pi - theta) +np.pi/2.
+	theta_ra = theta2
+	theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
+	
+	#Correct polar angle for e1, e2
+	theta = theta+np.pi/2.
+	
+	e1     = backgx.e1[mask]
+	e2     = backgx.e2[mask]
+	
+	#get tangential ellipticities 
+	et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
+	#get cross ellipticities
+	ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
+	
+	del(e1)
+	del(e2)
+	
+	r=np.rad2deg(rads)*3600*KPCSCALE
+	del(rads)
+	
+	peso = backgx.weight[mask]
+	peso = peso/(sigma_c**2) 
+	m    = backgx.m[mask]
+	
+	print '---------------------------------------------------------'
+	print '             COMPUTING THE SHEAR PROFILES                '
+	print '========================================================='
+	
+	
+	profile = shear_profile_log(RIN,ROUT,r,et,ex,peso,m,sigma_c,ndots,
+							booterror_flag=True)
+							
+	print 'Now is trying to fit a NFW profile...'
+	
+	try:
+		nfw          = NFW_stack_fit(profile[0]/1.e3,profile[1],profile[5],zmean,roc)
+	except:
+		nfw          = [-999.,0.,-100.,[0.,0.],[0.,0.],-999.,0.]
+							
+	
+	M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
+	
+	f1=open(folder+'profile_'+sample+'.cat','w')
+	f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
+	f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
+	f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
+	f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
+	f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
+	f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+	f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+	f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
+	f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
+	f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
+	f1.write('# R,shear,err_et,cero,err_ex \n')
+	profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+	np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+	f1.close()
+	
+	def write_profile(angle,sample):
+		
+		print sample
+	
+		profile = quadrupole_profile_log(RIN,ROUT,r,et,ex,
+								peso,m,sigma_c,angle,
+								ndots,booterror_flag=True)
+		
+		f1=open(folder+'profile_'+sample+'.cat','w')
+		f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
+		f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
+		f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
+		f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
+		f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
+		f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
+		f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
+		f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
+		f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
+		f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
+		f1.write('# R,shear,err_et,cero,err_ex \n')
+		profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
+		np.savetxt(f1,profile,fmt = ['%12.6f']*5)
+		f1.close()
+	
+	at     = theta_ra - angles.theta[mask]
+	atwl   = theta_ra - angles.theta_wlum[mask]
+	atwd   = theta_ra - angles.theta_wd[mask]
+	atp    = theta_ra - angles.theta_pcut[mask]
+	atpwl  = theta_ra - angles.theta_pcut_wlum[mask]
+	atpwd  = theta_ra - angles.theta_pcut_wd[mask]
+	atpwdl = theta_ra - angles.theta_pcut_wdl[mask]
+	
+	write_profile(at,sample+'_t')
+	write_profile(atwl,sample+'_twl')
+	write_profile(atwd,sample+'_twd')
+	write_profile(atp,sample+'_tp')
+	write_profile(atpwl,sample+'_tpwl')
+	write_profile(atpwd,sample+'_tpwd')
+	write_profile(atpwdl,sample+'_tpwdl')
+	write_profile(theta_ra,sample+'_control')
 
 
 def makeprofile_unpack(pinput):
