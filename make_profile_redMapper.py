@@ -260,6 +260,9 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 
+	print survey
+	print sample
+
 	sample = survey+'_'+sample
 	
 	try:
@@ -277,7 +280,7 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	
 	folder = '/mnt/clemente/lensing/redMaPPer/'
 	
-	backgx   = fits.open(folder++'gx_'+survey+'_redMapper.fits')[1].data
+	backgx   = fits.open(folder+'gx_'+survey+'_redMapper.fits')[1].data
 	angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
 	clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
 	borderid = np.loadtxt(folder+'redMapperID_border.list')
