@@ -5,7 +5,26 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-'''
+
+samples  = ['original_bin1','original_bin2','original_bin3','original_bin4']
+lmin     = np.array([20.,23.42,28.3,39.7])
+lmax     = np.array([23.42,28.3,39.7,145.])
+zmin     = np.ones(len(lmin))*0.1
+zmax     = np.ones(len(lmin))*0.33
+z_back   = np.ones(len(lmin))*0.1
+odds_min = np.ones(len(lmin))*0.5
+RIN      = np.ones(len(lmin))*(100./0.7)
+ROUT     = np.ones(len(lmin))*(10000./0.7)
+ndots    = np.ones(len(lmin))*20
+
+entrada = np.array([samples,lmin,lmax,zmin,zmax,
+                    z_back,odds_min,RIN,ROUT,ndots]).T
+
+for j in range(3):
+    makeprofile_unpack(entrada[j+1])
+
+
+#'''
 samples  = ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']
 lmin     = np.array([20.,20.,28.,40.])
 lmax     = np.array([150.,28.,40.,150.])
