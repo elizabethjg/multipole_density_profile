@@ -36,6 +36,9 @@ zmean = float(lines[2][j:-2])
 pcc = float((lines[-1][1:-2]))
 M200 = float((lines[-2][1:-2]))*1.e14
     
+print 'M200',M200
+print 'pcc',pcc
+
 
 def log_likelihood(data_model, r, Gamma, e_Gamma):
     ellip = data_model
