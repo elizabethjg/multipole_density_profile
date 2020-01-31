@@ -231,11 +231,13 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		'''		
 		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))*0.5
 	
+
+	
 	def monopole_off(R,theta):
 		'''
 		F_Eq12
+		'''
 		
-		'''				
 		def moff(x):
 			return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)
 		argumento = lambda x: moff(x)
@@ -244,12 +246,14 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		integral3  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
 		return integral1 + integral2 + integral3
 	vec_moff = np.vectorize(monopole_off)
-
+	
+	
+	
 	def Delta_Sigma_off(R,theta):
 		'''
 		F_Eq14
+		'''
 		
-		'''						
 		argumento = lambda x: monopole_off(x,theta)*x
 		integral  = integrate.quad(argumento, 0, R, epsabs=1.e-01, epsrel=1.e-01)[0]
 		DS_off    = (2./R**2)*integral - monopole_off(R,theta)
@@ -334,11 +338,15 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				print (t2-t1)/60.			
 
 			def DS_t_off(theta):
-				gamma_t0 = Delta_Sigma_off(R,theta)
-				gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
-							- 2.*monopole_off(R,theta) 
-							+ quadrupole_off(R,theta))
-				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
+				gamma_t0 = []
+				gamma_t2 = []
+				for t in theta:
+					gamma_t0 = np.append(gamma_t0,Delta_Sigma_off(R,t))
+					gamma_t2 = np.append(gamma_t2,((-6*psi2_off(R,t)/R**2) 
+								- 2.*monopole_off(R,t) 
+								+ quadrupole_off(R,t))*np.cos(2.*t))
+				return gamma_t0 + ellip*gamma_t2
+
 
 			if 't' in components:
 				print 'computing DS_t_off'
@@ -347,21 +355,21 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 					DSoff = Delta_Sigma_off0(R)
 					gamma_t_off0 = np.append(gamma_t_off0,DSoff)
 				else:
-					argumento = lambda x: DS_t_off(x)
-					integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+					x = np.linspace(0.,2.*np.pi,200)
+					integral  = integrate.simps(DS_t_off(x),x,even='first')
 					gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
-			 	print (t2-t1)/60.
-			
+				print (t2-t1)/60.
+
 			if 'tcos' in components:	
 				print 'computing DS_t_off_cos'
 				t1 = time.time()
-				argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
-				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+				x = np.linspace(0.,2.*np.pi,200)
+				integral  = integrate.simps(DS_t_off(x)*np.cos(2.*x),x,even='first')
 				gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 				t2 = time.time()
 			 	print (t2-t1)/60.
-			
+
 			if 'xsin' in components:
 				print 'computing DS_x_off_sin'
 				t1 = time.time()
@@ -374,6 +382,43 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
 				t2 = time.time()
 				print (t2-t1)/60.
+
+
+			'''
+
+			def DS_t_off(theta):
+				gamma_t0 = Delta_Sigma_off(R,theta)
+				gamma_t2 = ((-6*psi2_off(R,theta)/R**2) 
+							- 2.*monopole_off(R,theta) 
+							+ quadrupole_off(R,theta))
+				return gamma_t0 + ellip*gamma_t2*np.cos(2.*theta)
+
+			
+			
+			if 't' in components:
+				print 'computing DS_t_off'
+				t1 = time.time()
+				if ellip == 0.:
+					DSoff = Delta_Sigma_off0(R)
+					gamma_t_off0 = np.append(gamma_t_off0,DSoff)
+				else:
+					argumento = lambda x: DS_t_off(x)
+					integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+					gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
+				t2 = time.time()
+				print (t2-t1)/60.
+
+			
+			if 'tcos' in components:	
+				print 'computing DS_t_off_cos'
+				t1 = time.time()
+				argumento = lambda x: DS_t_off(x)*np.cos(2.*x)
+				integral  = integrate.quad(argumento, 0., 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+				gamma_t_off = np.append(gamma_t_off,integral/np.pi)
+				t2 = time.time()
+			 	print (t2-t1)/60.
+						
+			'''
 					
 		return gamma_t0_off, gamma_t_off0, gamma_t_off, gamma_x_off
 		
@@ -695,4 +740,47 @@ def multipole_clampitt(r,M200=1.e14,z=0.2,zs=0.35,
 	output = {'monopole':m,'quadrupole':q,'I1':I1r,'I2':I2r}
 		
 	return output
+	
+	def monopole_off(R,theta):
+		
+		F_Eq12
+		
+			
+		try:		
+			integral = []
+			
+			for r in R:
+	
+				def moff(x):
+					return monopole(np.sqrt(r**2+x**2-2.*x*r*np.cos(theta)))*P_Roff(x)
+				argumento = lambda x: moff(x)
+	
+				integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+				integral2  = integrate.quad(argumento, 0., r, epsabs=1.e-01, epsrel=1.e-01)[0]
+				integral3  = integrate.quad(argumento, r, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+				integral   = np.append(integral,integral1 + integral2 + integral3)
+		except:
+			
+			def moff(x):
+				return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)
+			argumento = lambda x: moff(x)
+			integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+			integral2  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
+			integral3  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+			integral   = integral1 + integral2 + integral3
+		return integral
+		
+	vec_moff = np.vectorize(monopole_off)
+
+	def Delta_Sigma_off(R,theta):
+		
+		F_Eq14
+		
+								
+		x = np.linspace(0.,R,200)
+		integral  = integrate.simps(monopole_off(x,theta)*x,x,even='first')
+		DS_off    = (2./R**2)*integral - monopole_off(R,theta)
+		return DS_off
+	
+	
 '''
