@@ -14,11 +14,13 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-folder', action='store', dest='folder',default='./')
 parser.add_argument('-file', action='store', dest='file_name', default='profile.cat')
+parser.add_argument('-ang', action='store', dest='angle', default='twl')
 parser.add_argument('-ncores', action='store', dest='ncores', default=4)
 args = parser.parse_args()
 
 folder    = args.folder
 file_name = args.file_name
+angle     = args.angle
 ncores    = args.ncores
 ncores    = int(ncores)
 
@@ -36,7 +38,6 @@ M200 = float((lines[-2][1:-2]))*1.e14
 
 def log_likelihood(data_model, r, Gamma, e_Gamma):
     ellip = data_model
-    M200 = 10**log_M200
     multipoles = multipole_shear_parallel(r,M200=M200,misscentred = True,
                                 ellip=ellip,z=zmean,components = ['xsin'],
                                 verbose=False,ncores=ncores)
@@ -55,14 +56,13 @@ def log_probability(data_model, r, Gamma, e_Gamma):
 
 pos = np.array([np.random.uniform(0.,0.5,15)]).T
 
-
 nwalkers, ndim = pos.shape
 
 #-------------------
 # running emcee
 
 
-profile = np.loadtxt(folder+file_name).T
+profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
 
 t1 = time.time()
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
@@ -72,7 +72,7 @@ sampler.run_mcmc(pos, 250, progress=True)
 print (time.time()-t1)/60.
 
 #-------------------
-
+# saving mcmc out
 
 mcmc_out = sampler.get_chain(flat=True)
 

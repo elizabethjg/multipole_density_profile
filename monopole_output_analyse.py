@@ -107,17 +107,17 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	plt.legend()
 	plt.savefig(folder+'plots_mcmc/'+'t'+file_profile[:-3]+'png')
 
-#folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_original/'
-folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
+folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_terciles/'
+# folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
 
 maria_result = np.loadtxt(folder+'../maria_result').T
 m200_maria   = maria_result[0]/0.7
 em200_maria  = maria_result[1]/0.7
 pcc_maria    = maria_result[2]
 
-plot_monopole_miss(folder,'profile_original_bin1.cat','out_original_table',m200_maria[0],pcc_maria[0])
-plot_monopole_miss(folder,'profile_original_bin2.cat','out_original_table',m200_maria[1],pcc_maria[1])
-plot_monopole_miss(folder,'profile_original_bin3.cat','out_original_table',m200_maria[2],pcc_maria[2])
-plot_monopole_miss(folder,'profile_original_bin4.cat','out_original_table',m200_maria[3],pcc_maria[3])
+plot_monopole_miss(folder,'profile_terciles_bin1.cat','out_terciles_table',m200_maria[0],pcc_maria[0])
+plot_monopole_miss(folder,'profile_terciles_bin2.cat','out_terciles_table',m200_maria[1],pcc_maria[1])
+plot_monopole_miss(folder,'profile_terciles_bin3.cat','out_terciles_table',m200_maria[2],pcc_maria[2])
+plot_monopole_miss(folder,'profile_terciles_total.cat','out_terciles_table',m200_maria[3],pcc_maria[3])
 
 lmean = [21.75,25.76,32.91,57.59]
