@@ -58,6 +58,10 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	f1.write(str('%.2f' % (pcc[1]))+'   '+str('%.2f' % (np.diff(pcc)[0]))+'   '+str('%.2f' % (np.diff(pcc)[1]))+'   \n')
 	f1.close()
 	
+	f=open(folder+file_profile,'a')
+	f.write('#'+str('%.2f' % (M200))+'   \n')
+	f.write('#'+str('%.2f' % (pcc[1]))+'   \n')
+	f.close()
 	
 	profile = np.loadtxt(folder+file_profile).T
 	
@@ -105,7 +109,7 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 
 folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_original/'
 
-maria_result = np.loadtxt(folder+'maria_result').T
+maria_result = np.loadtxt(folder+'../maria_result').T
 m200_maria   = maria_result[0]/0.7
 em200_maria  = maria_result[1]/0.7
 pcc_maria    = maria_result[2]
