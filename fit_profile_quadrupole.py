@@ -23,9 +23,12 @@ args = parser.parse_args()
 folder    = args.folder
 file_name = args.file_name
 angle     = args.angle
-print args.miss
-miss      = bool(args.miss)
-print miss
+
+if 'True' in args.miss:
+	miss      = True
+elif 'False' in args.miss:
+	miss      = False
+	
 component = args.component
 ncores    = args.ncores
 ncores    = int(ncores)
