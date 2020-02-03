@@ -58,7 +58,7 @@ def log_probability(data_model, r, Gamma, e_Gamma):
 
 # initializing
 
-pos = np.array([np.random.uniform(0.,0.5,15)]).T
+pos = np.array([np.random.uniform(0.,0.5,10)]).T
 
 nwalkers, ndim = pos.shape
 
@@ -70,7 +70,7 @@ profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
 t1 = time.time()
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
                                 args=(profile[0],profile[1],profile[2]))
-sampler.run_mcmc(pos, 1000, progress=True)
+sampler.run_mcmc(pos, 200, progress=True)
 print (time.time()-t1)/60.
 
 #-------------------
