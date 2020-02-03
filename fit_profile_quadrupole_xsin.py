@@ -79,7 +79,7 @@ print (time.time()-t1)/60.
 
 mcmc_out = sampler.get_chain(flat=True)
 
-f1=open(folder+'quadrupole_xsin_'+file_name,'w')
+f1=open(folder+'quadrupole_xsin_'+file_name[:-4]+'_'+angle+'.cat','w')
 f1.write('# ellip \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
 f1.close()

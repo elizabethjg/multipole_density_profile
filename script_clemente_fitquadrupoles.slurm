@@ -16,4 +16,4 @@ export MKL_NUM_THREADS=10
 
 source activate py2env
 
-srun python -u fit_profile_quadrupole_xsin.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_terciles_total.cat' -ncores 10 -ang 'twd'
+srun python -u fit_profile_quadrupole_xsin.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_terciles_total.cat' -ncores 10 -ang 'twl'
