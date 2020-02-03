@@ -17,7 +17,7 @@ parser.add_argument('-file', action='store', dest='file_name', default='profile.
 parser.add_argument('-ang', action='store', dest='angle', default='twl')
 parser.add_argument('-ncores', action='store', dest='ncores', default=4)
 parser.add_argument('-misscentred', action='store', dest='miss', default=0)
-parser.add_argument('-component', action='store', dest='miss', default='tcos')
+parser.add_argument('-component', action='store', dest='component', default='tcos')
 args = parser.parse_args()
 
 folder    = args.folder
