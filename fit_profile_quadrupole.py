@@ -23,7 +23,9 @@ args = parser.parse_args()
 folder    = args.folder
 file_name = args.file_name
 angle     = args.angle
+print miss
 miss      = bool(args.miss)
+print miss
 component = args.component
 ncores    = args.ncores
 ncores    = int(ncores)
@@ -53,7 +55,7 @@ def log_likelihood(data_model, r, Gamma, e_Gamma):
     multipoles = multipole_shear_parallel(r,M200=M200,misscentred = miss,
                                 ellip=ellip,z=zmean,components = [component],
                                 verbose=False,ncores=ncores)
-    model = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
+    model = model_Gamma(multipoles,component, misscentred = miss, pcc = pcc)
     sigma2 = e_Gamma**2
     return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
     
