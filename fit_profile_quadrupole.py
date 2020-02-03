@@ -23,7 +23,7 @@ args = parser.parse_args()
 folder    = args.folder
 file_name = args.file_name
 angle     = args.angle
-print miss
+print args.miss
 miss      = bool(args.miss)
 print miss
 component = args.component
