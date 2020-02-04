@@ -90,7 +90,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
 		 lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
      
-     mlambda = (lamb[mask_lens] >= lmin)*(lamb[mask_lens] < lmax)   
+     mlambda = (lamb >= lmin)*(lamb < lmax)   
      
      mask = mask_back*mask_lens*mlambda
      
@@ -324,7 +324,7 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 		lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
 		lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
 	
-	mlambda = (lamb[mask_lens] >= lmin)*(lamb[mask_lens] < lmax)   
+	mlambda = (lamb >= lmin)*(lamb < lmax)   
 	
 	mask = mask_back*mask_lens*mlambda
 	
