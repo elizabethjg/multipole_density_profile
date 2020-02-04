@@ -265,12 +265,12 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 
 
 def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-                      z_back = 0.1, odds_min = 0.5, percentil = False,
-                      RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
-
+					z_back = 0.1, odds_min = 0.5, percentil = False,
+					RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
+	
 	print survey
 	print sample
-
+	
 	sample = survey+'_'+sample
 	
 	try:
@@ -306,8 +306,8 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	
 	#-----------------------------------------------
 	
-    lamb = backgx.LAMBDA
-
+	lamb = backgx.LAMBDA
+	
 	Z_B  = backgx.Z_B
 	ODDS = backgx.ODDS
 	zlambda = backgx.Z_LAMBDA
