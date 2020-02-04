@@ -27,7 +27,7 @@ lmax     = 145.
 # '''
 
 def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-                      z_back = 0.1, odds_min = 0.5,
+                      z_back = 0.1, odds_min = 0.5, percentil = False,
                       RIN = 100., ROUT = 10000., ndots = 20.):
      
      try:
@@ -60,7 +60,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      cs82 = cs82[mcs82]
      cfht = cfht[mcfht]
      
-     # MATCH ANGLES
+     # MATCH ANGLES  
      
      ID = np.concatenate((cfht.ID,kids.ID,cs82.ID))
      IDc = clusters.ID
@@ -74,6 +74,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      lamb = np.concatenate((cfht.LAMBDA,kids.LAMBDA,cs82.LAMBDA))
      
+     
      Z_B  = np.concatenate((cfht.Z_B,kids.Z_B,cs82.Z_B))
      ODDS = np.concatenate((cfht.ODDS,kids.ODDS,cs82.ODDS))
      zlambda = np.concatenate((cfht.Z_LAMBDA,kids.Z_LAMBDA,cs82.Z_LAMBDA))
@@ -83,8 +84,15 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      
      mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
-     mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
-     mask = mask_back*mask_lens
+     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+     
+     if percentil:
+		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
+		 lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
+     
+     mlambda = (lamb[mask_lens] >= lmin)*(lamb[mask_lens] < lmax)   
+     
+     mask = mask_back*mask_lens*mlambda
      
      Nclusters = len(np.unique(ID[mask]))
      
@@ -257,7 +265,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 
 
 def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-                      z_back = 0.1, odds_min = 0.5,
+                      z_back = 0.1, odds_min = 0.5, percentil = False,
                       RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 
 	print survey
@@ -298,8 +306,8 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	
 	#-----------------------------------------------
 	
-	lamb = backgx.LAMBDA
-	
+    lamb = backgx.LAMBDA
+
 	Z_B  = backgx.Z_B
 	ODDS = backgx.ODDS
 	zlambda = backgx.Z_LAMBDA
@@ -312,7 +320,13 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
 	mask = mask_back*mask_lens
 	
-	Nclusters = len(np.unique(ID[mask]))
+	if percentil:
+		lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
+		lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
+	
+	mlambda = (lamb[mask_lens] >= lmin)*(lamb[mask_lens] < lmax)   
+	
+	mask = mask_back*mask_lens*mlambda
 	
 	Nclusters = len(np.unique(ID[mask]))
 	
@@ -488,12 +502,14 @@ def makeindprofile_unpack(pinput):
 	return profile_redMapper_indcat(*pinput)
 
 def makeprofile_parallel(samples,lmin,lmax,zmin,zmax,
-                         z_back, odds_min,RIN, ROUT, ndots):
+                         z_back, odds_min,percentil,
+                         RIN, ROUT, ndots):
      	
      ncores = len(lmin)
           
      entrada = np.array([samples,lmin,lmax,zmin,zmax,
-                         z_back,odds_min,RIN,ROUT,ndots]).T
+                         z_back,odds_min,percentil,
+                         RIN,ROUT,ndots]).T
                          
      pool = Pool(processes=(ncores))
      salida=np.array(pool.map(makeprofile_unpack, entrada))
@@ -505,7 +521,8 @@ def makeindprofile_parallel(name_cat,samples,lmin,lmax,zmin,zmax,
      ncores = len(lmin)
           
      entrada = np.array([name_cat,samples,lmin,lmax,zmin,zmax,
-                         z_back,odds_min,RIN,ROUT,ndots,zlim]).T
+                         z_back,odds_min,percentil,
+                         RIN,ROUT,ndots,zlim]).T
                          
      pool = Pool(processes=(ncores))
      salida=np.array(pool.map(makeindprofile_unpack, entrada))
