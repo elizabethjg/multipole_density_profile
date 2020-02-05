@@ -98,8 +98,8 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,out_file,ncores):
 								ellip=e_x[1],z=zmean,components = ['tcos','xsin'],
 								verbose=False,ncores=ncores)
 	
-	modelx_t = model_Gamma(multipoles,'tcos', misscentred = False)
-	modelx_x = model_Gamma(multipoles,'xsin', misscentred = False)
+	modelx_t = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
+	modelx_x = model_Gamma(multipoles,'xsin', misscentred = miss, pcc = pcc)
 	
 	
 	f, ax = plt.subplots(1, 2, figsize=(6.5,5))

@@ -26,10 +26,11 @@ for j in range(3):
 
 '''
 
-samples  = ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']
-lmin     = np.array([20.,20.,24.87,33.24])
-lmax     = np.array([150.,24.87,33.24,150.])
-percentil = [False,[0,1./3.],[1./3.,2./3.],[2./3.,1.]]
+#samples  = ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']
+samples  = ['median_bin1','median_bin2']
+lmin     = np.array([20.,20.])
+lmax     = np.array([150.,24.87])
+percentil = [[0,0.5],[0.5,1.]]
 zmin     = np.ones(len(lmin))*0.1
 zmax     = np.ones(len(lmin))*0.4
 z_back   = np.ones(len(lmin))*0.1
@@ -42,7 +43,7 @@ entrada = np.array([samples,lmin,lmax,zmin,zmax,
                     z_back,odds_min,percentil,
                     RIN,ROUT,ndots]).T
 
-for j in range(len(entrada)):
+for j in range(2):
     makeprofile_unpack(entrada[j])
 
 '''
