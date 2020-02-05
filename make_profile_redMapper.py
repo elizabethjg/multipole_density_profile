@@ -43,6 +43,10 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
+     if type(percentil) == bool:
+		 if 'False' in percentil:
+			 percentil = False
+
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
      cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
@@ -87,7 +91,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      
      mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
-     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20)*(lamb < 150)
      
      if percentil:
 		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
