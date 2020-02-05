@@ -48,7 +48,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
      kids     = fits.open(folder+'gx_KiDS_redMapper.fits')[1].data
      cs82     = fits.open(folder+'gx_CS82_redMapper.fits')[1].data
-     rcsl     = fits.open(folder+'gx_RCSL_redMapper.fits')[1].data
+     #rcsl     = fits.open(folder+'gx_RCSL_redMapper.fits')[1].data
      angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
      borderid = np.loadtxt(folder+'redMapperID_border.list')
@@ -60,12 +60,12 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      kids = kids[mkids]
      cs82 = cs82[mcs82]
-     rcsl = rcsl[mrcsl]
+     #rcsl = rcsl[mrcsl]
      cfht = cfht[mcfht]
      
      # MATCH ANGLES  
      
-     ID = np.concatenate((cfht.ID,kids.ID,cs82.ID,rcsl.ID))
+     ID = np.concatenate((cfht.ID,kids.ID,cs82.ID))
      IDc = clusters.ID
      
      ides,index,c = np.unique(ID,return_index=True,return_counts=True)
@@ -75,13 +75,13 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      #-----------------------------------------------
      
-     lamb = np.concatenate((cfht.LAMBDA,kids.LAMBDA,cs82.LAMBDA,rcsl.LAMBDA))
+     lamb = np.concatenate((cfht.LAMBDA,kids.LAMBDA,cs82.LAMBDA))
      
      
-     Z_B  = np.concatenate((cfht.Z_B,kids.Z_B,cs82.Z_B,rcsl.Z_B))
-     ODDS = np.concatenate((cfht.ODDS,kids.ODDS,cs82.ODDS,rcsl.ODDS))
-     zlambda = np.concatenate((cfht.Z_LAMBDA,kids.Z_LAMBDA,cs82.Z_LAMBDA,rcsl.Z_LAMBDA))
-     zspec   = np.concatenate((cfht.Z_SPEC,kids.Z_SPEC,cs82.Z_SPEC,rcsl.Z_SPEC))
+     Z_B  = np.concatenate((cfht.Z_B,kids.Z_B,cs82.Z_B))
+     ODDS = np.concatenate((cfht.ODDS,kids.ODDS,cs82.ODDS))
+     zlambda = np.concatenate((cfht.Z_LAMBDA,kids.Z_LAMBDA,cs82.Z_LAMBDA))
+     zspec   = np.concatenate((cfht.Z_SPEC,kids.Z_SPEC,cs82.Z_SPEC))
      Z_c      = zspec
      Z_c[Z_c<0] = zlambda[Z_c<0]
      
@@ -122,9 +122,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 
      del(Z_c)
      
-     dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS,rcsl.DLS))[mask]
-     ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS,rcsl.DS))[mask]
-     dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL,rcsl.DL))[mask]
+     dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS))[mask]
+     ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS))[mask]
+     dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL))[mask]
      
      
      KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
@@ -146,11 +146,11 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      # Compute tangential and cross components
      
-     ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000,rcsl.RAJ2000))[mask]
-     dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000,rcsl.DECJ2000))[mask]
+     ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
+     dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
           
-     ALFA0  = np.concatenate((cfht.RA,kids.RA,cs82.RA,rcsl.RA))[mask]
-     DELTA0 = np.concatenate((cfht.DEC,kids.DEC,cs82.DEC,rcsl.DEC))[mask]
+     ALFA0  = np.concatenate((cfht.RA,kids.RA,cs82.RA))[mask]
+     DELTA0 = np.concatenate((cfht.DEC,kids.DEC,cs82.DEC))[mask]
      
      rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
                               np.deg2rad(dec),
@@ -170,8 +170,8 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      #Correct polar angle for e1, e2
      theta = theta+np.pi/2.
 
-     e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1,rcsl.e1))[mask]
-     e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2,rcsl.e2))[mask]
+     e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1))[mask]
+     e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2))[mask]
      
      #get tangential ellipticities 
      et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
@@ -184,9 +184,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      r=np.rad2deg(rads)*3600*KPCSCALE
      del(rads)
      
-     peso = np.concatenate((cfht.weight,kids.weight,cs82.weight,rcsl.weight))[mask]
+     peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
      peso = peso/(sigma_c**2) 
-     m    = np.concatenate((cfht.m,kids.m,cs82.m,rcsl.m))[mask]
+     m    = np.concatenate((cfht.m,kids.m,cs82.m))[mask]
     
      
      
