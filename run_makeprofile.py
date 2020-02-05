@@ -5,8 +5,8 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-'''
-samples  = ['original_bin1','original_bin2','original_bin3','original_bin4']
+#'''
+samples  = ['original2_bin1','original2_bin2','original2_bin3','original2_bin4']
 lmin     = np.array([20.,23.42,28.3,39.7])
 lmax     = np.array([23.42,28.3,39.7,145.])
 zmin     = np.ones(len(lmin))*0.1
@@ -24,7 +24,7 @@ for j in range(3):
     makeprofile_unpack(entrada[j+1])
 
 
-'''
+#'''
 
 '''
 
@@ -51,7 +51,7 @@ for j in range(2):
 
 
 '''
-
+'''
 samples  = ['terciles_z33_total','terciles_z33_bin1','terciles_z33_bin2','terciles_z33_bin3']
 lmin     = np.array([20.,20.,24.87,33.24])
 lmax     = np.array([150.,24.87,33.24,150.])
@@ -72,7 +72,7 @@ for j in range(4):
     makeprofile_unpack(entrada[j])
 
 '''
-
+'''
 name_cat = ['CFHT']*4 + ['CS82']*4 + ['KiDS']*4
 samples  = ['original_bin1','original_bin2','original_bin3','original_bin4']*3
 lmin     = np.tile(np.array([20.,23.42,28.3,39.7]),3)
