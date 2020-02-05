@@ -72,7 +72,7 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,out_file,ncores):
 	f1.write(file_profile+'  '+'  tcos  ') 
 	f1.write(str('%.2f' % (e_t[1]))+'   '+str('%.2f' % (np.diff(e_t)[0]))+'   '+str('%.2f' % (np.diff(e_t)[1]))+'   ')
 	f1.write('  xsin  ') 
-	f1.write(str('%.2f' % (e_x[1]))+'   '+str('%.2f' % (np.diff(e_x)[0]))+'   '+str('%.2f' % (np.diff(e_x)[1]))+'   ')
+	f1.write(str('%.2f' % (e_x[1]))+'   '+str('%.2f' % (np.diff(e_x)[0]))+'   '+str('%.2f' % (np.diff(e_x)[1]))+'\n')
 	f1.close()
 	
 	profile = np.loadtxt(folder+file_profile).T
@@ -124,12 +124,12 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,out_file,ncores):
 	ax[1].errorbar(profile[0],profile[3],yerr=profile[4],fmt = 'none',ecolor='k')
 	ax[1].set_xlabel('R [mpc]')
 	ax[1].set_xscale('log')
-	ax[1].set_ylim(-150,150)
+	ax[1].set_ylim(-30,30)
 	ax[1].set_xlim(0.1,5.2)
 	ax[1].xaxis.set_ticks([0.1,1,5])
 	ax[1].set_xticklabels([0.1,1,5])
-	ax[1].yaxis.set_ticks([-100,0,100])
-	ax[1].set_yticklabels([-100,0,100])
+	ax[1].yaxis.set_ticks([-15,0,15])
+	ax[1].set_yticklabels([-15,0,15])
 	plt.legend()
 	plt.savefig(folder+'plots_mcmc/'+plot_out)
 

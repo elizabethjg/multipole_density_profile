@@ -34,7 +34,7 @@ zmin     = np.ones(len(lmin))*0.1
 zmax     = np.ones(len(lmin))*0.4
 z_back   = np.ones(len(lmin))*0.1
 odds_min = np.ones(len(lmin))*0.5
-RIN      = np.ones(len(lmin))*200.
+RIN      = np.ones(len(lmin))*100.
 ROUT     = np.ones(len(lmin))*5000.
 ndots    = np.ones(len(lmin))*10
 

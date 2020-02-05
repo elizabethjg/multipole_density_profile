@@ -425,6 +425,10 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 	
 	gt0,m,q,p2 = quantities_centred(r)
 	
+	'''
+	vU_Eq18
+	
+	'''
 	gt2 = ellip*((-6*p2/r**2) - 2.*m + q)
 	gx2 = ellip*((-6*p2/r**2) - 4.*m)
 	
