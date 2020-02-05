@@ -9,6 +9,7 @@ from make_profile_redMapper import *
 samples  = ['original2_bin1','original2_bin2','original2_bin3','original2_bin4']
 lmin     = np.array([20.,23.42,28.3,39.7])
 lmax     = np.array([23.42,28.3,39.7,145.])
+percentil = [False,False,False,False]
 zmin     = np.ones(len(lmin))*0.1
 zmax     = np.ones(len(lmin))*0.33
 z_back   = np.ones(len(lmin))*0.1
