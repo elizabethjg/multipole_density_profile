@@ -54,13 +54,13 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      borderid = np.loadtxt(folder+'redMapperID_border.list')
      
      mkids = (~np.in1d(kids.ID,cfht.ID))*(kids.Z_B < 0.9)
-     mrcsl = (~np.in1d(rcsl.ID,rcsl.ID))*(rcsl.Z_B < 1.3)
+     mrcsl = (~np.in1d(rcsl.ID,cfht.ID))*(rcsl.Z_B < 1.3)
      mcs82 = (~np.in1d(cs82.ID,cfht.ID))*(cs82.Z_B < 1.3)
      mcfht = (cfht.Z_B < 1.3)
      
      kids = kids[mkids]
      cs82 = cs82[mcs82]
-     rcsl = cs82[mrcsl]
+     rcsl = rcsl[mrcsl]
      cfht = cfht[mcfht]
      
      # MATCH ANGLES  
