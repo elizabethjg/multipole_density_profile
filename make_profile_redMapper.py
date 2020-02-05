@@ -43,9 +43,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
-     if type(percentil) == bool:
-		 if 'False' in percentil:
-			 percentil = False
+
+	 if 'False' in percentil:
+		 percentil = False
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
      
