@@ -525,8 +525,9 @@ def makeprofile_parallel(samples,lmin,lmax,zmin,zmax,
      salida=np.array(pool.map(makeprofile_unpack, entrada))
      pool.terminate()
 
-def makeindprofile_parallel(name_cat,samples,lmin,lmax,zmin,zmax,
-                         z_back, odds_min,RIN, ROUT, ndots,zlim):
+def makeindprofile_parallel(name_cat,samples,lmin,lmax,
+						 zmin,zmax,z_back, odds_min,percentil,
+						 RIN, ROUT, ndots,zlim):
      	
      ncores = len(lmin)
           
