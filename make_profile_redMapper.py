@@ -89,8 +89,8 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Z_c[Z_c<0] = zlambda[Z_c<0]
      
      
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)#*(Z_B > (Z_c + s95/2.))
-     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)
+     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
      
      if percentil:
 		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
@@ -291,6 +291,10 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 		ndots    = int(ndots.astype(float))
 	except:
 		print 'not running in parallel'
+
+     if 'False' in percentil:
+		 percentil = False
+
 	
 	folder = '/mnt/clemente/lensing/redMaPPer/'
 	
@@ -322,8 +326,8 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	Z_c[Z_c<0] = zlambda[Z_c<0]
 	
 	
-	mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)#*(Z_B > (Z_c + s95/2.))
-	mask_lens = (lamb >= lmin)*(lamb < lmax)*(Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))
+	mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)
+	mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
 	mask = mask_back*mask_lens
 	
 	if percentil:
