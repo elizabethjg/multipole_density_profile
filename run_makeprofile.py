@@ -98,11 +98,11 @@ for j in range(4):
 '''
 #'''
 name_cat = ['CFHT']*3 + ['CS82']*3 + ['RCSL']*3 + ['KiDS']*3
-samples  = ['total_z033','total_z04','total_z045']*3
+samples  = ['total_z033','total_z04','total_z045']*4
 lmin     = np.array([20.]*12)
 lmax     = np.array([150.]*12)
 zmin     = np.ones(len(lmin))*0.1
-zmax     = np.array([0.33,0.4,0.45]*3)
+zmax     = np.array([0.33,0.4,0.45]*4)
 z_back   = np.ones(len(lmin))*0.1
 odds_min = np.ones(len(lmin))*0.5
 percentil = [False,False,False]*4
