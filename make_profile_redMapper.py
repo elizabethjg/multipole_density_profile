@@ -43,7 +43,8 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
-     if 'False' in percentil:
+     if len(percentil) > 2:
+		 print 'not computing percentil'
 		 percentil = False
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
@@ -282,7 +283,8 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
-     if 'False' in percentil:
+     if len(percentil) > 2:
+		 print 'not computing percentil'
 		 percentil = False
 
      folder = '/mnt/clemente/lensing/redMaPPer/'
@@ -531,7 +533,8 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	except:
 		print 'not running in parallel'
 
-	if 'False' in percentil:
+	if len(percentil) > 2:
+		print 'not computing percentil'
 		percentil = False
 
 	
