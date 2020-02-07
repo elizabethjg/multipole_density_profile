@@ -66,7 +66,7 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      # MATCH ANGLES  
      
-     ID = np.concatenate((cfht.ID,kids.ID,cs82.ID,rcsl.ID))
+     ID = np.concatenate((cfht.ID,kids.ID,cs82.ID))
      IDc = clusters.ID
      
      ides,index,c = np.unique(ID,return_index=True,return_counts=True)
