@@ -2,7 +2,7 @@ import numpy as np
 # from pylab import *
 from astropy.io import fits
 from astropy.cosmology import LambdaCDM
-import modified_corner
+#import modified_corner
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 from matplotlib import rc
 import medianas
@@ -12,7 +12,8 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 12})
 
-folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
+#folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
+folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/'
 
 members  = fits.open(folder+'redmapper_dr8_public_v6.3_members.fits')
 clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')

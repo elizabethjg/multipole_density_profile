@@ -13,7 +13,8 @@ cvel = 299792458;   # Speed of light (m.s-1)
 G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
 pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
-# '''
+
+'''
 z_back   = 0.1
 odds_min = 0.5
 zmin     = 0.1
@@ -100,13 +101,13 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      Nclusters = len(np.unique(ID[mask]))
      
-     del(mask_back)
-     del(mask_lens)
-     del(ODDS)
-     del(zlambda)
-     del(zspec)
-     del(Z_B)     
-     del(ID)
+     #del(mask_back)
+     #del(mask_lens)
+     #del(ODDS)
+     #del(zlambda)
+     #del(zspec)
+     #del(Z_B)     
+     #del(ID)
      
 
      # Cosmological distances
@@ -121,7 +122,7 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      D_ang    = cosmo.angular_diameter_distance(zmean)
      kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
 
-     del(Z_c)
+     #del(Z_c)
      
      dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS))[mask]
      ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS))[mask]
@@ -135,9 +136,9 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Dl = dl*1.e6*pc
      sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
      
-     del(dls)
-     del(dl)
-     del(ds)
+     #del(dls)
+     #del(dl)
+     #del(ds)
      
      print 'BETA.mean',beta
      
@@ -158,10 +159,10 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                               np.deg2rad(ALFA0),
                               np.deg2rad(DELTA0))
      
-     del(ra)
-     del(dec)
-     del(ALFA0)
-     del(DELTA0)
+     #del(ra)
+     #del(dec)
+     #del(ALFA0)
+     #del(DELTA0)
      
      
      theta2 = (2.*np.pi - theta) +np.pi/2.
@@ -179,11 +180,11 @@ def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      #get cross ellipticities
      ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
      
-     del(e1)
-     del(e2)
+     #del(e1)
+     #del(e2)
      
      r=np.rad2deg(rads)*3600*KPCSCALE
-     del(rads)
+     #del(rads)
      
      peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
      peso = peso/(sigma_c**2) 
@@ -297,7 +298,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      borderid = np.loadtxt(folder+'redMapperID_border.list')
      
      mkids = (~np.in1d(kids.ID,cfht.ID))*(kids.Z_B < 0.9)
-     mrcsl = (~np.in1d(rcsl.ID,cfht.ID))*(rcsl.Z_B < 1.3)
+     mrcsl = (~np.in1d(rcsl.ID,cfht.ID))*(~np.in1d(rcsl.ID,cs82.ID))*(~np.in1d(rcsl.ID,kids.ID))*(rcsl.Z_B < 1.3)
      mcs82 = (~np.in1d(cs82.ID,cfht.ID))*(cs82.Z_B < 1.3)
      mcfht = (cfht.Z_B < 1.3)
      
@@ -329,7 +330,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Z_c[Z_c<0] = zlambda[Z_c<0]
      
      
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)
+     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(~np.in1d(ID,rcslens.ID))
      mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
      
      if percentil:
@@ -342,13 +343,13 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      Nclusters = len(np.unique(ID[mask]))
      
-     del(mask_back)
-     del(mask_lens)
-     del(ODDS)
-     del(zlambda)
-     del(zspec)
-     del(Z_B)     
-     del(ID)
+     #del(mask_back)
+     #del(mask_lens)
+     #del(ODDS)
+     #del(zlambda)
+     #del(zspec)
+     #del(Z_B)     
+     #del(ID)
      
 
      # Cosmological distances
@@ -363,7 +364,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      D_ang    = cosmo.angular_diameter_distance(zmean)
      kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
 
-     del(Z_c)
+     #del(Z_c)
      
      dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS,rcsl.DLS))[mask]
      ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS,rcsl.DS))[mask]
@@ -377,9 +378,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Dl = dl*1.e6*pc
      sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
      
-     del(dls)
-     del(dl)
-     del(ds)
+     #del(dls)
+     #del(dl)
+     #del(ds)
      
      print 'BETA.mean',beta
      
@@ -400,10 +401,10 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                               np.deg2rad(ALFA0),
                               np.deg2rad(DELTA0))
      
-     del(ra)
-     del(dec)
-     del(ALFA0)
-     del(DELTA0)
+     #del(ra)
+     #del(dec)
+     #del(ALFA0)
+     #del(DELTA0)
      
      
      theta2 = (2.*np.pi - theta) +np.pi/2.
@@ -421,11 +422,11 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      #get cross ellipticities
      ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
      
-     del(e1)
-     del(e2)
+     #del(e1)
+     #del(e2)
      
      r=np.rad2deg(rads)*3600*KPCSCALE
-     del(rads)
+     #del(rads)
      
      peso = np.concatenate((cfht.weight,kids.weight,cs82.weight,rcsl.weight))[mask]
      peso = peso/(sigma_c**2) 
