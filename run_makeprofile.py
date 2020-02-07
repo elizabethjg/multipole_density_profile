@@ -5,7 +5,7 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-profile_redMapper_withoutRCSL('total_z04_withoutRCS',20.,150.,zmin = 0.1, zmax = 0.4,
+profile_redMapper('total_z04_withoutRCSv2',20.,150.,zmin = 0.1, zmax = 0.4,
                       z_back = 0.1, odds_min = 0.5, percentil = False,
                       RIN = 100., ROUT = 5000., ndots = 10.)
 
