@@ -5,6 +5,10 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
+profile_redMapper_withoutRCSL('total_z04_withoutRCS',20.,150.,zmin = 0.1, zmax = 0.4,
+                      z_back = 0.1, odds_min = 0.5, percentil = False,
+                      RIN = 100., ROUT = 5000., ndots = 10.)
+
 '''
 samples  = ['total_z033','total_z04','total_z045']
 lmin     = np.array([20.,20.,20.])
@@ -22,7 +26,7 @@ entrada = np.array([samples,lmin,lmax,zmin,zmax,
                     z_back,odds_min,percentil,
                     RIN,ROUT,ndots]).T
 
-for j in range(4):
+for j in range(3):
     makeprofile_unpack(entrada[j])
 '''
 
