@@ -15,9 +15,9 @@ pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
 
 def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-                      z_back = 0.1, odds_min = 0.5, percentil = False,
+                      z_back = 0.1, odds_min = 0.5,
                       RIN = 100., ROUT = 10000., ndots = 20.):
-     
+        
      try:
           lmin     = lmin.astype(float)
           lmax     = lmax.astype(float)
@@ -28,9 +28,6 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           RIN      = RIN.astype(float)
           ROUT     = ROUT.astype(float)
           ndots    = int(ndots.astype(float))
-          if len(percentil) > 2:
-		     print 'not computing percentil'
-		     percentil = False
      except:
           print 'not running in parallel'
 
@@ -78,17 +75,9 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      
      mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)
-     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
-     
-     if percentil:
-          ids,index = np.unique(ID[mask_lens],return_index=True)
-          L = lamb[mask_lens][index]
-          lmin =  np.percentile(L,percentil[0]*100.,interpolation='lower')
-          lmax =  np.percentile(L,percentil[1]*100.,interpolation='lower')     
-     
-     mlambda = (lamb >= lmin)*(lamb < lmax)   
-     
-     mask = mask_back*mask_lens*mlambda
+     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= lmin)*(lamb < lmax)
+       
+     mask = mask_back*mask_lens
      
      Nclusters = len(np.unique(ID[mask]))
      
@@ -261,7 +250,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 
 
 def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-					z_back = 0.1, odds_min = 0.5, percentil = False,
+					z_back = 0.1, odds_min = 0.5,
 					RIN = 100., ROUT = 10000., ndots = 20.,zlim = 1.3):
 	
      print survey
@@ -279,9 +268,6 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
           RIN      = RIN.astype(float)
           ROUT     = ROUT.astype(float)
           ndots    = int(ndots.astype(float))
-          if len(percentil) > 2:
-               print 'not computing percentil'
-               percentil = False
      except:
           print 'not running in parallel'
      
@@ -317,28 +303,22 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      
      
      mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)
-     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
+     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= lmin)*(lamb < lmax)
      mask = mask_back*mask_lens
-     
-     if percentil:
-          ids,index = np.unique(ID[mask_lens],return_index=True)
-          L = lamb[mask_lens][index]
-          lmin =  np.percentile(L,percentil[0]*100.,interpolation='lower')
-          lmax =  np.percentile(L,percentil[1]*100.,interpolation='lower')     
-     
+          
      mlambda = (lamb >= lmin)*(lamb < lmax) 
      
      mask = mask_back*mask_lens*mlambda
      
      Nclusters = len(np.unique(ID[mask]))
      
-     # del(mask_back)
-     # del(mask_lens)
-     # del(ODDS)
-     # del(zlambda)
-     # del(zspec)
-     # del(Z_B)     
-     # del(ID)
+     del(mask_back)
+     del(mask_lens)
+     del(ODDS)
+     del(zlambda)
+     del(zspec)
+     del(Z_B)     
+     del(ID)
      
      
      # Cosmological distances
@@ -353,7 +333,7 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      D_ang    = cosmo.angular_diameter_distance(zmean)
      kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
      
-     # del(Z_c)
+     del(Z_c)
      
      dls  = backgx.DLS[mask]
      ds   = backgx.DS[mask]
@@ -367,9 +347,9 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Dl = dl*1.e6*pc
      sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
      
-     # del(dls)
-     # del(dl)
-     # del(ds)
+     del(dls)
+     del(dl)
+     del(ds)
      
      print 'BETA.mean',beta
      
@@ -390,10 +370,10 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                                    np.deg2rad(ALFA0),
                                    np.deg2rad(DELTA0))
      
-     # del(ra)
-     # del(dec)
-     # del(ALFA0)
-     # del(DELTA0)
+     del(ra)
+     del(dec)
+     del(ALFA0)
+     del(DELTA0)
      
      
      theta2 = (2.*np.pi - theta) +np.pi/2.
@@ -411,11 +391,11 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      #get cross ellipticities
      ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
      
-     # del(e1)
-     # del(e2)
+     del(e1)
+     del(e2)
      
      r=np.rad2deg(rads)*3600*KPCSCALE
-     # del(rads)
+     del(rads)
      
      peso = backgx.weight[mask]
      peso = peso/(sigma_c**2) 
@@ -504,28 +484,25 @@ def makeindprofile_unpack(pinput):
 	return profile_redMapper_indcat(*pinput)
 
 def makeprofile_parallel(samples,lmin,lmax,zmin,zmax,
-                         z_back, odds_min,percentil,
-                         RIN, ROUT, ndots):
+                         z_back, odds_min,RIN, ROUT, ndots):
      	
      ncores = len(lmin)
           
      entrada = np.array([samples,lmin,lmax,zmin,zmax,
-                         z_back,odds_min,percentil,
-                         RIN,ROUT,ndots]).T
+                         z_back,odds_min,RIN,ROUT,ndots]).T
                          
      pool = Pool(processes=(ncores))
      salida=np.array(pool.map(makeprofile_unpack, entrada))
      pool.terminate()
 
 def makeindprofile_parallel(name_cat,samples,lmin,lmax,
-						 zmin,zmax,z_back, odds_min,percentil,
-						 RIN, ROUT, ndots,zlim):
+                            zmin,zmax,z_back, odds_min,RIN, ROUT,
+                            ndots,zlim):
      	
      ncores = len(lmin)
           
      entrada = np.array([name_cat,samples,lmin,lmax,zmin,zmax,
-                         z_back,odds_min,percentil,
-                         RIN,ROUT,ndots,zlim]).T
+                         z_back,odds_min,RIN,ROUT,ndots,zlim]).T
                          
      pool = Pool(processes=(ncores))
      salida=np.array(pool.map(makeindprofile_unpack, entrada))

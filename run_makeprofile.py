@@ -5,9 +5,9 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-# profile_redMapper('total_z04_v3',20.,150.,zmin = 0.1, zmax = 0.4,
-                      # z_back = 0.1, odds_min = 0.5, percentil = False,
-                      # RIN = 100., ROUT = 5000., ndots = 10.)
+profile_redMapper('total_z04_v3',20.,150.,zmin = 0.1, zmax = 0.4,
+                      z_back = 0.1, odds_min = 0.5, percentil = False,
+                      RIN = 100., ROUT = 5000., ndots = 10.)
 
 '''
 samples  = ['total_z033','total_z04','total_z045']
@@ -60,11 +60,8 @@ samples  = ['total','median_bin1','median_bin2',
             'terciles_bin1','terciles_bin2','terciles_bin3',
             'medianz1','medianz2',
             'terciles_z1','terciles_z2','terciles_z3']
-lmin     = np.array([20.]*11)
-lmax     = np.array([150.]*11)
-percentil = [False,[0,0.5],[0.5,1.],
-             [0,1./3.],[1./3.,2./3.],[2./3.,1],
-             False,False,False,False,False]
+lmin     = np.array([20.,20.,27.982,20.,24.763,33.214]+[20.]*5)
+lmax     = np.array([150.,27.982,150.,24.763,33.214,150.]+[150.]*5)
 zmin     = np.array([0.1]*6+[0.1,0.313,0.1,0.268,0.346])
 zmax     = np.array([0.1]*6+[0.313,0.4,0.268,0.346,0.4])
 z_back   = np.ones(len(lmin))*0.1
