@@ -6,8 +6,7 @@ sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipol
 from make_profile_redMapper import *
 
 profile_redMapper('total_z04_v3',20.,150.,zmin = 0.1, zmax = 0.4,
-                      z_back = 0.1, odds_min = 0.5, percentil = False,
-                      RIN = 100., ROUT = 5000., ndots = 10.)
+                      z_back = 0.1, odds_min = 0.5, RIN = 100., ROUT = 5000., ndots = 10.)
 
 '''
 samples  = ['total_z033','total_z04','total_z045']
@@ -71,8 +70,7 @@ ROUT     = np.ones(len(lmin))*5000.
 ndots    = np.ones(len(lmin))*10
 
 entrada = np.array([samples,lmin,lmax,zmin,zmax,
-                    z_back,odds_min,percentil,
-                    RIN,ROUT,ndots]).T
+                    z_back,odds_min,RIN,ROUT,ndots]).T
 
 for j in range(len(entrada)):
     makeprofile_unpack(entrada[j])
