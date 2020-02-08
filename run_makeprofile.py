@@ -5,9 +5,9 @@ sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 from make_profile_redMapper import *
 
-profile_redMapper('total_z04_withoutRCSv2',20.,150.,zmin = 0.1, zmax = 0.4,
-                      z_back = 0.1, odds_min = 0.5, percentil = False,
-                      RIN = 100., ROUT = 5000., ndots = 10.)
+# profile_redMapper('total_z04_v3',20.,150.,zmin = 0.1, zmax = 0.4,
+                      # z_back = 0.1, odds_min = 0.5, percentil = False,
+                      # RIN = 100., ROUT = 5000., ndots = 10.)
 
 '''
 samples  = ['total_z033','total_z04','total_z045']
@@ -54,15 +54,19 @@ for j in range(4):
 
 #'''
 
-'''
+# '''
 
-#samples  = ['terciles_total','terciles_bin1','terciles_bin2','terciles_bin3']
-samples  = ['median_bin1','median_bin2']
-lmin     = np.array([20.,20.])
-lmax     = np.array([150.,24.87])
-percentil = [[0,0.5],[0.5,1.]]
-zmin     = np.ones(len(lmin))*0.1
-zmax     = np.ones(len(lmin))*0.4
+samples  = ['total','median_bin1','median_bin2',
+            'terciles_bin1','terciles_bin2','terciles_bin3',
+            'medianz1','medianz2',
+            'terciles_z1','terciles_z2','terciles_z3']
+lmin     = np.array([20.]*11)
+lmax     = np.array([150.]*11)
+percentil = [False,[0,0.5],[0.5,1.],
+             [0,1./3.],[1./3.,2./3.],[2./3.,1],
+             False,False,False,False,False]
+zmin     = np.array([0.1]*6+[0.1,0.313,0.1,0.268,0.346])
+zmax     = np.array([0.1]*6+[0.313,0.4,0.268,0.346,0.4])
 z_back   = np.ones(len(lmin))*0.1
 odds_min = np.ones(len(lmin))*0.5
 RIN      = np.ones(len(lmin))*100.
@@ -73,12 +77,12 @@ entrada = np.array([samples,lmin,lmax,zmin,zmax,
                     z_back,odds_min,percentil,
                     RIN,ROUT,ndots]).T
 
-for j in range(2):
+for j in range(len(entrada)):
     makeprofile_unpack(entrada[j])
 
 
 
-'''
+# '''
 '''
 samples  = ['terciles_wR_z33_total','terciles_wR_z33_bin1','terciles_wR_z33_bin2','terciles_wR_z33_bin3']
 lmin     = np.array([20.,20.,24.87,33.24])
@@ -100,7 +104,7 @@ for j in range(4):
     makeprofile_unpack(entrada[j])
 
 '''
-#'''
+'''
 name_cat = ['CFHT']*3 + ['CS82']*3 + ['RCSL']*3 + ['KiDS']*3
 samples  = ['total_z033','total_z04','total_z045']*4
 lmin     = np.array([20.]*12)

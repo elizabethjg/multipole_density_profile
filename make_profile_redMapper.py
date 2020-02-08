@@ -14,259 +14,6 @@ G    = 6.670e-11;   # Gravitational constant (m3.kg-1.s-2)
 pc   = 3.085678e16; # 1 pc (m)
 Msun = 1.989e30 # Solar mass (kg)
 
-'''
-z_back   = 0.1
-odds_min = 0.5
-zmin     = 0.1
-zmax     = 0.33
-RIN      = 100.
-ROUT     = 10000.
-ndots    = 20.
-sample   = 'pru'
-lmin     = 20.
-lmax     = 145.
-# '''
-
-def profile_redMapper_withoutRCSL(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
-                      z_back = 0.1, odds_min = 0.5, percentil = False,
-                      RIN = 100., ROUT = 10000., ndots = 20.):
-     
-     try:
-          lmin     = lmin.astype(float)
-          lmax     = lmax.astype(float)
-          zmin     = zmin.astype(float)
-          zmax     = zmax.astype(float)
-          z_back   = z_back.astype(float)
-          odds_min = odds_min.astype(float)
-          RIN      = RIN.astype(float)
-          ROUT     = ROUT.astype(float)
-          ndots    = int(ndots.astype(float))
-          if len(percentil) > 2:
-		     print 'not computing percentil'
-		     percentil = False
-     except:
-          print 'not running in parallel'
-
-
-     folder = '/mnt/clemente/lensing/redMaPPer/'
-     
-     cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
-     kids     = fits.open(folder+'gx_KiDS_redMapper.fits')[1].data
-     cs82     = fits.open(folder+'gx_CS82_redMapper.fits')[1].data
-     angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
-     clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
-     borderid = np.loadtxt(folder+'redMapperID_border.list')
-     
-     mkids = (~np.in1d(kids.ID,cfht.ID))*(kids.Z_B < 0.9)
-     mcs82 = (~np.in1d(cs82.ID,cfht.ID))*(cs82.Z_B < 1.3)
-     mcfht = (cfht.Z_B < 1.3)
-     
-     kids = kids[mkids]
-     cs82 = cs82[mcs82]
-     cfht = cfht[mcfht]
-     
-     # MATCH ANGLES  
-     
-     ID = np.concatenate((cfht.ID,kids.ID,cs82.ID))
-     IDc = clusters.ID
-     
-     ides,index,c = np.unique(ID,return_index=True,return_counts=True)
-     angles_in = angles[np.in1d(IDc,ID)]
-     sindex = np.argsort(index)
-     angles = np.repeat(angles_in[sindex],c[sindex])
-     
-     #-----------------------------------------------
-     
-     lamb = np.concatenate((cfht.LAMBDA,kids.LAMBDA,cs82.LAMBDA))
-     
-     
-     Z_B  = np.concatenate((cfht.Z_B,kids.Z_B,cs82.Z_B))
-     ODDS = np.concatenate((cfht.ODDS,kids.ODDS,cs82.ODDS))
-     zlambda = np.concatenate((cfht.Z_LAMBDA,kids.Z_LAMBDA,cs82.Z_LAMBDA))
-     zspec   = np.concatenate((cfht.Z_SPEC,kids.Z_SPEC,cs82.Z_SPEC))
-     Z_c      = zspec
-     Z_c[Z_c<0] = zlambda[Z_c<0]
-     
-     
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)
-     mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
-     
-     if percentil:
-		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
-		 lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
-     
-     mlambda = (lamb >= lmin)*(lamb < lmax)   
-     
-     mask = mask_back*mask_lens*mlambda
-     
-     Nclusters = len(np.unique(ID[mask]))
-     
-     #del(mask_back)
-     #del(mask_lens)
-     #del(ODDS)
-     #del(zlambda)
-     #del(zspec)
-     #del(Z_B)     
-     #del(ID)
-     
-
-     # Cosmological distances
-
-     Z_c    = Z_c[mask]
-     lamb   = lamb[mask]              
-     zmean    = (Z_c).mean()
-     zdisp    = (Z_c).std()
-     H        = cosmo.H(zmean).value/(1.0e3*pc) #H at z_pair s-1 
-     roc      = (3.0*(H**2.0))/(8.0*np.pi*G) #critical density at z_pair (kg.m-3)
-     roc_mpc  = roc*((pc*1.0e6)**3.0)
-     D_ang    = cosmo.angular_diameter_distance(zmean)
-     kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-
-     #del(Z_c)
-     
-     dls  = np.concatenate((cfht.DLS,kids.DLS,cs82.DLS))[mask]
-     ds   = np.concatenate((cfht.DS,kids.DS,cs82.DS))[mask]
-     dl   = np.concatenate((cfht.DL,kids.DL,cs82.DL))[mask]
-     
-     
-     KPCSCALE   = dl*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-     BETA_array = dls/ds
-     beta       = BETA_array.mean()
-     
-     Dl = dl*1.e6*pc
-     sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
-     
-     #del(dls)
-     #del(dl)
-     #del(ds)
-     
-     print 'BETA.mean',beta
-     
-     SIGMAC = (((cvel**2.0)/(4.0*np.pi*G*Dl.mean())))*(pc**2/Msun)
-     
-     print 'SIGMA_C', SIGMAC
-     
-     # Compute tangential and cross components
-     
-     ra     = np.concatenate((cfht.RAJ2000,kids.RAJ2000,cs82.RAJ2000))[mask]
-     dec    = np.concatenate((cfht.DECJ2000,kids.DECJ2000,cs82.DECJ2000))[mask]
-          
-     ALFA0  = np.concatenate((cfht.RA,kids.RA,cs82.RA))[mask]
-     DELTA0 = np.concatenate((cfht.DEC,kids.DEC,cs82.DEC))[mask]
-     
-     rads, theta, test1,test2 = eq2p2(np.deg2rad(ra),
-                              np.deg2rad(dec),
-                              np.deg2rad(ALFA0),
-                              np.deg2rad(DELTA0))
-     
-     #del(ra)
-     #del(dec)
-     #del(ALFA0)
-     #del(DELTA0)
-     
-     
-     theta2 = (2.*np.pi - theta) +np.pi/2.
-     theta_ra = theta2
-     theta_ra[theta2 > 2.*np.pi] = theta2[theta2 > 2.*np.pi] - 2.*np.pi
-
-     #Correct polar angle for e1, e2
-     theta = theta+np.pi/2.
-
-     e1     = np.concatenate((cfht.e1,kids.e1,cs82.e1))[mask]
-     e2     = np.concatenate((cfht.e2,kids.e2,cs82.e2))[mask]
-     
-     #get tangential ellipticities 
-     et = (-e1*np.cos(2*theta)-e2*np.sin(2*theta))*sigma_c
-     #get cross ellipticities
-     ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
-     
-     #del(e1)
-     #del(e2)
-     
-     r=np.rad2deg(rads)*3600*KPCSCALE
-     #del(rads)
-     
-     peso = np.concatenate((cfht.weight,kids.weight,cs82.weight))[mask]
-     peso = peso/(sigma_c**2) 
-     m    = np.concatenate((cfht.m,kids.m,cs82.m))[mask]
-    
-     
-     
-     print '---------------------------------------------------------'
-     print '             COMPUTING THE SHEAR PROFILES                '
-     print '========================================================='
-     
-     
-     profile = shear_profile_log(RIN,ROUT,r,et,ex,peso,m,sigma_c,ndots,
-                              booterror_flag=True)
-                              
-     print 'Now is trying to fit a NFW profile...'
-     
-     try:
-          nfw          = NFW_stack_fit(profile[0]/1.e3,profile[1],profile[5],zmean,roc)
-     except:
-          nfw          = [-999.,0.,-100.,[0.,0.],[0.,0.],-999.,0.]
-                              
-     
-     M200_NFW   = (800.0*np.pi*roc_mpc*(nfw[0]**3))/(3.0*Msun)
-     
-     f1=open(folder+'profile_'+sample+'.cat','w')
-     f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
-     f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
-     f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
-     f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
-     f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-     f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-     f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
-     f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
-     f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
-     f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
-     f1.write('# R,shear,err_et,cero,err_ex \n')
-     profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
-     np.savetxt(f1,profile,fmt = ['%12.6f']*5)
-     f1.close()
-     
-     def write_profile(angle,sample):
-          
-          print sample
-     
-          profile = quadrupole_profile_log(RIN,ROUT,r,et,ex,
-                                   peso,m,sigma_c,angle,
-                                   ndots,booterror_flag=True)
-          
-          f1=open(folder+'profile_'+sample+'.cat','w')
-          f1.write('# Nclusters = '+str('%8i' % Nclusters)+' \n')
-          f1.write('# M200 = '+str('%.2f' % (M200_NFW/1.e14))+' \n')
-          f1.write('# z_mean = '+str('%.2f' % zmean)+' \n')
-          f1.write('# z_back = '+str('%.2f' % z_back)+' \n')
-          f1.write('# odds_min = '+str('%.1f' % odds_min)+' \n')
-          f1.write('# l_min = '+str('%.1f' % lmin)+' \n')
-          f1.write('# l_max = '+str('%.1f' % lmax)+' \n')
-          f1.write('# l_mean = '+str('%.1f' % np.mean(lamb))+' \n')
-          f1.write('# z_min = '+str('%.1f' % zmin)+' \n')
-          f1.write('# z_max = '+str('%.1f' % zmax)+' \n')
-          f1.write('# R,shear,err_et,cero,err_ex \n')
-          profile = np.column_stack((profile[0]*1.0e-3,profile[1],profile[5],profile[2],profile[6]))
-          np.savetxt(f1,profile,fmt = ['%12.6f']*5)
-          f1.close()
-     
-     at     = theta_ra - angles.theta[mask]
-     atwl   = theta_ra - angles.theta_wlum[mask]
-     atwd   = theta_ra - angles.theta_wd[mask]
-     atp    = theta_ra - angles.theta_pcut[mask]
-     atpwl  = theta_ra - angles.theta_pcut_wlum[mask]
-     atpwd  = theta_ra - angles.theta_pcut_wd[mask]
-     atpwdl = theta_ra - angles.theta_pcut_wdl[mask]
-     
-     write_profile(at,sample+'_t')
-     write_profile(atwl,sample+'_twl')
-     write_profile(atwd,sample+'_twd')
-     write_profile(atp,sample+'_tp')
-     write_profile(atpwl,sample+'_tpwl')
-     write_profile(atpwd,sample+'_tpwd')
-     write_profile(atpwdl,sample+'_tpwdl')
-     write_profile(theta_ra,sample+'_control')
-
 def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
                       z_back = 0.1, odds_min = 0.5, percentil = False,
                       RIN = 100., ROUT = 10000., ndots = 20.):
@@ -334,8 +81,10 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
      
      if percentil:
-		 lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
-		 lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
+          ids,index = np.unique(ID[mask_lens],return_index=True)
+          L = lamb[mask_lens][index]
+          lmin =  np.percentile(L,percentil[0]*100.,interpolation='lower')
+          lmax =  np.percentile(L,percentil[1]*100.,interpolation='lower')     
      
      mlambda = (lamb >= lmin)*(lamb < lmax)   
      
@@ -571,11 +320,13 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
 	mask = mask_back*mask_lens
 	
-	if percentil:
-		lmin =  np.percentile(lamb[mask_lens],percentil[0]*100.,interpolation='lower')
-		lmax =  np.percentile(lamb[mask_lens],percentil[1]*100.,interpolation='lower')     
-	
-	mlambda = (lamb >= lmin)*(lamb < lmax)   
+     if percentil:
+          ids,index = np.unique(ID[mask_lens],return_index=True)
+          L = lamb[mask_lens][index]
+          lmin =  np.percentile(L,percentil[0]*100.,interpolation='lower')
+          lmax =  np.percentile(L,percentil[1]*100.,interpolation='lower')     
+     
+     mlambda = (lamb >= lmin)*(lamb < lmax) 
 	
 	mask = mask_back*mask_lens*mlambda
 	

@@ -72,7 +72,7 @@ def make_plot(file_name,folder):
 
 #folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original_withR/'
 # folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_pru/RCSL/'
-folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profile_pru/allcats_v2/'
+folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profile_pru/allcats_v3/'
 #folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_terciles/'
      
 f = open(folder+'list_names','r')
