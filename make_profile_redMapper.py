@@ -330,7 +330,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      Z_c[Z_c<0] = zlambda[Z_c<0]
      
      
-     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(~np.in1d(ID,rcsl.ID))
+     mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)
      mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
      
      if percentil:
@@ -581,13 +581,13 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	
 	Nclusters = len(np.unique(ID[mask]))
 	
-	del(mask_back)
-	del(mask_lens)
-	del(ODDS)
-	del(zlambda)
-	del(zspec)
-	del(Z_B)     
-	del(ID)
+	# del(mask_back)
+	# del(mask_lens)
+	# del(ODDS)
+	# del(zlambda)
+	# del(zspec)
+	# del(Z_B)     
+	# del(ID)
 	
 	
 	# Cosmological distances
@@ -602,7 +602,7 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	D_ang    = cosmo.angular_diameter_distance(zmean)
 	kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
 	
-	del(Z_c)
+	# del(Z_c)
 	
 	dls  = backgx.DLS[mask]
 	ds   = backgx.DS[mask]
@@ -616,9 +616,9 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	Dl = dl*1.e6*pc
 	sigma_c = (((cvel**2.0)/(4.0*np.pi*G*Dl))*(1./BETA_array))*(pc**2/Msun)
 	
-	del(dls)
-	del(dl)
-	del(ds)
+	# del(dls)
+	# del(dl)
+	# del(ds)
 	
 	print 'BETA.mean',beta
 	
@@ -639,10 +639,10 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 							np.deg2rad(ALFA0),
 							np.deg2rad(DELTA0))
 	
-	del(ra)
-	del(dec)
-	del(ALFA0)
-	del(DELTA0)
+	# del(ra)
+	# del(dec)
+	# del(ALFA0)
+	# del(DELTA0)
 	
 	
 	theta2 = (2.*np.pi - theta) +np.pi/2.
@@ -660,11 +660,11 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	#get cross ellipticities
 	ex = (-e1*np.sin(2*theta)+e2*np.cos(2*theta))*sigma_c
 	
-	del(e1)
-	del(e2)
+	# del(e1)
+	# del(e2)
 	
 	r=np.rad2deg(rads)*3600*KPCSCALE
-	del(rads)
+	# del(rads)
 	
 	peso = backgx.weight[mask]
 	peso = peso/(sigma_c**2) 
