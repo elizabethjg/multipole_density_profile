@@ -316,7 +316,7 @@ def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 	Z_c[Z_c<0] = zlambda[Z_c<0]
 	
 	
-	mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min)*(Z_B < zlim)
+	mask_back = (Z_B > (Z_c + z_back))*(ODDS >= odds_min
 	mask_lens = (Z_c >= zmin)*(Z_c < zmax)*(~np.in1d(ID,borderid))*(lamb >= 20.)*(lamb < 150.)
 	mask = mask_back*mask_lens
 	
