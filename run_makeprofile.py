@@ -72,8 +72,8 @@ ndots    = np.ones(len(lmin))*10
 entrada = np.array([samples,lmin,lmax,zmin,zmax,
                     z_back,odds_min,RIN,ROUT,ndots]).T
 
-for j in range(len(entrada)):
-    makeprofile_unpack(entrada[j])
+for j in range(len(entrada)-1):
+    makeprofile_unpack(entrada[j+1])
 
 
 

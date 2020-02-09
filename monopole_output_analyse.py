@@ -11,13 +11,14 @@ import corner
 import os
 
 
-def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
+# def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
+def plot_monopole_miss(folder,file_profile,out_file):
 	
 	print file_profile
 	
 	file_mcmc = 'monopole_misscentred_'+file_profile
 	
-	os.system('mkdir '+folder+'plots_mcmc/')
+	os.system('mkdir '+folder+'plots_monopole_mcmc/')
 	
 	mcmc = (np.loadtxt(folder+file_mcmc)).T
 	
@@ -25,11 +26,11 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	f, ax = plt.subplots(2, 1, figsize=(10,5))
 	ax[0].plot(mcmc[0],'k.',alpha=0.3)
 	ax[0].axvline(1500)
-	ax[0].axhline(np.log10(m200_maria*1.e14))
+	# ax[0].axhline(np.log10(m200_maria*1.e14))
 	ax[1].plot(mcmc[1],'k.',alpha=0.3)
 	ax[1].axvline(1500)
-	ax[1].axhline(pcc_maria)
-	plt.savefig(folder+'plots_mcmc/out_'+file_mcmc[:-3]+'png')
+	# ax[1].axhline(pcc_maria)
+	plt.savefig(folder+'plots_monopole_mcmc/out_'+file_mcmc[:-3]+'png')
 	
 	mcmc = mcmc[:,1500:]
 	
@@ -48,7 +49,7 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	
 	
 	fig = corner.corner(mcmc.T, labels=labels)
-	plt.savefig(folder+'plots_mcmc/'+file_mcmc[:-3]+'png')
+	plt.savefig(folder+'plots_monopole_mcmc/'+file_mcmc[:-3]+'png')
 	
 	
 	#/////// save file ///////
@@ -82,18 +83,18 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	
 	model_t = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc[1])
 
-	multipoles = multipole_shear_parallel(r,M200=m200_maria*1.e14,components = ['t'],
-										misscentred = True,
-										ellip=0.,z=zmean,
-										verbose=True,ncores=4)
+	# multipoles = multipole_shear_parallel(r,M200=m200_maria*1.e14,components = ['t'],
+										# misscentred = True,
+										# ellip=0.,z=zmean,
+										# verbose=True,ncores=4)
 	
-	model_maria = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc_maria)
+	# model_maria = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc_maria)
 	
 	
 	f, ax = plt.subplots(figsize=(6.5,5))
 	ax.plot(profile[0],profile[1],'C0o')
 	ax.plot(r,model_t,'C1',label = 'mcmc result')
-	ax.plot(r,model_maria,'C2',label = 'maria')
+	# ax.plot(r,model_maria,'C2',label = 'maria')
 	ax.errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='C0')
 	ax.set_xscale('log')
 	ax.set_yscale('log')
@@ -105,11 +106,25 @@ def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 	ax.yaxis.set_ticks([1,10,100])
 	ax.set_yticklabels([1,10,100])
 	plt.legend()
-	plt.savefig(folder+'plots_mcmc/'+'t'+file_profile[:-3]+'png')
+	plt.savefig(folder+'plots_monopole_mcmc/'+'t'+file_profile[:-3]+'png')
 
-folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles_original/CS82/'
+folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
 # folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
 
+os.system('rm '+folder+'out_table_monopole')
+plot_monopole_miss(folder,'profile_total.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_median_bin1.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_median_bin2.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_bin1.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_bin2.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_bin3.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_medianz1.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_medianz2.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_z1.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_z2.cat','out_table_monopole')
+plot_monopole_miss(folder,'profile_terciles_z3.cat','out_table_monopole')
+
+'''
 maria_result = np.loadtxt(folder+'../../maria_result').T
 m200_maria   = maria_result[0]/0.7
 em200_maria  = maria_result[1]/0.7
@@ -121,3 +136,4 @@ plot_monopole_miss(folder,'profile_CS82_original_bin3.cat','out_CS82_table',m200
 plot_monopole_miss(folder,'profile_CS82_original_bin4.cat','out_CS82_table',m200_maria[3],pcc_maria[3])
 
 lmean = [21.75,25.76,32.91,57.59]
+'''
