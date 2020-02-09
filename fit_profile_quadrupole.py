@@ -121,9 +121,9 @@ print (time.time()-t1)/60.
 mcmc_out = sampler.get_chain(flat=True)
 
 if miss:
-	f1=open(folder+'quadrupole_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))'.out','w')
+	f1=open(folder+'quadrupole_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out','w')
 else:
-	f1=open(folder+'quadrupole_'+component+'_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))'.out','w')
+	f1=open(folder+'quadrupole_'+component+'_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out','w')
 f1.write('# ellip \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
 f1.close()
