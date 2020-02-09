@@ -98,6 +98,10 @@ print rin,rout
 maskr   = (profile[0]>rin)*(profile[0]<rout)
 print profile[0]
 print maskr.sum()
+print (profile[0]>rin)
+print (profile[0]<rout)
+print type(rin)
+print type(rout)
 profile = profile[:,maskr]
 
 t1 = time.time()
