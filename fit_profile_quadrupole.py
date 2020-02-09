@@ -44,6 +44,8 @@ print angle
 print 'miss = ',miss
 print component
 print 'ncores = ',ncores
+print 'RIN ',rin
+print 'ROUT ',rout
 
 
 f = open(folder+file_name,'r')
@@ -93,6 +95,8 @@ nwalkers, ndim = pos.shape
 
 profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
 maskr   = (profile[0]>rin)*(profile[0]<rout)
+print profile[0]
+print maskr.sum()
 profile = profile[:,maskr]
 
 t1 = time.time()
