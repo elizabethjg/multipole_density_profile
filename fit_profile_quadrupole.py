@@ -94,6 +94,7 @@ nwalkers, ndim = pos.shape
 # running emcee
 
 profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
+print rin,rout
 maskr   = (profile[0]>rin)*(profile[0]<rout)
 print profile[0]
 print maskr.sum()
