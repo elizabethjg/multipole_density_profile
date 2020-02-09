@@ -34,8 +34,8 @@ elif 'False' in args.miss:
 component = args.component
 ncores    = args.ncores
 ncores    = int(ncores)
-rin       = args.RIN
-rout      = args.ROUT
+rin       = float(args.RIN)
+rout      = float(args.ROUT)
 
 print 'fitting quadrupole'
 print folder
@@ -94,14 +94,7 @@ nwalkers, ndim = pos.shape
 # running emcee
 
 profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
-print rin,rout
 maskr   = (profile[0]>rin)*(profile[0]<rout)
-print profile[0]
-print maskr.sum()
-print (profile[0]>rin)
-print (profile[0]<rout)
-print type(rin)
-print type(rout)
 profile = profile[:,maskr]
 
 t1 = time.time()
