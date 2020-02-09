@@ -106,6 +106,7 @@ def plot_monopole_miss(folder,file_profile,out_file):
 	ax.yaxis.set_ticks([1,10,100])
 	ax.set_yticklabels([1,10,100])
 	plt.legend()
+	f.subplots_adjust(hspace=0,wspace=0)
 	plt.savefig(folder+'plots_monopole_mcmc/'+'t'+file_profile[:-3]+'png')
 
 folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
