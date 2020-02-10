@@ -157,6 +157,7 @@ plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin2*mext], (eb+e_eb[1,:])[mmbin2*mex
 plt.xticks(ang_ind,angles)
 plt.legend()
 
+# REDSHIFT
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mrtot],c='C4',label = 'z_mean ='+str(zmean[mtotal*mrtot][0]))
@@ -205,5 +206,15 @@ plt.plot(ang_ind,eb[mmz1*mint],c='C5',label = 'z_mean ='+str(zmean[mmz1*mint][0]
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz1*mint], (eb+e_eb[1,:])[mmz1*mint],facecolor = 'C5', alpha = 0.3)
 plt.plot(ang_ind,eb[mmz2*mint],c='C6',label = 'z_mean ='+str(zmean[mmz2*mint][0]),ls = '--')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mint], (eb+e_eb[1,:])[mmz2*mint],facecolor = 'C6', alpha = 0.3)
+plt.xticks(ang_ind,angles)
+plt.legend()
+
+plt.figure()
+plt.plot(ang_ind,eb[mtotal*mext],c='C4',label = 'z_mean ='+str(zmean[mtotal*mext][0]),ls = '-.')
+plt.fill_between(ang_ind, (eb-e_eb[0,:])[mtotal*mext], (eb+e_eb[1,:])[mtotal*mext],facecolor = 'C4', alpha = 0.3)
+plt.plot(ang_ind,eb[mmz1*mext],c='C5',label = 'z_mean ='+str(zmean[mmz1*mext][0]),ls = '-.')
+plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz1*mext], (eb+e_eb[1,:])[mmz1*mext],facecolor = 'C5', alpha = 0.3)
+plt.plot(ang_ind,eb[mmz2*mext],c='C6',label = 'z_mean ='+str(zmean[mmz2*mext][0]),ls = '-.')
+plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mext], (eb+e_eb[1,:])[mmz2*mext],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
