@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=bin1monopole_miss
+#SBATCH --job-name=total_t
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
 #SBATCH --time=24:00:00
@@ -16,7 +16,8 @@ export MKL_NUM_THREADS=10
 
 source activate py2env
 
-srun python -u fit_profile_monopole_misscentred_parallelr.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_terciles_total.cat' -ncores 10
+srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' \
+-file 'profile_total.cat' -ncores 10 -ang 't' -misscentred 'True' -component 'both'
 
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_t.cat' -ncores 56
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_tp.cat' -ncores 56
