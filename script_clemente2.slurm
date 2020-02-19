@@ -17,7 +17,7 @@ export MKL_NUM_THREADS=10
 source activate py2env
 
 srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' \
--file 'profile_total.cat' -ncores 10 -ang 't' -misscentred 'True' -component 'both'
+-file 'profile_total.cat' -ncores 10 -ang 't' -misscentred 'True' -nit 100
 
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_t.cat' -ncores 56
 ##srun python -u fit_profile_quadrupole_tcos.py -folder '/mnt/clemente/lensing/redMaPPer/' -file 'profile_bin1_tp.cat' -ncores 56

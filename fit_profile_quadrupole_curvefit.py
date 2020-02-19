@@ -6,9 +6,8 @@ sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipol
 import numpy as np
 from pylab import *
 from multipoles_shear import *
-import emcee
 import time
-from multiprocessing import Pool
+from scipy.optimize import curve_fit
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -20,7 +19,6 @@ parser.add_argument('-misscentred', action='store', dest='miss', default=0)
 parser.add_argument('-component', action='store', dest='component', default='both')
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5)
-parser.add_argument('-nit', action='store', dest='nit', default=250)
 args = parser.parse_args()
 
 folder    = args.folder
@@ -61,43 +59,20 @@ print 'M200',M200
 print 'pcc',pcc
 
 
-def log_likelihood(data_model, r, Gamma, e_Gamma):
-    ellip = data_model
-    if 'both' in component:
-	r = np.split(r,2)[0]
-	multipoles = multipole_shear_parallel(r,M200=M200,misscentred = miss,
-				    ellip=ellip,z=zmean,components = ['tcos','xsin'],
-				    verbose=False,ncores=ncores)
-	model_t = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
-	model_x = model_Gamma(multipoles,'xsin', misscentred = miss, pcc = pcc)
-	model   = np.append(model_t,model_x)
-    else:
-	multipoles = multipole_shear_parallel(r,M200=M200,misscentred = miss,
-				    ellip=ellip,z=zmean,components = [component],
-				    verbose=False,ncores=ncores)
-	model = model_Gamma(multipoles,component, misscentred = miss, pcc = pcc)
-    sigma2 = e_Gamma**2
-    return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
-    
+profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
+maskr   = (profile[0]>rin)*(profile[0]<rout)
+profile = profile[:,maskr]
 
-def log_probability(data_model, r, Gamma, e_Gamma):
-    ellip = data_model
-    if 0. < ellip < 0.5:
-        return log_likelihood(data_model, r, Gamma, e_Gamma)
-    return -np.inf
 
-# initializing
-
-pos = np.array([np.random.uniform(0.,0.5,10)]).T
-
-nwalkers, ndim = pos.shape
+infit = output = {'r':profile[0],'M200':M200,
+                  'z':zmean,'h':0.7,'misscentred':miss,
+		  's_off':0.4,'components':[component],
+		  'verbose':True,'ncores':ncores}
 
 #-------------------
 # running emcee
 
-profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
-maskr   = (profile[0]>rin)*(profile[0]<rout)
-profile = profile[:,maskr]
+
 
 t1 = time.time()
 
