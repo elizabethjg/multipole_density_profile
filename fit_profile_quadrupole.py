@@ -35,7 +35,7 @@ elif 'False' in args.miss:
 
 if 'True' in args.cont:
 	cont      = True
-elif 'False' in args.miss:
+elif 'False' in args.cont:
 	cont      = False
 
 	
