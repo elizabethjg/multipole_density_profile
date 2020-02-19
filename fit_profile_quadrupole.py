@@ -21,6 +21,7 @@ parser.add_argument('-component', action='store', dest='component', default='bot
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5)
 parser.add_argument('-nit', action='store', dest='nit', default=250)
+parser.add_argument('-continue', action='store', dest='cont', default='False')
 args = parser.parse_args()
 
 folder    = args.folder
@@ -31,6 +32,12 @@ if 'True' in args.miss:
 	miss      = True
 elif 'False' in args.miss:
 	miss      = False
+
+if 'True' in args.cont:
+	cont      = True
+elif 'False' in args.miss:
+	cont      = False
+
 	
 component = args.component
 nit       = int(args.nit)
@@ -38,6 +45,15 @@ ncores    = args.ncores
 ncores    = int(ncores)
 rin       = float(args.RIN)
 rout      = float(args.ROUT)
+
+if miss:
+	outfile = folder+'quadrupole_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+	backup  = folder+'backup_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+else:
+	outfile = folder+'quadrupole_'+component+'_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+	backup  = folder+'backup_'+component+'_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+
+
 
 print 'fitting quadrupole'
 print folder
@@ -48,6 +64,8 @@ print component
 print 'ncores = ',ncores
 print 'RIN ',rin
 print 'ROUT ',rout
+print 'nit', nit
+print 'continue',cont
 
 
 f = open(folder+file_name,'r')
@@ -101,22 +119,34 @@ profile = profile[:,maskr]
 
 t1 = time.time()
 
+backend = emcee.backends.HDFBackend(backup)
+if not cont:
+    backend.reset(nwalkers, ndim)
+    
+
+
 if component == 'tcos':
-	
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                args=(profile[0],profile[1],profile[2]))
+                                args=(profile[0],profile[1],profile[2]),
+				backend=backend)
+				
 elif component == 'xsin':                                
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                args=(profile[0],profile[3],profile[4]))
+                                args=(profile[0],profile[3],profile[4]),
+				backend=backend)
 elif component == 'both':                                
 	sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
                                 args=(np.append(profile[0],profile[0]),
 				np.append(profile[1],profile[3]),
-				np.append(profile[2],profile[4])))
+				np.append(profile[2],profile[4])),
+				backend=backend)
 
 
-                                
-sampler.run_mcmc(pos, nit, progress=True)
+if cont:                                
+    sampler.run_mcmc(None, nit, progress=True)
+else:
+    sampler.run_mcmc(pos, nit, progress=True)
+    
 print (time.time()-t1)/60.
 
 #-------------------
@@ -124,10 +154,8 @@ print (time.time()-t1)/60.
 
 mcmc_out = sampler.get_chain(flat=True)
 
-if miss:
-	f1=open(folder+'quadrupole_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out','w')
-else:
-	f1=open(folder+'quadrupole_'+component+'_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out','w')
+
+f1=open(outfile,'w')
 f1.write('# ellip \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
 f1.close()

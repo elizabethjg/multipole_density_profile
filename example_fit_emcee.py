@@ -66,7 +66,11 @@ import emcee
 pos = soln.x + 1e-4 * np.random.randn(32, 3)
 nwalkers, ndim = pos.shape
 
-sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(x, y, yerr))
+filename = 'tutorial.h5'
+backend = emcee.backends.HDFBackend(filename)
+backend.reset(nwalkers, ndim)
+
+sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(x, y, yerr), backend=backend)
 sampler.run_mcmc(pos, 5000, progress=True)
 
 fig, axes = plt.subplots(3, figsize=(10, 7), sharex=True)
@@ -82,3 +86,32 @@ for i in range(ndim):
 axes[-1].set_xlabel("step number")
 
 print 'END OF PROGRAM'
+
+max_n = 100000
+
+# We'll track how the average autocorrelation time estimate changes
+index = 0
+autocorr = np.empty(max_n)
+
+# This will be useful to testing convergence
+old_tau = np.inf
+
+# Now we'll sample for up to max_n steps
+for sample in sampler.sample(pos, iterations=nit, progress=True):
+    # Only check convergence every 100 steps
+    if sampler.iteration % 100:
+        continue
+
+    # Compute the autocorrelation time so far
+    # Using tol=0 means that we'll always get an estimate even
+    # if it isn't trustworthy
+    tau = sampler.get_autocorr_time(tol=0)
+    autocorr[index] = np.mean(tau)
+    index += 1
+
+    # Check convergence
+    converged = np.all(tau * 100 < sampler.iteration)
+    converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
+    if converged:
+        break
+    old_tau = tau
