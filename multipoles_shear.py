@@ -241,9 +241,13 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		def moff(x):
 			return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)
 		argumento = lambda x: moff(x)
-		integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
-		integral2  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
-		integral3  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+		# integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral1  = integrate.quad(argumento, -1.*np.inf, -100., epsabs=1.e-01, epsrel=1.e-01)[0]
+		# integral2  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
+		x = np.linspace(-100.,100.,5000)
+		integral2  = integrate.simps(moff(x),x,even='first')
+		# integral3  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral3  = integrate.quad(argumento, 100., np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
 		return integral1 + integral2 + integral3
 	vec_moff = np.vectorize(monopole_off)
 	
@@ -295,9 +299,13 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			rp = np.sqrt(R**2+roff**2-2*roff*R*np.cos(theta))
 			return quadrupole(rp)*P_Roff(roff)
 		argumento = lambda x: q_off(x)
-		integral10  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
-		integral20  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
-		integral30  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+		# integral10  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral10  = integrate.quad(argumento, -1.*np.inf, -100., epsabs=1.e-01, epsrel=1.e-01)[0]
+		# integral20  = integrate.quad(argumento, 0., R, epsabs=1.e-01, epsrel=1.e-01)[0]
+		x = np.linspace(-100.,100.,5000)
+		integral20  = integrate.simps(q_off(x),x,even='first')
+		# integral30  = integrate.quad(argumento, R, np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
+		integral30  = integrate.quad(argumento, 100., np.inf, epsabs=1.e-01, epsrel=1.e-01)[0]
 
 		return integral10 + integral20 + integral30	
 	vec_qoff = np.vectorize(quadrupole_off)
@@ -355,20 +363,20 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 					DSoff = Delta_Sigma_off0(R)
 					gamma_t_off0 = np.append(gamma_t_off0,DSoff)
 				else:
-					x = np.linspace(0.,2.*np.pi,200)
+					x = np.linspace(0.,2.*np.pi,100)
 					integral  = integrate.simps(DS_t_off(x),x,even='first')
 					gamma_t_off0 = np.append(gamma_t_off0,integral/(2.*np.pi))
 				t2 = time.time()
-				print (t2-t1)/60.
+				print R,(t2-t1)/60.
 
 			if 'tcos' in components:	
 				print 'computing DS_t_off_cos'
 				t1 = time.time()
-				x = np.linspace(0.,2.*np.pi,200)
+				x = np.linspace(0.,2.*np.pi,100)
 				integral  = integrate.simps(DS_t_off(x)*np.cos(2.*x),x,even='first')
 				gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 				t2 = time.time()
-			 	print (t2-t1)/60.
+			 	print 'tcos',R,(t2-t1)/60.
 
 			if 'xsin' in components:
 				print 'computing DS_x_off_sin'
@@ -381,7 +389,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
 				gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
 				t2 = time.time()
-				print (t2-t1)/60.
+				print 'xsin',R,(t2-t1)/60.			 	
 
 
 			'''
@@ -417,6 +425,19 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 				gamma_t_off = np.append(gamma_t_off,integral/np.pi)
 				t2 = time.time()
 			 	print (t2-t1)/60.
+			 	
+			if 'xsin' in components:
+				print 'computing DS_x_off_sin'
+				t1 = time.time()
+				def DS_x_off(theta):
+					gamma_x2 = ((-6*psi2_off(R,theta)/R**2) 
+								- 4.*monopole_off(R,theta))
+					return ellip*gamma_x2*np.sin(2.*theta)
+				argumento = lambda x: DS_x_off(x)*np.sin(2.*x)
+				integral  = integrate.quad(argumento, 0, 2.*np.pi,points=[np.pi], epsabs=1.e-01, epsrel=1.e-01)[0]
+				gamma_x_off = np.append(gamma_x_off,integral/np.pi)	
+				t2 = time.time()
+				print 'xsin',R,(t2-t1)/60.			 	
 						
 			'''
 					
