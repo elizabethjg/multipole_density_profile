@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=makeprofile
+#SBATCH --job-name=bin2_t
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=10
 #SBATCH --time=24:00:00
 ## An email is sent when the job is canceled or finished
 ## Change "root" for your e-mail address
@@ -11,9 +11,10 @@
 
 cd /home/elizabeth/multipole_density_profile
 
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=10
 
 module load softwares/anaconda2/5.0-intel-2018.0
 source activate py2env
 
-srun python -u run_makeprofile.py
+srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper' \
+-file 'profile_median_bin2.cat' -ncores 10 -ang 't' -misscentred 'True' -nit 100
