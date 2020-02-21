@@ -207,7 +207,7 @@ def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,angle,miss,
 	
 	e_b    = np.percentile(mcmc_both, [16, 50, 84])
 	
-	f, ax = plt.subplots(1, 3, figsize=(3,5))
+	f, ax = plt.subplots(figsize=(3,5))
 	ax.hist(mcmc_both,histtype='step')
 	ax.set_xlabel('e_b')
 	f.subplots_adjust(hspace=0,wspace=0)
