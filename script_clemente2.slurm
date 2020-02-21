@@ -18,6 +18,3 @@ source activate py2env
 
 srun python -u run_quadrupole_analyse.py -file 'table_mcmc_centred.out' \
 -profile 'profile_total.cat' -misscentred 'False'
-
-##srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' \
--file 'profile_total.cat' -ncores 10 -ang 't' -misscentred 'True' -nit 100

@@ -50,7 +50,8 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,
 		f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
 		f1.write('0.     0.01     0.01    0.     0.01     0.01    0.     0.01     0.01 \n')
 		f1.close()
-		continue
+		print 'FILE NOT FOUND'
+		return None
 	
 	
 	f, ax = plt.subplots(3, 1, figsize=(6,5))
