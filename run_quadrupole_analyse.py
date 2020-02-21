@@ -12,6 +12,7 @@ parser.add_argument('-file', action='store', dest='file_name', default='table_mc
 parser.add_argument('-profile', action='store', dest='profile', default='profile.cat')
 parser.add_argument('-ncores', action='store', dest='ncores', default=10)
 parser.add_argument('-misscentred', action='store', dest='miss', default=0)
+args = parser.parse_args()
 
 folder    = args.folder
 out_file  = args.file_name
