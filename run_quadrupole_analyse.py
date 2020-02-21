@@ -17,7 +17,7 @@ args = parser.parse_args()
 folder    = args.folder
 out_file  = args.file_name
 profile   = args.profile
-ncores    = int(ncores)
+ncores    = int(args.ncores)
 if 'True' in args.miss:
 	miss      = True
 elif 'False' in args.miss:
