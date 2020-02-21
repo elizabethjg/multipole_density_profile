@@ -9,10 +9,6 @@ from multipoles_shear import *
 import time
 import os
 
-folder         = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_terciles/'
-file_profile   = 'profile_bin3_tpwl.cat'
-out_file       = 'out_mcmc_table'
-
 def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,
 							 rin,rout,out_file,ncores):
 	
@@ -159,5 +155,120 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,
 	f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
 	f1.write(str('%.2f' % (e_t[1]))+'   '+str('%.2f' % (np.diff(e_t)[0]))+'   '+str('%.2f' % (np.diff(e_t)[1]))+'   ')
 	f1.write(str('%.2f' % (e_x[1]))+'   '+str('%.2f' % (np.diff(e_x)[0]))+'   '+str('%.2f' % (np.diff(e_x)[1]))+'   ')
+	f1.write(str('%.2f' % (e_b[1]))+'   '+str('%.2f' % (np.diff(e_b)[0]))+'   '+str('%.2f' % (np.diff(e_b)[1]))+'\n')
+	f1.close()
+
+def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,angle,miss,
+							 rin,rout,out_file,ncores):
+	
+	file_profile = file_name[:-4]+'_'+angle+'.cat'
+	
+	print file_profile
+
+	if miss:
+		file_mcmc_xsin = folder+'quadrupole_xsin_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		file_mcmc_tcos = folder+'quadrupole_tcos_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		file_mcmc_both = folder+'quadrupole_both_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		plot_out       = file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'_miss.png'
+	else:
+		file_mcmc_xsin = folder+'quadrupole_xsin_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		file_mcmc_tcos = folder+'quadrupole_tcos_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		file_mcmc_both = folder+'quadrupole_both_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
+		plot_out       = file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.png'
+	
+	os.system('mkdir '+folder+'plots_mcmc/')
+	
+	f = open(folder+file_name,'r')
+	lines = f.readlines()
+	j = lines[2].find('=')+1
+	zmean = float(lines[2][j:-2])
+	pcc = float((lines[-1][1:-2]))
+	M200 = float((lines[-2][1:-2]))*1.e14
+	
+	try:
+		mcmc_both = (np.loadtxt(file_mcmc_both))
+	except:
+		f1=open(folder+out_file,'a')
+		f1.write(file_profile+' ') 
+		f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
+		f1.write('0.     0.01     0.01 \n')
+		f1.close()
+		print 'FILE NOT FOUND'
+		return None
+	
+	
+	f, ax = plt.subplots(figsize=(5,2))
+	ax.plot(mcmc_both,'k.',alpha=0.3)
+	ax.axvline(500)
+	f.subplots_adjust(hspace=0,wspace=0)
+	plt.savefig(folder+'plots_mcmc/mcmc_out_'+plot_out)
+	
+	mcmc_both = mcmc_both[500:1000] 
+	
+	e_b    = np.percentile(mcmc_both, [16, 50, 84])
+	
+	f, ax = plt.subplots(1, 3, figsize=(3,5))
+	ax.hist(mcmc_both,histtype='step')
+	ax.set_xlabel('e_b')
+	f.subplots_adjust(hspace=0,wspace=0)
+	plt.savefig(folder+'plots_mcmc/hist_'+plot_out)
+	
+	
+	profile = np.loadtxt(folder+file_profile).T
+	
+	f = open(folder+file_profile,'r')
+	lines = f.readlines()
+	j = lines[1].find('=')+1
+	Mguess = (float(lines[1][j:-2])*1.e14)
+	j = lines[2].find('=')+1
+	zmean = float(lines[2][j:-2])
+	
+	r  = np.logspace(np.log10(min(profile[0])),
+					np.log10(max(profile[0])),20)
+	
+
+	multipoles = multipole_shear_parallel(r,M200=M200,misscentred = miss,
+								ellip=e_b[1],z=zmean,components = ['tcos','xsin'],
+								verbose=False,ncores=ncores)
+	
+	modelb_t = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
+	modelb_x = model_Gamma(multipoles,'xsin', misscentred = miss, pcc = pcc)
+	
+	
+	f, ax = plt.subplots(1, 2, figsize=(8,5))
+	ax[0].plot(profile[0],profile[1],'k')
+	ax[0].plot(r,modelb_t,'C4')
+	ax[0].errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='k')
+	ax[0].set_xscale('log')
+	ax[0].set_yscale('log')
+	ax[0].set_xlabel('R [mpc]')
+	ax[0].set_ylim(0.1,200)
+	ax[0].set_xlim(0.1,5.2)
+	ax[0].xaxis.set_ticks([0.1,1,5])
+	ax[0].set_xticklabels([0.1,1,5])
+	ax[0].yaxis.set_ticks([1,10,100])
+	ax[0].set_yticklabels([1,10,100])
+	plt.legend()
+	
+	ax[1].plot(profile[0],profile[3],'k')
+	ax[1].plot(r,modelb_x,'C4')
+	ax[1].errorbar(profile[0],profile[3],yerr=profile[4],fmt = 'none',ecolor='k')
+	ax[1].set_xlabel('R [mpc]')
+	ax[1].set_xscale('log')
+	ax[1].set_ylim(-50,50)
+	ax[1].set_xlim(0.1,5.2)
+	ax[1].xaxis.set_ticks([0.1,1,5])
+	ax[1].set_xticklabels([0.1,1,5])
+	ax[1].yaxis.set_ticks([-30,-15,0,15,30])
+	ax[1].set_yticklabels([-30,-15,0,15,30])
+	plt.legend()
+	f.subplots_adjust(hspace=0,wspace=0)
+	plt.savefig(folder+'plots_mcmc/'+plot_out)
+	
+	#/////// save file ///////
+	
+	f1=open(folder+out_file,'a')
+	f1.write(file_profile+' ') 
+	f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
 	f1.write(str('%.2f' % (e_b[1]))+'   '+str('%.2f' % (np.diff(e_b)[0]))+'   '+str('%.2f' % (np.diff(e_b)[1]))+'\n')
 	f1.close()
