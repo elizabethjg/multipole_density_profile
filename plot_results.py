@@ -10,7 +10,7 @@ import os
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
 
-out = np.loadtxt(folder+'out_mcmc_centred',dtype='str').T
+out = np.loadtxt(folder+'table_mcmc_centred.out',dtype='str').T
 
 samples = out[0]
 M200    = out[1].astype(float)
@@ -20,10 +20,16 @@ rin     = out[3].astype(float)
 rout    = out[4].astype(float)
 et      = out[5].astype(float)
 e_et    = np.array([out[6].astype(float),out[7].astype(float)])
-ex      = out[8].astype(float)
-e_ex    = np.array([out[9].astype(float),out[10].astype(float)])
-eb      = out[11].astype(float)
-e_eb    = np.array([out[12].astype(float),out[13].astype(float)])
+chi_t   = out[8].astype(float)
+ex      = out[9].astype(float)
+e_ex    = np.array([out[10].astype(float),out[11].astype(float)])
+chi_x   = out[12].astype(float)
+eb      = out[13].astype(float)
+e_eb    = np.array([out[14].astype(float),out[15].astype(float)])
+chi_b   = out[16].astype(float)
+# eb    = out[5].astype(float)
+# e_eb  = np.array([out[6].astype(float),out[7].astype(float)])
+
 
 mtotal   = []
 mmbin1   = []
@@ -75,6 +81,30 @@ mint  = (rout == 1)
 mext  = (rin == 1)
 mrtot = (rin == 0)*(rout == 5)
 
+plt.figure()
+plt.plot(ang_ind,(eb-et)[mrtot],'C4',label='diff et')
+plt.plot(ang_ind,(eb-et)[mint],'C4--')
+plt.plot(ang_ind,(eb-et)[mext],'C4-.')
+plt.plot(ang_ind,(eb-ex)[mrtot],'C5',label='diff ex')
+plt.plot(ang_ind,(eb-ex)[mint],'C5--')
+plt.plot(ang_ind,(eb-ex)[mext],'C5-.')
+plt.xticks(ang_ind,angles)
+plt.ylabel(r'$e-e_b$')
+plt.legend()
+
+plt.figure()
+plt.plot(ang_ind,chi_b[mrtot],'C4',label='both')
+plt.plot(ang_ind,chi_b[mint],'C4--')
+plt.plot(ang_ind,chi_b[mext],'C4-.')
+plt.plot(ang_ind,chi_t[mrtot],'C5',label='tcos')
+plt.plot(ang_ind,chi_t[mint],'C5--')
+plt.plot(ang_ind,chi_t[mext],'C5-.')
+plt.plot(ang_ind,chi_x[mrtot],'C6',label='xsin')
+plt.plot(ang_ind,chi_x[mint],'C6--')
+plt.plot(ang_ind,chi_x[mext],'C6-.')
+plt.xticks(ang_ind,angles)
+plt.ylabel(r'$\chi^2_{red}$')
+plt.legend()
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mrtot],c='C4',label = 'lM200_mean ='+str(lM200[mtotal*mrtot][0]))
@@ -85,7 +115,7 @@ plt.plot(ang_ind,eb[mmbin2*mrtot],c='C6',label = 'lM200_mean ='+str(lM200[mmbin2
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin2*mrtot], (eb+e_eb[1,:])[mmbin2*mrtot],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/Mrtot.png')
+plt.savefig(folder+'plot_results_misscentred/Mrtot.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mrtot],c='C4',label = 'lM200_mean ='+str(lM200[mtotal*mrtot][0]))
@@ -96,7 +126,7 @@ plt.plot(ang_ind,eb[mtotal*mext],c='C4',ls = '-.')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mtotal*mext], (eb+e_eb[1,:])[mtotal*mext],facecolor = 'C4', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/tot_inout.png')
+plt.savefig(folder+'plot_results_misscentred/tot_inout.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mmbin1*mrtot],c='C5',label = 'lM200_mean ='+str(lM200[mmbin1*mrtot][0]))
@@ -107,7 +137,7 @@ plt.plot(ang_ind,eb[mmbin1*mext],c='C5',ls = '-.')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin1*mext], (eb+e_eb[1,:])[mmbin1*mext],facecolor = 'C5', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/LM_inout.png')
+plt.savefig(folder+'plot_results_misscentred/LM_inout.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mmbin2*mrtot],c='C6',label = 'lM200_mean ='+str(lM200[mmbin2*mrtot][0]))
@@ -118,7 +148,7 @@ plt.plot(ang_ind,eb[mmbin2*mext],c='C6',ls = '-.')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin2*mext], (eb+e_eb[1,:])[mmbin2*mext],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/HM_inout.png')
+plt.savefig(folder+'plot_results_misscentred/HM_inout.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mint],c='C4',label = 'lM200_mean ='+str(lM200[mtotal*mint][0]),ls = '--')
@@ -129,7 +159,7 @@ plt.plot(ang_ind,eb[mmbin2*mint],c='C6',label = 'lM200_mean ='+str(lM200[mmbin2*
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin2*mint], (eb+e_eb[1,:])[mmbin2*mint],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/Mrin.png')
+plt.savefig(folder+'plot_results_misscentred/Mrin.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mext],c='C4',label = 'lM200_mean ='+str(lM200[mtotal*mext][0]),ls = '-.')
@@ -140,7 +170,7 @@ plt.plot(ang_ind,eb[mmbin2*mext],c='C6',label = 'lM200_mean ='+str(lM200[mmbin2*
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmbin2*mext], (eb+e_eb[1,:])[mmbin2*mext],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/Mrout.png')
+plt.savefig(folder+'plot_results_misscentred/Mrout.png')
 
 # REDSHIFT
 
@@ -153,7 +183,7 @@ plt.plot(ang_ind,eb[mmz2*mrtot],c='C6',label = 'z_mean ='+str(zmean[mmz2*mrtot][
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mrtot], (eb+e_eb[1,:])[mmz2*mrtot],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/zrtot.png')
+plt.savefig(folder+'plot_results_misscentred/zrtot.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mrtot],c='C4',label = 'z_mean ='+str(zmean[mtotal*mrtot][0]))
@@ -174,7 +204,7 @@ plt.plot(ang_ind,eb[mmz1*mext],c='C5',ls = '-.')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz1*mext], (eb+e_eb[1,:])[mmz1*mext],facecolor = 'C5', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/Lz_inout.png')
+plt.savefig(folder+'plot_results_misscentred/Lz_inout.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mmz2*mrtot],c='C6',label = 'z_mean ='+str(zmean[mmz2*mrtot][0]))
@@ -185,7 +215,7 @@ plt.plot(ang_ind,eb[mmz2*mext],c='C6',ls = '-.')
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mext], (eb+e_eb[1,:])[mmz2*mext],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/Hz_inout.png')
+plt.savefig(folder+'plot_results_misscentred/Hz_inout.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mint],c='C4',label = 'z_mean ='+str(zmean[mtotal*mint][0]),ls = '--')
@@ -196,7 +226,7 @@ plt.plot(ang_ind,eb[mmz2*mint],c='C6',label = 'z_mean ='+str(zmean[mmz2*mint][0]
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mint], (eb+e_eb[1,:])[mmz2*mint],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/zrin.png')
+plt.savefig(folder+'plot_results_misscentred/zrin.png')
 
 plt.figure()
 plt.plot(ang_ind,eb[mtotal*mext],c='C4',label = 'z_mean ='+str(zmean[mtotal*mext][0]),ls = '-.')
@@ -207,4 +237,4 @@ plt.plot(ang_ind,eb[mmz2*mext],c='C6',label = 'z_mean ='+str(zmean[mmz2*mext][0]
 plt.fill_between(ang_ind, (eb-e_eb[0,:])[mmz2*mext], (eb+e_eb[1,:])[mmz2*mext],facecolor = 'C6', alpha = 0.3)
 plt.xticks(ang_ind,angles)
 plt.legend()
-plt.savefig(folder+'plot_results/zrout.png')
+plt.savefig(folder+'plot_results_misscentred/zrout.png')

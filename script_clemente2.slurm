@@ -16,5 +16,4 @@ export MKL_NUM_THREADS=10
 
 source activate py2env
 
-srun python -u run_quadrupole_analyse.py -file 'table_mcmc_centred.out' \
--profile 'profile_total.cat' -misscentred 'False'
+srun python -u run_quadrupole_analyse.py -file 'table_mcmc_centred.out' -profile 'profile_total.cat' -misscentred 'False'
