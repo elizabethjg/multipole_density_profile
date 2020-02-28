@@ -16,7 +16,7 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,
 							 rin,rout,out_file,ncores):
 	
 	file_profile = file_name[:-4]+'_'+angle+'.cat'
-	
+	print rin, rout
 	print file_profile
 
 	if miss:
