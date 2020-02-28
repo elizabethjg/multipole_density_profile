@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-folder', action='store', dest='folder',default='/mnt/clemente/lensing/redMaPPer/')
 parser.add_argument('-file', action='store', dest='file_name', default='table_mcmc.out')
 parser.add_argument('-profile', action='store', dest='profile', default='profile.cat')
-parser.add_argument('-ncores', action='store', dest='ncores', default=10)
-parser.add_argument('-misscentred', action='store', dest='miss', default=0)
+parser.add_argument('-ncores', action='store', dest='ncores', default=20)
+parser.add_argument('-misscentred', action='store', dest='miss', default='False')
 args = parser.parse_args()
 
 folder    = args.folder
@@ -23,7 +23,7 @@ if 'True' in args.miss:
 elif 'False' in args.miss:
 	miss      = False
 
-plot_mcmc_quadrupole_out_all(folder,file_name,out_file)
+plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores)
 
 '''
 plot_mcmc_quadrupole_out(folder,profile,'t',miss,0,5,out_file,ncores)
