@@ -17,16 +17,16 @@ module load softwares/anaconda2/5.0-intel-2018.0
 source activate py2env
 
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 't' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 't' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'twl' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'twl' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'twd' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'twd' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'tp' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'tp' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'tpwl' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'tpwl' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'tpwd' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'tpwd' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_median_bin2.cat' -ncores 10 -ang 'control' -misscentred 'False' -nit 200 -ROUT 700 -component 'tcos'
+-file 'profile_median_bin2.cat' -ncores 10 -ang 'control' -misscentred 'False' -nit 200 -ROUT 5000 -component 'tcos'

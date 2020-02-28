@@ -44,6 +44,9 @@ def plot_mcmc_quadrupole_out(folder,file_name,angle,miss,
 		mcmc_tcos = (np.loadtxt(file_mcmc_tcos))
 		mcmc_both = (np.loadtxt(file_mcmc_both))
 	except:
+		print file_mcmc_xsin
+		print file_mcmc_tcos
+		print file_mcmc_both
 		f1=open(folder+out_file,'a')
 		f1.write(file_profile+' ') 
 		f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
