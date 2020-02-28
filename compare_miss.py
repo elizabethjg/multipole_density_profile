@@ -21,9 +21,9 @@ rout    = out[4].astype(float)
 eb      = out[5].astype(float)
 e_eb    = np.array([out[6].astype(float),out[7].astype(float)])
 chi     = out[8].astype(float)
-eb_miss      = out_miss[9].astype(float)
-e_eb_miss    = np.array([out_miss[10].astype(float),out_miss[11].astype(float)])
-
+eb_miss      = out[9].astype(float)
+e_eb_miss    = np.array([out[10].astype(float),out[11].astype(float)])
+chi_miss     = out[12].astype(float)
 
 mtotal   = []
 mmbin1   = []
@@ -74,6 +74,20 @@ for j in samples:
 mint  = (rout == 1)
 mext  = (rin == 1)
 mrtot = (rin == 0)*(rout == 5)
+
+
+plt.figure()
+plt.plot(ang_ind,chi[mrtot*mtotal],'C2',label='centred')
+plt.plot(ang_ind,chi[mint*mtotal],'C2--')
+plt.plot(ang_ind,chi[mext*mtotal],'C2-.')
+plt.plot(ang_ind,chi_miss[mrtot*mtotal],'C4',label='misscentred')
+plt.plot(ang_ind,chi_miss[mint*mtotal],'C4--')
+plt.plot(ang_ind,chi_miss[mext*mtotal],'C4-.')
+plt.xticks(ang_ind,angles)
+plt.ylabel(r'$\chi^2_{red}$')
+plt.legend()
+
+
 
 plt.figure()
 plt.plot(eb[mtotal*mrtot],eb_miss[mtotal*mrtot],'C0.',label='total')
