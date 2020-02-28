@@ -4,6 +4,8 @@ sys.path.append('/mnt/clemente/lensing/multipole_density_profile')
 sys.path.append('/home/elizabeth/multipole_density_profile')
 sys.path.append('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/multipole_density_profile')
 import numpy as np
+mport matplotlib
+matplotlib.use('Agg')
 from pylab import *
 from multipoles_shear import *
 import time

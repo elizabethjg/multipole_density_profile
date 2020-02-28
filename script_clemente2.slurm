@@ -16,4 +16,4 @@ export MKL_NUM_THREADS=20
 
 source activate py2env
 
-srun python -u run_quadrupole_analyse.py -file 'table_mcmc_total.out' -profile 'profile_total.cat'
+srun python -u run_quadrupole_analyse.py -file 'table_mcmc_bin1.out' -profile 'profile_median_bin1.cat'
