@@ -389,7 +389,7 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 		eb_out      = np.percentile(mcmc_both_out, [16, 50, 84])
 		eb_miss_out = np.percentile(mcmc_both_miss_out, [16, 50, 84])
 		
-		e = [eb[1],eb_miss[1],eb_in[1]
+		e = [eb[1],eb_miss[1],eb_in[1],
 		     eb_miss_in[1],eb_out[1],eb_miss_out[1]]
 		
 		f, ax = plt.subplots(figsize=(3,5))
