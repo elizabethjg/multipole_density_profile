@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=total_t
+#SBATCH --job-name=total
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
 ## An email is sent when the job is canceled or finished
 ## Change "root" for your e-mail address
@@ -11,9 +11,9 @@
 
 cd /mnt/clemente/lensing/multipole_density_profile
 
-export OMP_NUM_THREADS=10
-export MKL_NUM_THREADS=10
+export OMP_NUM_THREADS=20
+export MKL_NUM_THREADS=20
 
 source activate py2env
 
-srun python -u run_quadrupole_analyse.py -file 'table_mcmc_centred.out' -profile 'profile_total.cat' -misscentred 'False'
+srun python -u run_quadrupole_analyse.py -file 'table_mcmc_total.out' -profile 'profile_total.cat'

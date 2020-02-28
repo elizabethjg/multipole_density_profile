@@ -23,6 +23,9 @@ if 'True' in args.miss:
 elif 'False' in args.miss:
 	miss      = False
 
+plot_mcmc_quadrupole_out_all(folder,file_name,out_file)
+
+'''
 plot_mcmc_quadrupole_out(folder,profile,'t',miss,0,5,out_file,ncores)
 plot_mcmc_quadrupole_out(folder,profile,'twl',miss,0,5,out_file,ncores)
 plot_mcmc_quadrupole_out(folder,profile,'twd',miss,0,5,out_file,ncores)
@@ -46,4 +49,4 @@ plot_mcmc_quadrupole_out(folder,profile,'tp',miss,0,1,out_file,ncores)
 plot_mcmc_quadrupole_out(folder,profile,'tpwl',miss,0,1,out_file,ncores)
 plot_mcmc_quadrupole_out(folder,profile,'tpwd',miss,0,1,out_file,ncores)
 plot_mcmc_quadrupole_out(folder,profile,'control',miss,0,1,out_file,ncores)
-
+'''
