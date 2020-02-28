@@ -367,11 +367,20 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 			mcmc_both_out      = (np.loadtxt(file_mcmc_both_out))
 			mcmc_both_miss_out = (np.loadtxt(file_mcmc_both_miss_out))
 		except:
+			
 			f1=open(folder+out_file,'a')
 			f1.write(file_profile+' ') 
-			f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   '+str(int(rin))+'   '+str(int(rout))+'    ')
+			f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   5    ')
 			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
+	
+			f1.write(file_profile+' ') 
+			f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   1    ')
+			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
+	
+			f1.write(file_profile+' ') 
+			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')	
 			f1.close()
+			
 			print 'FILE NOT FOUND'
 			return None
 			
