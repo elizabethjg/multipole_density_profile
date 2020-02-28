@@ -23,7 +23,7 @@ if 'True' in args.miss:
 elif 'False' in args.miss:
 	miss      = False
 
-plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores)
+plot_mcmc_quadrupole_out_all(folder,profile,out_file,ncores)
 
 '''
 plot_mcmc_quadrupole_out(folder,profile,'t',miss,0,5,out_file,ncores)
