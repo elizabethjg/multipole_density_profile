@@ -10,8 +10,7 @@ import os
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
 
-out      = np.loadtxt(folder+'table_mcmc_centred.out',dtype='str').T
-out_miss = np.loadtxt(folder+'table_mcmc_misscentred.out',dtype='str').T
+out      = np.loadtxt(folder+'table_mcmc.out',dtype='str').T
 
 samples = out[0]
 M200    = out[1].astype(float)
@@ -21,9 +20,9 @@ rin     = out[3].astype(float)
 rout    = out[4].astype(float)
 eb      = out[5].astype(float)
 e_eb    = np.array([out[6].astype(float),out[7].astype(float)])
-
-eb_miss      = out_miss[5].astype(float)
-e_eb_miss    = np.array([out_miss[6].astype(float),out_miss[7].astype(float)])
+chi     = out[8].astype(float)
+eb_miss      = out_miss[9].astype(float)
+e_eb_miss    = np.array([out_miss[10].astype(float),out_miss[11].astype(float)])
 
 
 mtotal   = []

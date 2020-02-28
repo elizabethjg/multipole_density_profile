@@ -19,7 +19,7 @@ parser.add_argument('-ncores', action='store', dest='ncores', default=4)
 parser.add_argument('-misscentred', action='store', dest='miss', default=0)
 parser.add_argument('-component', action='store', dest='component', default='both')
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
-parser.add_argument('-ROUT', action='store', dest='ROUT', default=5)
+parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000)
 parser.add_argument('-nit', action='store', dest='nit', default=250)
 parser.add_argument('-continue', action='store', dest='cont', default='False')
 args = parser.parse_args()
@@ -114,7 +114,7 @@ nwalkers, ndim = pos.shape
 # running emcee
 
 profile = np.loadtxt(folder+file_name[:-4]+'_'+angle+'.cat').T
-maskr   = (profile[0]>rin)*(profile[0]<rout)
+maskr   = (profile[0]>(rin/1000.))*(profile[0]<(rout/1000.))
 profile = profile[:,maskr]
 
 t1 = time.time()
