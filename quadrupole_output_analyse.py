@@ -386,7 +386,7 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 			f1.close()
 			
 			print 'FILE NOT FOUND'
-			return None
+			continue
 			
 		mcmc_both           = mcmc_both[500:1000] 
 		mcmc_both_miss      = mcmc_both_miss[500:1000] 
