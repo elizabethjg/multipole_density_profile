@@ -446,8 +446,8 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 										ellip=e[j],z=zmean,components = ['tcos','xsin'],
 										verbose=False,ncores=ncores)
 			
-			modelb_t = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
-			modelb_x = model_Gamma(multipoles,'xsin', misscentred = miss, pcc = pcc)
+			modelb_t = model_Gamma(multipoles,'tcos', misscentred = miss[j], pcc = pcc)
+			modelb_x = model_Gamma(multipoles,'xsin', misscentred = miss[j], pcc = pcc)
 		
 			chi = np.append(chi,chi_red(np.append(modelb_t,modelb_x),
 					np.append(profile[1],profile[3]),
