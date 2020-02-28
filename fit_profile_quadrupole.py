@@ -66,6 +66,7 @@ print 'RIN ',rin
 print 'ROUT ',rout
 print 'nit', nit
 print 'continue',cont
+print 'outfile',outfile
 
 
 f = open(folder+file_name,'r')
