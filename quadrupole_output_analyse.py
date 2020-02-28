@@ -338,6 +338,8 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 	
 	for angle in angles:
 		
+		t1 = time.time()
+		
 		file_profile = file_name[:-4]+'_'+angle+'.cat'
 		
 		print file_profile
@@ -359,30 +361,30 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 		pcc = float((lines[-1][1:-2]))
 		M200 = float((lines[-2][1:-2]))*1.e14
 		
-		# try:
-		mcmc_both          = (np.loadtxt(file_mcmc_both))
-		mcmc_both_miss     = (np.loadtxt(file_mcmc_both_miss))
-		mcmc_both_in       = (np.loadtxt(file_mcmc_both_in))
-		mcmc_both_miss_in  = (np.loadtxt(file_mcmc_both_miss_in))
-		mcmc_both_out      = (np.loadtxt(file_mcmc_both_out))
-		mcmc_both_miss_out = (np.loadtxt(file_mcmc_both_miss_out))
-		# except:
+		try:
+			mcmc_both          = (np.loadtxt(file_mcmc_both))
+			mcmc_both_miss     = (np.loadtxt(file_mcmc_both_miss))
+			mcmc_both_in       = (np.loadtxt(file_mcmc_both_in))
+			mcmc_both_miss_in  = (np.loadtxt(file_mcmc_both_miss_in))
+			mcmc_both_out      = (np.loadtxt(file_mcmc_both_out))
+			mcmc_both_miss_out = (np.loadtxt(file_mcmc_both_miss_out))
+		except:
 			
-			# f1=open(folder+out_file,'a')
-			# f1.write(file_profile+' ') 
-			# f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   5    ')
-			# f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
+			f1=open(folder+out_file,'a')
+			f1.write(file_profile+' ') 
+			f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   5    ')
+			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
 	
-			# f1.write(file_profile+' ') 
-			# f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   1    ')
-			# f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
+			f1.write(file_profile+' ') 
+			f1.write(str('%.2f' % (M200/1.e14))+'   '+str('%.2f' % (zmean))+'   0   1    ')
+			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')
 	
-			# f1.write(file_profile+' ') 
-			# f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')	
-			# f1.close()
+			f1.write(file_profile+' ') 
+			f1.write('0.     0.01     0.01  0.0  0.     0.01     0.01  0.0 \n')	
+			f1.close()
 			
-			# print 'FILE NOT FOUND'
-			# return None
+			print 'FILE NOT FOUND'
+			return None
 			
 		mcmc_both           = mcmc_both[500:1000] 
 		mcmc_both_miss      = mcmc_both_miss[500:1000] 
@@ -512,3 +514,5 @@ def plot_mcmc_quadrupole_out_all(folder,file_name,out_file,ncores=20):
 		f1.write(str('%.2f' % chi[5])+'   \n')
 
 		f1.close()
+		print 'tardo... '
+		print (time.time() -t1)/60.
