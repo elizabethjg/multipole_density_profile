@@ -18,65 +18,6 @@ angles        = fits.open(folder+'angles_redMapper.fits')[1].data
 coordinates   = fits.open(folder+'redMapper_projected_member_position.fits')[1].data
 used          = np.loadtxt(folder+'IDs_usedclusters.list')
 
-
-mid         = np.in1d(clusters.ID,used)
-mid_members = np.in1d(members.ID,used)
-
-members      = members[mid_members]
-coordinates  = coordinates[mid_members]
-clusters = clusters[mid]
-angles   = angles[mid]
-
-ides  = members.ID
-R_cen = members.R
-RA    = members.RA
-RA[RA > 275] = RA[RA>275] - 360.
-DEC   = members.DEC
-P     = members.P
-
-ID,c = np.unique(ides,return_counts=True)
-
-ID_c  = clusters.ID
-zspec = clusters.Z_SPEC
-zlambda = clusters.Z_LAMBDA
-zc = zspec
-zc[zc<0] = zlambda[zc<0]
-Lambda = np.repeat(clusters.LAMBDA,c)
-R_lambda = ((Lambda/100.)**(0.2))/0.7
-
-f, ax = plt.subplots(1, 2, figsize=(10,4))
-ax[0].hist(zc,50,histtype='step',color='C5')
-ax[0].set_xlabel(r'$z_{cluster}$',fontsize = 14)
-ax[0].set_ylabel(r'$N$')
-ax[0].axis([0.1,0.44,0.,100])
-ax[0].axvline(0.313,c='C4')
-ax[1].hist(clusters.LAMBDA,50,histtype='step',color='C5')
-ax[1].set_xlabel(r'$\lambda$',fontsize = 14)
-ax[1].axvline(27.982,c='C4')
-f.subplots_adjust(hspace=0,wspace=0)
-
-D_ang    = np.array(cosmo.angular_diameter_distance(zc))
-kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
-KPCSCALE = np.repeat(kpcscale,c)
-
-zc = np.repeat(zc,c)
-D_lum    = np.array(cosmo.luminosity_distance(zc))*1.e6
-MAG_abs  = members.MODEL_MAG_R + 5.0-5.0*np.log10(D_lum)
-Lum_r = 10.**(-0.4*MAG_abs)
-
-
-mcen = R_cen == 0.
-RA0  = np.repeat(RA[mcen],c)
-DEC0 = np.repeat(DEC[mcen],c)
-
-t     = np.repeat(angles['theta'],c)
-twl   = np.repeat(angles['theta_wlum'],c)
-twd   = np.repeat(angles['theta_wd'],c)
-tp    = np.repeat(angles['theta_pcut'],c)
-tpwl  = np.repeat(angles['theta_pcut_wlum'],c)
-tpwd  = np.repeat(angles['theta_pcut_wd'],c)
-tpwdl = np.repeat(angles['theta_pcut_wdl'],c)
-
 # --------------------------
 # change angle for profile
 # --------------------------
@@ -107,6 +48,77 @@ hdu.writeto(folder+'angles_redMapper_forprofile.fits',overwrite=True)
 
 
 # --------------------------
+angles        = fits.open(folder+'angles_redMapper.fits')[1].data
+mid         = np.in1d(clusters.ID,used)
+mid_members = np.in1d(members.ID,used)
+
+members      = members[mid_members]
+coordinates  = coordinates[mid_members]
+clusters = clusters[mid]
+angles   = angles[mid]
+
+ides  = members.ID
+R_cen = members.R
+RA    = members.RA
+RA[RA > 275] = RA[RA>275] - 360.
+DEC   = members.DEC
+P     = members.P
+
+ID,c = np.unique(ides,return_counts=True)
+
+ID_c  = clusters.ID
+zspec = clusters.Z_SPEC
+zlambda = clusters.Z_LAMBDA
+zc = zspec
+zc[zc<0] = zlambda[zc<0]
+Lambda = np.repeat(clusters.LAMBDA,c)
+R_lambda = ((Lambda/100.)**(0.2))/0.7
+
+
+#######################################
+# HISTOGRAMS redMaPPer sample
+f, ax = plt.subplots(2, 1, figsize=(4,6))
+ax[0].hist(zc,50,histtype='step',color='C5')
+ax[0].set_xlabel(r'$z_{cluster}$',fontsize = 14)
+ax[0].set_ylabel(r'$N$')
+ax[0].axis([0.1,0.4,0.,100])
+ax[0].axvline(0.313,c='C4')
+ax[1].hist(clusters.LAMBDA,50,histtype='step',color='C5')
+ax[1].set_xlabel(r'$\lambda$',fontsize = 14)
+ax[1].axvline(27.982,c='C4')
+ax[1].set_ylabel(r'$N$')
+plt.subplots_adjust(hspace = 0.25)
+ax[1].axis([20,150,0.,400])
+# f.subplots_adjust(hspace=0,wspace=0)
+plt.savefig(folder+'hist.eps',format='eps',bbox_inches='tight')
+#######################################
+
+D_ang    = np.array(cosmo.angular_diameter_distance(zc))
+kpcscale = D_ang*(((1.0/3600.0)*np.pi)/180.0)*1000.0
+KPCSCALE = np.repeat(kpcscale,c)
+
+zc = np.repeat(zc,c)
+D_lum    = np.array(cosmo.luminosity_distance(zc))*1.e6
+MAG_abs  = members.MODEL_MAG_R + 5.0-5.0*np.log10(D_lum)
+Lum_r = 10.**(-0.4*MAG_abs)
+
+
+mcen = R_cen == 0.
+
+
+
+RA0  = np.repeat(RA[mcen],c)
+DEC0 = np.repeat(DEC[mcen],c)
+
+t     = np.repeat(angles['theta'],c)
+twl   = np.repeat(angles['theta_wlum'],c)
+twd   = np.repeat(angles['theta_wd'],c)
+tp    = np.repeat(angles['theta_pcut'],c)
+tpwl  = np.repeat(angles['theta_pcut_wlum'],c)
+tpwd  = np.repeat(angles['theta_pcut_wd'],c)
+tpwdl = np.repeat(angles['theta_pcut_wdl'],c)
+
+
     
 e     = np.repeat(angles['e'],c)
 ewl   = np.repeat(angles['e_wlum'],c)
@@ -168,33 +180,95 @@ yedges = np.linspace(-2.,2.,50)
 xcenters = (xedges[:-1] + xedges[1:]) / 2.
 ycenters = (yedges[:-1] + yedges[1:]) / 2.
 X,Y = np.meshgrid(xcenters,ycenters)
-f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(8,4))
+f, ax = plt.subplots(2, 4, sharey=True,figsize=(8,4))
 
 
 levels = np.linspace(1000,5000,5)
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[0,0].contour(X, Y, H.T,levels,cmap='plasma')
-H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[0,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
+ax[0,0].axis([-1.2,1.2,-1.2,1.2])
+
+H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[0,1].contour(X, Y, H.T,levels,cmap='plasma')
+ax[0,1].axis([-1.2,1.2,-1.2,1.2])
+plt.setp(ax[0,1].get_xticklabels(), visible=False)
+
 H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[0,2].contour(X, Y, H.T,levels,cmap='plasma')
+ax[0,2].axis([-1.2,1.2,-1.2,1.2])
+plt.setp(ax[0,2].get_xticklabels(), visible=False)
+
 H, xedges, yedges = np.histogram2d(x_d,y_d, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[0,3].contour(X, Y, H.T,levels,cmap='plasma')
-H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[0,3].axis([-1.2,1.2,-1.2,1.2])
+plt.setp(ax[0,3].get_xticklabels(), visible=False)
+
 ax[1,0].axis('off')
+
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[1,1].contour(X, Y, H.T,levels,cmap='plasma')
-H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[1,1].axis([-1.2,1.2,-1.2,1.2])
 ax[1,1].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 ax[1,1].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+
+H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[1,2].contour(X, Y, H.T,levels,cmap='plasma')
-H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges),weights=np.log10(Lum_r))
+ax[1,2].axis([-1.2,1.2,-1.2,1.2])
 ax[1,2].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+
+H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges),weights=np.log10(Lum_r))
 ax[1,3].contour(X, Y, H.T,levels,cmap='plasma')
+ax[1,3].axis([-1.2,1.2,-1.2,1.2])
 ax[1,3].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
-plt.axis([-1.2,1.2,-1.2,1.2])
+
 f.subplots_adjust(hspace=0,wspace=0)
 plt.savefig(folder+'contours.eps',format='eps',bbox_inches='tight')
+
+
+#########################
+#  DISTANCE DISTRIBUTION
+
+Rscaled = (R_cen/0.7)/R_lambda
+f, ax = plt.subplots(2, 1, figsize=(4,5),sharex=True)
+
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',lw=1.5)
+ax[0].axvline(np.average(Rscaled[~mcen]),color='C3',lw=1.5,label='$uniform$')
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',lw=1.5) 
+ax[0].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',lw=1.5,label='$wL$')
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',lw=1.5) 
+ax[0].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',lw=1.5,label='$wd$')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',lw=1.5) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',lw=1.5,ls='--')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',lw=1.5) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',lw=1.5,ls='--')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',lw=1.5) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',lw=1.5,ls='--')
+ax[0].axis([0.,1.2,0,20])
+# ax[0].set_xlabel('$R/R_{\lambda}$',fontsize = '14')
+ax[0].set_ylabel('$n$',fontsize = '14')
+ax[0].legend()
+
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',lw=1.5)
+ax[1].axvline(np.average(Rscaled[~mcen]),color='C3',lw=1.5)
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',lw=1.5) 
+ax[1].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',lw=1.5)
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',lw=1.5) 
+ax[1].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',lw=1.5)
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',lw=1.5) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',lw=1.5,ls='--')
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',lw=1.5) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',lw=1.5,ls='--')
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',lw=1.5) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',lw=1.5,ls='--')
+ax[1].axis([0.,1.2,0,1.37])
+ax[1].set_xlabel('$R/R_{\lambda}$',fontsize = '14')
+ax[1].set_ylabel('$n$',fontsize = '14')
+f.subplots_adjust(hspace=0,wspace=0)
+plt.savefig(folder+'dist.eps',format='eps',bbox_inches='tight')
+
+#########################
+
 
 '''
 levels = np.linspace(H.min(),10000.,15)

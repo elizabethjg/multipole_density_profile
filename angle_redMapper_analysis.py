@@ -12,26 +12,33 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 12})
 
-#folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
-folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/'
+folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
+# folder = '/home/eli/Documentos/PostDoc/halo-elongation/redMapper/'
 
-members  = fits.open(folder+'redmapper_dr8_public_v6.3_members.fits')
-clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')
-angles   = fits.open(folder+'angles_redMapper.fits')[1].data
+members  = fits.open(folder+'redmapper_dr8_public_v6.3_members.fits')[1].data
+clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
+angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
+used     = np.loadtxt(folder+'IDs_usedclusters.list')
 
-ides  = members[1].data['ID']
-R_cen = members[1].data['R']#[mask]
-ra    = members[1].data['RA']#[mask]
+mid         = np.in1d(clusters.ID,used)
+mid_members = np.in1d(members.ID,used)
+members      = members[mid_members]
+clusters = clusters[mid]
+angles   = angles[mid]
+
+ides  = members['ID']
+R_cen = members['R']#[mask]
+ra    = members['RA']#[mask]
 ra[ra > 275] = ra[ra>275] - 360.
-dec   = members[1].data['DEC']#[mask]
+dec   = members['DEC']#[mask]
 ID,c = np.unique(ides,return_counts=True)
 
-ID_c  = clusters[1].data['ID']
-zspec = clusters[1].data['Z_SPEC']
-zlambda = clusters[1].data['Z_LAMBDA']
+ID_c  = clusters['ID']
+zspec = clusters['Z_SPEC']
+zlambda = clusters['Z_LAMBDA']
 zc = zspec
 zc[zc<0] = zlambda[zc<0]
-Lambda = clusters[1].data['LAMBDA']
+Lambda = clusters['LAMBDA']
 
 
 D_ang    = np.array(cosmo.angular_diameter_distance(zc))
@@ -58,8 +65,6 @@ epwd  = angles['e_pcut_wd']
 epwdl = angles['e_pcut_wdl']
 
 
-
-
 # mask = (e<0.8)*(ewl<0.8)*(epwl<0.8)*(epwd<0.8)*(epwdl<0.8)
 inc = np.zeros((len(e),7))
 
@@ -80,78 +85,24 @@ labels = ['$uniform$','$wL$',
           '$wd$','$uniform$',
           '$wL$' ,'$wd$', '$wdL$']
 
-f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(10,5))
-
-# ax[0,0].xaxis.set_ticks([0.2, 0.4, 0.6, 0.8])
-# ax[0,0].set_xticklabels([0.2, 0.4, 0.6, 0.8])
-
-ax[0,0].text(0.45,500,labels[0])
-ax[0,1].text(0.6,500,labels[1])
-ax[0,2].text(0.6,500,labels[2])
-ax[1,0].text(0.45,500,labels[3])
-ax[1,1].text(0.6,500,labels[4])
-ax[1,2].text(0.6,500,labels[5])
-ax[1,3].text(0.6,500,labels[6])
-
-ax[0,0].hist(inc[:,0],100,histtype='step',edgecolor='k')
-ax[0,1].hist(inc[:,1],100,histtype='step',edgecolor='k')
-ax[0,2].hist(inc[:,2],100,histtype='step',edgecolor='k')
-ax[1,0].hist(inc[:,3],100,histtype='step',edgecolor='k')
-ax[1,1].hist(inc[:,4],100,histtype='step',edgecolor='k')
-ax[1,2].hist(inc[:,5],100,histtype='step',edgecolor='k')
-ax[1,3].hist(inc[:,6],100,histtype='step',edgecolor='k')
-
-ax[0,0].axvline(truths[0],color='C2')
-ax[0,1].axvline(truths[1],color='C2')
-ax[0,2].axvline(truths[2],color='C2')
-ax[1,0].axvline(truths[3],color='C2')
-ax[1,1].axvline(truths[4],color='C2')
-ax[1,2].axvline(truths[5],color='C2')
-ax[1,3].axvline(truths[6],color='C2')   
-
-ax[0,0].axvline(truths[0]-std[0],c='C2',ls='--')
-ax[0,1].axvline(truths[1]-std[1],c='C2',ls='--')
-ax[0,2].axvline(truths[2]-std[2],c='C2',ls='--')
-ax[1,0].axvline(truths[3]-std[3],c='C2',ls='--')
-ax[1,1].axvline(truths[4]-std[4],c='C2',ls='--')
-ax[1,2].axvline(truths[5]-std[5],c='C2',ls='--')
-ax[1,3].axvline(truths[6]-std[6],c='C2',ls='--')   
-
-ax[0,0].axvline(truths[0]+std[0],c='C2',ls='--')
-ax[0,1].axvline(truths[1]+std[1],c='C2',ls='--')
-ax[0,2].axvline(truths[2]+std[2],c='C2',ls='--')
-ax[1,0].axvline(truths[3]+std[3],c='C2',ls='--')
-ax[1,1].axvline(truths[4]+std[4],c='C2',ls='--')
-ax[1,2].axvline(truths[5]+std[5],c='C2',ls='--')
-ax[1,3].axvline(truths[6]+std[6],c='C2',ls='--')    
-ax[0,3].axis('off')
-
-ax[1,0].set_xlabel('$\epsilon$')
-ax[1,1].set_xlabel('$\epsilon$')
-ax[1,2].set_xlabel('$\epsilon$')
-ax[1,3].set_xlabel('$\epsilon$')
-
-ax[1,0].set_ylabel('$N$')
-ax[0,0].set_ylabel('$N$')
-plt.axis([0,0.89,0,750])
-f.subplots_adjust(hspace=0,wspace=0)
-plt.savefig(folder+'e_comparison.eps',format='eps',bbox_inches='tight')
-
-
 style = ['C3','C4','C5','C3--','C4--','C5--','C6--']
 
-f, ax = plt.subplots(figsize=(4.5,5))
-f2, ax2 = plt.subplots(figsize=(4.5,5))
+f, ax = plt.subplots(figsize=(4,5))
+f2, ax2 = plt.subplots(figsize=(4,5))
 mask = Lambda < 150
-for j in range(inc.shape[1]):
-    x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
-    ax.plot(x,y,style[j],label=labels[j])
-    ax2.plot(x,d,style[j],label=labels[j])
+for j in range(inc.shape[1]-1):
+    x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False) 
+    if j < 3:  
+        ax.plot(x,y,style[j],label=labels[j])
+        ax2.plot(x,d,style[j],label=labels[j])
+    else:
+        ax.plot(x,y,style[j])
+        ax2.plot(x,d,style[j])
     
 ax.set_xlabel('$\lambda$')
 ax.set_ylabel('$\epsilon$')
 ax.axis([18,110,0.15,0.4])
-ax.legend(ncol=2,fontsize=12)
+ax.legend(fontsize=12)
 plt.savefig(folder+'e_lambda.eps',format='eps',bbox_inches='tight')
 
 ax2.set_xlabel('$\lambda$')
@@ -159,7 +110,6 @@ ax2.set_ylabel('$\sigma_\epsilon$')
 ax2.axis([18,110,0.08,0.19])
 ax2.legend(ncol=2,fontsize=12)
 plt.savefig(folder+'disp_e_lambda.eps',format='eps',bbox_inches='tight')
-
 
 '''
 fig = modified_corner.corner(inc,labels = labels,
@@ -185,33 +135,25 @@ inc[:,6] = np.rad2deg(np.abs(tpwdl))
 
 truths = np.average(inc,axis=0)
 
-f, ax = plt.subplots(2, 4, sharex=True, sharey=True,figsize=(10,10))
-ax[0,0].hist(inc[:,0],100,histtype='step',edgecolor='k')
-ax[0,1].hist(inc[:,1],100,histtype='step',edgecolor='k')
-ax[0,2].hist(inc[:,2],100,histtype='step',edgecolor='k')
-ax[0,3].hist(inc[:,3],100,histtype='step',edgecolor='k')
-ax[1,0].hist(inc[:,4],100,histtype='step',edgecolor='k')
-ax[1,1].hist(inc[:,5],100,histtype='step',edgecolor='k')
-ax[1,2].hist(inc[:,6],100,histtype='step',edgecolor='k')
+plt.hist(inc[:,1]-inc[:,0],20,color='C4',histtype='step')
+plt.hist(inc[:,2]-inc[:,0],20,color='C5',histtype='step')
+plt.hist(inc[:,3]-inc[:,0],20,color='C3',histtype='step',ls='--')
+plt.hist(inc[:,4]-inc[:,0],20,color='C4',histtype='step',ls='--')
+plt.hist(inc[:,5]-inc[:,0],20,color='C5',histtype='step',ls='--')
 
-plt.savefig(folder+'theta_comparison.eps',format='pdf',bbox_inches='tight')
+print np.mean(inc[:,0]-inc[:,2]),np.std(inc[:,0]-inc[:,2])
+print np.mean(inc[:,1]-inc[:,2]),np.std(inc[:,1]-inc[:,2])
+print np.mean(inc[:,3]-inc[:,2]),np.std(inc[:,3]-inc[:,2])
+print np.mean(inc[:,4]-inc[:,2]),np.std(inc[:,4]-inc[:,2])
+print np.mean(inc[:,5]-inc[:,2]),np.std(inc[:,5]-inc[:,2])
 
 f2, ax2 = plt.subplots()
 f, ax = plt.subplots()
-mask = Lambda < 150
+
 for j in range(inc.shape[1]):
-    x,y,d = medianas.plot_medianas_disp(Lambda[mask],inc[mask,j],plot=False)   
-    ax.plot(x,y)
-    ax2.plot(x,d)
+    x,y,d = medianas.plot_medianas_disp(Lambda,inc[:,j]-inc[:,0],plot=False)   
+    ax.plot(x,y,style[j],label=labels[j])
+    ax2.plot(x,d,style[j],label=labels[j])
     
 ax.set_xlabel('$\lambda$')
 ax.set_ylabel('$\epsilon$')
-
-# plt.savefig(folder+'e_lambda.eps',format='eps',bbox_inches='tight')
-
-
-# fig = modified_corner.corner(inc,labels = labels,
-                              # range = [(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max()),(inc.min(),inc.max())],
-                              # plot_contours = False, truths = truths)
-
-# plt.savefig(folder+'theta_comparison.pdf',format='pdf',bbox_inches='tight')
