@@ -16,8 +16,7 @@ parser.add_argument('-folder', action='store', dest='folder',default='./')
 parser.add_argument('-file', action='store', dest='file_name', default='profile.cat')
 parser.add_argument('-ang', action='store', dest='angle', default='twl')
 parser.add_argument('-ncores', action='store', dest='ncores', default=4)
-parser.add_argument('-misscentred', action='store', dest='miss', default=0)
-parser.add_argument('-component', action='store', dest='component', default='both')
+parser.add_argument('-misscentred', action='store', dest='miss', default=False)
 parser.add_argument('-RIN', action='store', dest='RIN', default=0)
 parser.add_argument('-ROUT', action='store', dest='ROUT', default=5000)
 parser.add_argument('-nit', action='store', dest='nit', default=250)
@@ -39,13 +38,13 @@ elif 'False' in args.cont:
 	cont      = False
 
 	
-component = args.component
+
 nit       = int(args.nit)
 ncores    = args.ncores
 ncores    = int(ncores)
 rin       = float(args.RIN)
 rout      = float(args.ROUT)
-
+component = 'mq'
 if miss:
 	outfile = folder+'mq_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
 	backup  = folder+'backup_mq_'+component+'_miss_'+file_name[:-4]+'_'+angle+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
@@ -85,14 +84,14 @@ print 'pcc',pcc
 def log_likelihood(data_model, r, Gamma, e_Gamma):
     log_M200, ellip = data_model
     M200 = 10**log_M200
-    r = np.split(r,2)[0]
+    r = np.split(r,3)[0]
     multipoles = multipole_shear_parallel(r,M200=M200,misscentred = miss,
 			    ellip=ellip,z=zmean,components = ['tcos','xsin'],
 			    verbose=False,ncores=ncores)
     model_t = model_Gamma(multipoles,'tcos', misscentred = miss, pcc = pcc)
     model_x = model_Gamma(multipoles,'xsin', misscentred = miss, pcc = pcc)
     model0  = model_Gamma(multipoles,'t', misscentred = miss, pcc = pcc)
-    model   = np.append(model0,model_t,model_x)
+    model   = np.concatenate((model0,model_t,model_x))
     sigma2  = e_Gamma**2
     return -0.5 * np.sum((Gamma - model)**2 / sigma2 + np.log(2.*np.pi*sigma2))
     
@@ -105,7 +104,7 @@ def log_probability(data_model, r, Gamma, e_Gamma):
 
 # initializing
 
-pos = np.array([np.random.normal(np.log10(Mguess),0.1,50),
+pos = np.array([np.random.normal(np.log10(Mguess),0.1,10),
                 np.random.uniform(0.,0.5,10)]).T
 
 nwalkers, ndim = pos.shape
@@ -126,9 +125,9 @@ if not cont:
     backend.reset(nwalkers, ndim)
     
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                        args=(np.append(profile[0],profile[0],profile[0]),
-			np.append(profile_m[1],profile[1],profile[3]),
-			np.append(profile_m[2],profile[2],profile[4])),
+                        args=(np.concatenate((profile[0],profile[0],profile[0])),
+			np.concatenate((profile_m[1],profile[1],profile[3])),
+			np.concatenate((profile_m[2],profile[2],profile[4]))),
 			backend=backend)
 
 
