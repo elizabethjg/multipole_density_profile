@@ -20,5 +20,4 @@ srun python -u run_fit.py -folder '/mnt/clemente/lensing/redMaPPer/test/' -ini 0
 
 ##srun python -u make_profile_redMapper.py
 
-##srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper' \
--file 'profile_median_bin1.cat' -ncores 10 -ang 'tp' -misscentred 'True' -nit 100 -RIN 1
+##srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper' -file 'profile_median_bin1.cat' -ncores 10 -ang 'tp' -misscentred 'True' -nit 100 -RIN 1

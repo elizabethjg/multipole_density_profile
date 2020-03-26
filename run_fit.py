@@ -3,7 +3,7 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-folder', action='store', dest='ini',default='./')
+parser.add_argument('-folder', action='store', dest='folder',default='./')
 parser.add_argument('-ini', action='store', dest='ini',default=0)
 parser.add_argument('-fini', action='store', dest='fini', default=10)
 args = parser.parse_args()
