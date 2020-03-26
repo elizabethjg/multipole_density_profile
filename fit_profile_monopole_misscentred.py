@@ -53,8 +53,8 @@ def log_probability(data_model, r, Gamma, e_Gamma):
 
 # initializing
 
-pos = np.array([np.random.uniform(12.5,15.5,15),
-                np.random.normal(0.8,0.3,15)]).T
+pos = np.array([np.random.uniform(12.5,15.5,10),
+                np.random.normal(0.8,0.3,10)]).T
 
 pccdist = pos[:,1]                
 pos[pccdist > 1.,1] = 1.
@@ -71,7 +71,7 @@ profile = np.loadtxt(folder+file_name).T
 t1 = time.time()
 sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
                                 args=(profile[0],profile[1],profile[2]))
-sampler.run_mcmc(pos, 300, progress=True)
+sampler.run_mcmc(pos, 200, progress=True)
 print '//////////////////////'
 print '         TIME         '
 print '----------------------'
@@ -93,3 +93,12 @@ f1=open(folder+'monopole_misscentred_'+file_name,'w')
 f1.write('# log(M200)  pcc \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f']*2)
 f1.close()
+
+
+mcmc1 = (mcmc_out.T)[:,500:]
+M200,pcc = np.median(mcmc1,axis=1)
+
+f=open(folder+file_name,'a')
+f.write('#'+str('%.2f' % (M200))+'   \n')
+f.write('#'+str('%.2f' % (pcc))+'   \n')
+f.close()

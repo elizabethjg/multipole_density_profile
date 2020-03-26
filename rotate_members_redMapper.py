@@ -6,7 +6,7 @@ from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 12})
-
+import medianas
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 
 folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'
@@ -102,6 +102,8 @@ D_lum    = np.array(cosmo.luminosity_distance(zc))*1.e6
 MAG_abs  = members.MODEL_MAG_R + 5.0-5.0*np.log10(D_lum)
 Lum_r = 10.**(-0.4*MAG_abs)
 
+c_gr = members.MODEL_MAG_G - members.MODEL_MAG_R
+c_ri = members.MODEL_MAG_R - members.MODEL_MAG_I
 
 mcen = R_cen == 0.
 
@@ -183,92 +185,98 @@ X,Y = np.meshgrid(xcenters,ycenters)
 f, ax = plt.subplots(2, 4, sharey=True,figsize=(8,4))
 
 
-levels = np.linspace(1000,5000,5)
-H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges),weights=np.log10(Lum_r))
+levels = np.linspace(150,1000,10)
+H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,0].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 ax[0,0].axis([-1.2,1.2,-1.2,1.2])
 
-H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,1].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,1].axis([-1.2,1.2,-1.2,1.2])
+ax[0,1].text(0.7,0.8,'$\phi_1$',fontsize = 14)
 plt.setp(ax[0,1].get_xticklabels(), visible=False)
 
-H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,2].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,2].axis([-1.2,1.2,-1.2,1.2])
+ax[0,2].text(0.7,0.8,'$\phi_L$',fontsize = 14)
 plt.setp(ax[0,2].get_xticklabels(), visible=False)
 
-H, xedges, yedges = np.histogram2d(x_d,y_d, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_d,y_d, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,3].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,3].axis([-1.2,1.2,-1.2,1.2])
+ax[0,3].text(0.7,0.8,r'$\phi_d$',fontsize = 14)
 plt.setp(ax[0,3].get_xticklabels(), visible=False)
 
 ax[1,0].axis('off')
 
-H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_p,y_p, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[1,1].contour(X, Y, H.T,levels,cmap='plasma')
 ax[1,1].axis([-1.2,1.2,-1.2,1.2])
+ax[1,1].text(0.7,0.8,u'$\phi^*_1$',fontsize = 14)
 ax[1,1].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 ax[1,1].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 
-H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[1,2].contour(X, Y, H.T,levels,cmap='plasma')
 ax[1,2].axis([-1.2,1.2,-1.2,1.2])
+ax[1,2].text(0.7,0.8,u'$\phi^*_L$',fontsize = 14)
 ax[1,2].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 
-H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges),weights=np.log10(Lum_r))
+H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[1,3].contour(X, Y, H.T,levels,cmap='plasma')
 ax[1,3].axis([-1.2,1.2,-1.2,1.2])
+ax[1,3].text(0.7,0.8,u'$\phi^*_d$',fontsize = 14)
 ax[1,3].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 
 f.subplots_adjust(hspace=0,wspace=0)
 plt.savefig(folder+'contours.eps',format='eps',bbox_inches='tight')
 
-
+# '''
 #########################
 #  DISTANCE DISTRIBUTION
 
 Rscaled = (R_cen/0.7)/R_lambda
 f, ax = plt.subplots(2, 1, figsize=(4,5),sharex=True)
 
-ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',lw=1.5)
-ax[0].axvline(np.average(Rscaled[~mcen]),color='C3',lw=1.5,label='$uniform$')
-ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',lw=1.5) 
-ax[0].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',lw=1.5,label='$wL$')
-ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',lw=1.5) 
-ax[0].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',lw=1.5,label='$wd$')
-ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',lw=1.5) 
-ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',lw=1.5,ls='--')
-ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',lw=1.5) 
-ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',lw=1.5,ls='--')
-ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',lw=1.5) 
-ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',lw=1.5,ls='--')
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',)
+ax[0].axvline(np.average(Rscaled[~mcen]),color='C3',label=u'$\phi_1$')
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',) 
+ax[0].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',label=u'$\phi_L$')
+ax[0].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',) 
+ax[0].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',label=u'$\phi_d$')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',ls='--',label=u'$\phi^*_1$')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',ls='--',label=u'$\phi^*_L$')
+ax[0].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',) 
+ax[0].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',ls='--',label=u'$\phi^*_d$')
 ax[0].axis([0.,1.2,0,20])
 # ax[0].set_xlabel('$R/R_{\lambda}$',fontsize = '14')
 ax[0].set_ylabel('$n$',fontsize = '14')
 ax[0].legend()
 
-ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',lw=1.5)
-ax[1].axvline(np.average(Rscaled[~mcen]),color='C3',lw=1.5)
-ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',lw=1.5) 
-ax[1].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',lw=1.5)
-ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',lw=1.5) 
-ax[1].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',lw=1.5)
-ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',lw=1.5) 
-ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',lw=1.5,ls='--')
-ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',lw=1.5) 
-ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',lw=1.5,ls='--')
-ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',lw=1.5) 
-ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',lw=1.5,ls='--')
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',density=True,color='C3',)
+ax[1].axvline(np.average(Rscaled[~mcen]),color='C3',)
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[~mcen],density=True,color='C4',) 
+ax[1].axvline(np.average(Rscaled[~mcen],weights=Lum_r[~mcen]),color='C4',)
+ax[1].hist(Rscaled[~mcen],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[~mcen],density=True,color='C5',) 
+ax[1].axvline(np.average(Rscaled[~mcen],weights=(1./(dx**2 + dy**2))[~mcen]),color='C5',)
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',density=True,linestyle='dashed',color='C3',) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)]),color='C3',ls='--')
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=Lum_r[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C4',) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=Lum_r[(P>0.5)*(~mcen)]),color='C4',ls='--')
+ax[1].hist(Rscaled[(P>0.5)*(~mcen)],np.linspace(0,1.2,50),histtype='step',weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)],density=True,linestyle='dashed',color='C5',) 
+ax[1].axvline(np.average(Rscaled[(P>0.5)*(~mcen)],weights=(1./(dx**2 + dy**2))[(P>0.5)*(~mcen)]),color='C5',ls='--')
 ax[1].axis([0.,1.2,0,1.37])
-ax[1].set_xlabel('$R/R_{\lambda}$',fontsize = '14')
+ax[1].set_xlabel('$r/R_{\lambda}$',fontsize = '14')
 ax[1].set_ylabel('$n$',fontsize = '14')
 f.subplots_adjust(hspace=0,wspace=0)
 plt.savefig(folder+'dist.eps',format='eps',bbox_inches='tight')
 
 #########################
-
+# '''
 
 '''
 levels = np.linspace(H.min(),10000.,15)

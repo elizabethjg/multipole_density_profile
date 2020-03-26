@@ -125,13 +125,13 @@ labels = [r'$\theta^{(1)}_{sat}$',r'$\theta^{(2)}_{sat}$',
           r'$\theta^{(7)}_{sat}$']
 
 inc = np.zeros((len(e),7))
-inc[:,0] = np.rad2deg(np.abs(t))
-inc[:,1] = np.rad2deg(np.abs(twl))
-inc[:,2] = np.rad2deg(np.abs(twd))
-inc[:,3] = np.rad2deg(np.abs(tp))
-inc[:,4] = np.rad2deg(np.abs(tpwl))
-inc[:,5] = np.rad2deg(np.abs(tpwd))
-inc[:,6] = np.rad2deg(np.abs(tpwdl))
+inc[:,0] = np.rad2deg(t)
+inc[:,1] = np.rad2deg(twl)
+inc[:,2] = np.rad2deg(twd)
+inc[:,3] = np.rad2deg(tp)
+inc[:,4] = np.rad2deg(tpwl)
+inc[:,5] = np.rad2deg(tpwd)
+inc[:,6] = np.rad2deg(tpwdl)
 
 truths = np.average(inc,axis=0)
 

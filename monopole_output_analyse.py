@@ -9,7 +9,7 @@ from multipoles_shear import *
 import time
 import corner
 import os
-
+from profiles_fit import chi_red
 
 # def plot_monopole_miss(folder,file_profile,out_file,m200_maria,pcc_maria):
 def plot_monopole_miss(folder,file_profile,out_file):
@@ -51,19 +51,7 @@ def plot_monopole_miss(folder,file_profile,out_file):
 	fig = corner.corner(mcmc.T, labels=labels)
 	plt.savefig(folder+'plots_monopole_mcmc/'+file_mcmc[:-3]+'png')
 	
-	
-	#/////// save file ///////
-	
-	f1=open(folder+out_file,'a')
-	f1.write(str('%.2f' % (M200))+'   '+str('%.2f' % (e_M200[0]))+'   '+str('%.2f' % (e_M200[1]))+'   ')
-	f1.write(str('%.2f' % (pcc[1]))+'   '+str('%.2f' % (np.diff(pcc)[0]))+'   '+str('%.2f' % (np.diff(pcc)[1]))+'   \n')
-	f1.close()
-	
-	f=open(folder+file_profile,'a')
-	f.write('#'+str('%.2f' % (M200))+'   \n')
-	f.write('#'+str('%.2f' % (pcc[1]))+'   \n')
-	f.close()
-	
+		
 	profile = np.loadtxt(folder+file_profile).T
 	
 	f = open(folder+file_profile,'r')
@@ -75,6 +63,21 @@ def plot_monopole_miss(folder,file_profile,out_file):
 	
 	r  = np.logspace(np.log10(min(profile[0])),
 					np.log10(max(profile[0])),10)
+
+	######################
+	#COMPUTE CHI_SQUARE
+
+	multipoles = multipole_shear_parallel(profile[0],M200=M200*1.e14,components = ['t'],
+										misscentred = True,
+										ellip=0.,z=zmean,
+										verbose=True,ncores=4)
+	
+	model_t = model_Gamma(multipoles,'t', misscentred = True,pcc=pcc[1])
+
+	chi_t = chi_red(model_t,profile[1],profile[2],1)
+
+	#--------------------
+
 	
 	multipoles = multipole_shear_parallel(r,M200=M200*1.e14,components = ['t'],
 										misscentred = True,
@@ -108,6 +111,20 @@ def plot_monopole_miss(folder,file_profile,out_file):
 	plt.legend()
 	f.subplots_adjust(hspace=0,wspace=0)
 	plt.savefig(folder+'plots_monopole_mcmc/'+'t'+file_profile[:-3]+'png')
+	
+	#/////// save file ///////
+	
+	f1=open(folder+out_file,'a')
+	f1.write(str('%.2f' % (M200))+'   '+str('%.2f' % (e_M200[0]))+'   '+str('%.2f' % (e_M200[1]))+'   ')
+	f1.write(str('%.2f' % (pcc[1]))+'   '+str('%.2f' % (np.diff(pcc)[0]))+'   '+str('%.2f' % (np.diff(pcc)[1]))+'   ')
+	f1.write(str('%.2f' % chi_t)+'   \n')
+	f1.close()
+	
+	f=open(folder+file_profile,'a')
+	f.write('#'+str('%.2f' % (M200))+'   \n')
+	f.write('#'+str('%.2f' % (pcc[1]))+'   \n')
+	f.close()
+
 
 folder        = u'/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
 # folder        = u'/home/eli/Documentos/PostDoc/halo-elongation/redMapper/profiles_original/'
@@ -116,14 +133,14 @@ os.system('rm '+folder+'out_table_monopole')
 plot_monopole_miss(folder,'profile_total.cat','out_table_monopole')
 plot_monopole_miss(folder,'profile_median_bin1.cat','out_table_monopole')
 plot_monopole_miss(folder,'profile_median_bin2.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_bin1.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_bin2.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_bin3.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_bin1.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_bin2.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_bin3.cat','out_table_monopole')
 plot_monopole_miss(folder,'profile_medianz1.cat','out_table_monopole')
 plot_monopole_miss(folder,'profile_medianz2.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_z1.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_z2.cat','out_table_monopole')
-plot_monopole_miss(folder,'profile_terciles_z3.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_z1.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_z2.cat','out_table_monopole')
+# plot_monopole_miss(folder,'profile_terciles_z3.cat','out_table_monopole')
 
 '''
 maria_result = np.loadtxt(folder+'../../maria_result').T
