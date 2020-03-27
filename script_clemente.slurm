@@ -16,7 +16,13 @@ export MKL_NUM_THREADS=10
 
 source activate py2env
 
-srun python -u run_fit.py -folder '/mnt/clemente/lensing/redMaPPer/test/' -ini 0 -fini 10
+srun python -u fit_profile_monopole_misscentred.py -folder '/mnt/clemente/lensing/redMaPPer/' \\
+ -file 'profile_pru_highmass.cat' -ncores 10
+ 
+srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' -file  'profile_pru_highmass.cat' \\
+-ncores 10 -ang 'tp' -misscentred 'False' -nit 200 -ROUT 700
+
+##srun python -u run_fit.py -folder '/mnt/clemente/lensing/redMaPPer/test/' -ini 0 -fini 10
 
 ##srun python -u make_profile_redMapper.py
 
