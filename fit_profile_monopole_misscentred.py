@@ -99,6 +99,6 @@ mcmc1 = (mcmc_out.T)[:,500:]
 M200,pcc = np.median(mcmc1,axis=1)
 
 f=open(folder+file_name,'a')
-f.write('#'+str('%.2f' % (M200))+'   \n')
+f.write('#'+str('%.2f' % (10**(M200)/1.e14))+'   \n')
 f.write('#'+str('%.2f' % (pcc))+'   \n')
 f.close()
