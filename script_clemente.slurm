@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=0_10 
+#SBATCH --job-name=CS82
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
 #SBATCH --time=3-0:00
@@ -16,11 +16,11 @@ export MKL_NUM_THREADS=10
 
 source activate py2env
 
-srun python -u fit_profile_monopole_misscentred.py -folder '/mnt/clemente/lensing/redMaPPer/' \\
- -file 'profile_pru_highmass.cat' -ncores 10
+srun python -u fit_profile_monopole_misscentred.py -folder '/mnt/clemente/lensing/redMaPPer/' \
+ -file 'profile_CS82_total.cat' -ncores 10
  
-srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' -file  'profile_pru_highmass.cat' \\
--ncores 10 -ang 'tp' -misscentred 'False' -nit 200 -ROUT 700
+srun python -u fit_profile_quadrupole.py -folder '/mnt/clemente/lensing/redMaPPer/' -file  'profile_pru_highmass.cat' \
+-ncores 10 -ang 't' -misscentred 'False' -nit 200 
 
 ##srun python -u run_fit.py -folder '/mnt/clemente/lensing/redMaPPer/test/' -ini 0 -fini 10
 

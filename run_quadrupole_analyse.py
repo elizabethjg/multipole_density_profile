@@ -26,29 +26,41 @@ if 'True' in args.miss:
 elif 'False' in args.miss:
 	miss      = False
 
-matplotlib.rcParams.update({'font.size': 16})
+matplotlib.rcParams.update({'font.size': 14})
 
-ft, axt = plt.subplots(2,3, figsize=(10,6), sharex=True, sharey=True)
-fx, axx = plt.subplots(2,3, figsize=(10,6), sharex=True, sharey=True)
+ft, axt = plt.subplots(2,6, figsize=(13,4.5), sharex=True)
+# fx, axx = plt.subplots(2,3, figsize=(10,6), sharex=True, sharey=True)
 ft.subplots_adjust(hspace=0,wspace=0)
-fx.subplots_adjust(hspace=0,wspace=0)
+# fx.subplots_adjust(hspace=0,wspace=0)
 
-final_plots(folder,file_name,'t',False,2,axt[0,0],axx[0,0],r'$\phi_1$')
-final_plots(folder,file_name,'twl',False,2,axt[0,1],axx[0,1],r'$\phi_L$')
-final_plots(folder,file_name,'twd',False,2,axt[0,2],axx[0,2],r'$\phi_d$')
-final_plots(folder,file_name,'tp',False,2,axt[1,0],axx[1,0],r'$\phi^*_1$')
-final_plots(folder,file_name,'tpwl',False,2,axt[1,1],axx[1,1],r'$\phi^*_L$')
-final_plots(folder,file_name,'tpwd',False,2,axt[1,2],axx[1,2],r'$\phi^*_d$')
+final_plots(folder,file_name,'t',False,2,axt[0,0],axt[1,0],r'$\phi_1$')
+final_plots(folder,file_name,'twl',False,2,axt[0,1],axt[1,1],r'$\phi_L$')
+final_plots(folder,file_name,'twd',False,2,axt[0,2],axt[1,2],r'$\phi_d$')
+final_plots(folder,file_name,'tp',False,2,axt[0,3],axt[1,3],r'$\phi^*_1$')
+final_plots(folder,file_name,'tpwl',False,2,axt[0,4],axt[1,4],r'$\phi^*_L$')
+final_plots(folder,file_name,'tpwd',False,2,axt[0,5],axt[1,5],r'$\phi^*_d$')
+
+plt.setp(axt[0,1].get_yticklabels(), visible=False)
+plt.setp(axt[0,2].get_yticklabels(), visible=False)
+plt.setp(axt[0,3].get_yticklabels(), visible=False)
+plt.setp(axt[0,4].get_yticklabels(), visible=False)
+plt.setp(axt[0,5].get_yticklabels(), visible=False)
+
+plt.setp(axt[1,1].get_yticklabels(), visible=False)
+plt.setp(axt[1,2].get_yticklabels(), visible=False)
+plt.setp(axt[1,3].get_yticklabels(), visible=False)
+plt.setp(axt[1,4].get_yticklabels(), visible=False)
+plt.setp(axt[1,5].get_yticklabels(), visible=False)
+
+
 plt.rc('font', family='serif', size='12.0')
 axt[0,0].set_ylabel(r'$ \Gamma_{t \cos{\theta}} [h_{70}M_\odot/pc]$ ',labelpad=10)
-axt[1,0].set_ylabel(r'$ \Gamma_{t \cos{\theta}} [h_{70}M_\odot/pc]$ ',labelpad=10)
-axx[0,0].set_ylabel(r'$ \Gamma_{\times \sin{\theta}} [h_{70}M_\odot/pc]$',labelpad=10)
-axx[1,0].set_ylabel(r'$ \Gamma_{\times \sin{\theta}} [h_{70}M_\odot/pc]$',labelpad=10)
+axt[1,0].set_ylabel(r'$ \Gamma_{\times \sin{\theta}} [h_{70}M_\odot/pc]$',labelpad=10)
 # axt[1,2].legend(loc=3,fontsize=11)
-axx[1,2].legend(loc=4,fontsize=14)
+axt[1,5].legend(loc=4,fontsize=11)
 
-fx.savefig('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'+file_name[:-4]+'_xsin.pdf',bbox_inches='tight')
-ft.savefig('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'+file_name[:-4]+'_tcos.pdf',bbox_inches='tight')
+# fx.savefig('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'+file_name[:-4]+'_xsin.pdf',bbox_inches='tight')
+ft.savefig('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/'+file_name[:-4]+'.pdf',bbox_inches='tight')
 
 '''
 
