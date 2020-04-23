@@ -51,7 +51,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 	misscentred     Float/ If True computes de misscentred quantities
 					The misscentred is considered only in the 
 					x - axis
-	s_off           Float/ sigma_offset width of the distribution 
+	s_off           [Mpc h-1] Float/ sigma_offset width of the distribution 
 	                of cluster offsets (F_Eq11)
 	components      List of misscentred components that are going
 	                to be computed:

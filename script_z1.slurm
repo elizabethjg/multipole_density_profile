@@ -18,15 +18,3 @@ source activate py2env
 
 srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
 -file 'profile_medianz1.cat' -ncores 10 -ang 't' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'twl' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'twd' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'tp' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'tpwl' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'tpwd' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'
-srun python -u fit_profile_quadrupole.py -folder '/home/elizabeth/profiles_redMapper/' \
--file 'profile_medianz1.cat' -ncores 10 -ang 'control' -misscentred 'False' -nit 200 -ROUT 5000 -component 'both'

@@ -208,7 +208,7 @@ def plot_mcmc_quadrupole_out(folder,file_name,ang,miss,
 	f1.close()
 
 def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,ang,miss,
-							 rin,rout,out_file,ncores):
+							 rin,rout,out_file,ncores,folder_out):
 	
 	file_profile = file_name[:-4]+'_'+ang+'.cat'
 	
@@ -225,7 +225,7 @@ def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,ang,miss,
 		file_mcmc_both = folder+'quadrupole_both_'+file_name[:-4]+'_'+ang+'_'+str(int(rin))+'_'+str(int(rout))+'.out'
 		plot_out       = file_name[:-4]+'_'+ang+'_'+str(int(rin))+'_'+str(int(rout))+'.png'
 	
-	os.system('mkdir '+folder+'plots_mcmc/')
+	os.system('mkdir '+folder+folder_out)
 	
 	f = open(folder+file_name,'r')
 	lines = f.readlines()
@@ -250,7 +250,7 @@ def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,ang,miss,
 	ax.plot(mcmc_both,'k.',alpha=0.3)
 	ax.axvline(500)
 	f.subplots_adjust(hspace=0,wspace=0)
-	plt.savefig(folder+'plots_mcmc/mcmc_out_'+plot_out)
+	plt.savefig(folder+folder_out+'mcmc_out_'+plot_out)
 	
 	mcmc_both = mcmc_both[500:1000] 
 	
@@ -260,7 +260,7 @@ def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,ang,miss,
 	ax.hist(mcmc_both,histtype='step')
 	ax.set_xlabel('e_b')
 	f.subplots_adjust(hspace=0,wspace=0)
-	plt.savefig(folder+'plots_mcmc/hist_'+plot_out)
+	plt.savefig(folder+folder_out+'/hist_'+plot_out)
 	
 	
 	profile = np.loadtxt(folder+file_profile).T
@@ -328,7 +328,7 @@ def plot_mcmc_quadrupole_out_onlyboth(folder,file_name,ang,miss,
 	ax[1].set_yticklabels([-30,-15,0,15,30])
 	plt.legend()
 	f.subplots_adjust(hspace=0,wspace=0)
-	plt.savefig(folder+'plots_mcmc/'+plot_out)
+	plt.savefig(folder+folder_out+plot_out)
 	
 	#/////// save file ///////
 	
@@ -658,36 +658,39 @@ def finalplot2():
 	
 	multipoles = multipole_shear_parallel(r,M200=M200,misscentred = False, ellip=e,z=zmean,ncores=2)
 
+	profile = np.loadtxt(folder+file_name).T
+
 	f, ax = plt.subplots(3,1, figsize=(3.5,7), sharex=True)
 	f.subplots_adjust(hspace=0,wspace=0)
 	matplotlib.rcParams.update({'font.size': 12})
 	
+
 	
 	ax[0].scatter(profile[0],profile[1],facecolor='none',edgecolors='0.4')
 	ax[0].errorbar(profile[0],profile[1],yerr=profile[2],fmt = 'none',ecolor='0.4')
-	ax[0].plot(r,mono,'C3')
+	ax[0].plot(r,mono,'C3',lw=2.5)
 	ax[0].plot(r,pcc*mono_cen,'C4')
 	ax[0].plot(r,(1-pcc)*mono_miss,'C4--')
 	ax[0].set_xscale('log')
 	ax[0].set_yscale('log')
-	ax[0].set_ylabel(r'$\Delta \Sigma [h_{70}M_\odot/pc]$')
+	ax[0].set_ylabel(r'$\Delta \Sigma [h_{70}M_\odot\,\rm{pc}^{-2}]$')
 	
 	ax[1].scatter(quadrupole[0],quadrupole[1],facecolor='none',edgecolors='0.4')
 	ax[1].errorbar(quadrupole[0],quadrupole[1],yerr=quadrupole[2],fmt = 'none',ecolor='0.4')
-	ax[1].plot(r,multipoles['Gt2'],'C3')
+	ax[1].plot(r,multipoles['Gt2'],'C3',lw=2.5)
 	ax[1].set_xscale('log')
 	ax[1].set_yscale('log')
-	ax[1].set_ylabel(r'$\Gamma_{\rm{t} \cos{2\theta}} [h_{70}M_\odot/pc]$')
+	ax[1].set_ylabel(r'$\Gamma_{\rm{t} \cos{2\theta}} [h_{70}M_\odot\,\rm{pc}^{-2}]$')
 
 	plt.rc('font', family='serif', size='12.0')
 	ax[2].scatter(quadrupole[0],quadrupole[3],facecolor='none',edgecolors='0.4')
 	ax[2].errorbar(quadrupole[0],quadrupole[3],yerr=quadrupole[4],fmt = 'none',ecolor='0.4')
-	ax[2].plot(r,multipoles['Gx2'],'C3')
+	ax[2].plot(r,multipoles['Gx2'],'C3',lw=2.5)
 	ax[2].plot([0,6],[0,0],'C7--')
 	ax[2].set_ylim(-70,30)
 	ax[2].yaxis.set_ticks([-60,-30,0])
 	ax[2].set_yticklabels([-60,-30,0])
-	ax[2].set_ylabel(r'$\Gamma_{\rm{\times} \sin{2\theta}} [h_{70}M_\odot/pc]$') 
+	ax[2].set_ylabel(r'$\Gamma_{\rm{\times} \sin{2\theta}} [h_{70}M_\odot\,\rm{pc}^{-2}]$') 
 	ax[2].set_xlabel(r'$r [h^{-1}_{70}\,Mpc]$')
 	
 	ax[0].xaxis.set_ticks([0.2,1,4])
