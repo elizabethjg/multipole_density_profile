@@ -701,3 +701,10 @@ def finalplot2():
 	f.savefig('/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles.pdf',bbox_inches='tight')
 
 
+def random_test():
+	
+	e = []
+	
+	for j in range(100):
+		fname = 'quadrupole_both_profile_medianas_'+str(j)+'_tp_0_700.out'
+		e  = np.append(e,np.median((np.loadtxt(fname))[500:]))

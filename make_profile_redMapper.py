@@ -481,7 +481,7 @@ def profile_redMapper_randomchoice(sample,lmin=20,lmax=150,zmin = 0.1, zmax = 0.
           print (time.time()-t1)/60.
 
 
-profile_redMapper_randomchoice('medianas')
+# profile_redMapper_randomchoice('medianas')
 
 def profile_redMapper_indcat(survey,sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
 					z_back = 0.1, odds_min = 0.5,

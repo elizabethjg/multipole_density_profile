@@ -54,8 +54,8 @@ plt.setp(axt[1,5].get_yticklabels(), visible=False)
 
 
 plt.rc('font', family='serif', size='12.0')
-axt[0,0].set_ylabel(r'$ \Gamma_{t \cos{\theta}} [h_{70}M_\odot/pc]$ ',labelpad=10)
-axt[1,0].set_ylabel(r'$ \Gamma_{\times \sin{\theta}} [h_{70}M_\odot/pc]$',labelpad=10)
+axt[0,0].set_ylabel(r'$ \Gamma_{t \cos{\theta}} [h_{70}M_\odot/pc^2]$ ',labelpad=10)
+axt[1,0].set_ylabel(r'$ \Gamma_{\times \sin{\theta}} [h_{70}M_\odot/pc^2]$',labelpad=10)
 # axt[1,2].legend(loc=3,fontsize=11)
 axt[1,5].legend(loc=4,fontsize=11)
 
