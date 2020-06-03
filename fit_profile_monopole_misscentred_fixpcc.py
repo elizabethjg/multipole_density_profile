@@ -87,8 +87,8 @@ print (time.time()-t1)/60.
 
 mcmc_out = sampler.get_chain(flat=True)
 
-f1=open(folder+'monopole_misscentred_'+file_name,'w')
-f1.write('# log(M200)  pcc \n')
+f1=open(folder+'monopole_misscentred_fixpcc_'+file_name,'w')
+f1.write('# log(M200) \n')
 np.savetxt(f1,mcmc_out,fmt = ['%12.6f'])
 f1.close()
 

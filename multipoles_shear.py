@@ -28,7 +28,7 @@ Msun = 1.989e30 # Solar mass (kg)
 def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 					misscentred=False,s_off=0.4,
 					components = ['t0','t','tcos','xsin'],
-					verbose=True):
+					verbose=True,Yanmiss = False):
 
 	'''
 	Equations from van Uitert (vU, arXiv:1610.04226) for the 
@@ -60,6 +60,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 	                'tcos' -> Gt_off_cos
 	                'xsin' -> Gx_off_sin
 	verbose         Print time computing
+	Yanmiss         if True use Eq 4 to model the miss of Yan et al. 2020
 	
 	OUTPUT:
 	output          Dictionary (the shear is scales with the
@@ -225,13 +226,12 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 	#print '##################'
 
 	def P_Roff(Roff):
-		'''
-		F_Eq11
-		
-		'''		
-		return abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))*0.5
-	
-
+		if Yanmiss:
+			Poff = (Roff/s_off**2)*np.exp(-1.*(Roff/s_off))
+		else:
+			# F_Eq11
+			Poff = abs((Roff/s_off**2)*np.exp(-0.5*(Roff/s_off)**2))
+		return Poff
 	
 	def monopole_off(R,theta):
 		'''
@@ -239,7 +239,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 		'''
 		
 		def moff(x):
-			return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)
+			return monopole(np.sqrt(R**2+x**2-2.*x*R*np.cos(theta)))*P_Roff(x)*0.5
 		argumento = lambda x: moff(x)
 		# integral1  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
 		integral1  = integrate.quad(argumento, -1.*np.inf, -100., epsabs=1.e-01, epsrel=1.e-01)[0]
@@ -277,7 +277,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 			integral  = integrate.simps(monopole(np.sqrt(R**2+Rs**2-2.*Rs*R*np.cos(x))),x,even='first')
 			return integral/(2.*np.pi)
 
-		argumento = lambda x: DS_RRs(x,R)*P_Roff(x)*2.
+		argumento = lambda x: DS_RRs(x,R)*P_Roff(x)
 		integral  = integrate.quad(argumento, 0, np.inf, epsabs=1.e-02, epsrel=1.e-02)[0]
 		return integral
 
@@ -297,7 +297,7 @@ def multipole_shear(r,M200=1.e14,ellip=0.25,z=0.2,h=0.7,
 	def quadrupole_off(R,theta):
 		def q_off(roff):
 			rp = np.sqrt(R**2+roff**2-2*roff*R*np.cos(theta))
-			return quadrupole(rp)*P_Roff(roff)
+			return quadrupole(rp)*P_Roff(roff)*0.5
 		argumento = lambda x: q_off(x)
 		# integral10  = integrate.quad(argumento, -1.*np.inf, 0, epsabs=1.e-01, epsrel=1.e-01)[0]
 		integral10  = integrate.quad(argumento, -1.*np.inf, -100., epsabs=1.e-01, epsrel=1.e-01)[0]
@@ -471,7 +471,7 @@ def multipole_shear_unpack(minput):
 def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 							 h=0.7,misscentred=False,
 							 s_off=0.4,components = ['t0','t','tcos','xsin'],
-							 verbose = True, ncores=2):
+							 verbose = True, Yanmiss = False, ncores=2):
 	
 	if ncores > len(r):
 		ncores = len(r)
@@ -492,6 +492,7 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	s_off = np.ones(ncores)*s_off
 	comp  = [components]*ncores
 	v  = np.ones(ncores,dtype=bool)*verbose
+	v  = np.ones(ncores,dtype=bool)*Yanmiss
 	
 	entrada = np.array([r_splitted,M200,ellip,z,h,miss,s_off,comp,v]).T
 	
