@@ -492,9 +492,9 @@ def multipole_shear_parallel(r,M200=1.e14,ellip=0.25,z=0.2,
 	s_off = np.ones(ncores)*s_off
 	comp  = [components]*ncores
 	v  = np.ones(ncores,dtype=bool)*verbose
-	v  = np.ones(ncores,dtype=bool)*Yanmiss
+	y  = np.ones(ncores,dtype=bool)*Yanmiss
 	
-	entrada = np.array([r_splitted,M200,ellip,z,h,miss,s_off,comp,v]).T
+	entrada = np.array([r_splitted,M200,ellip,z,h,miss,s_off,comp,v,y]).T
 	
 	pool = Pool(processes=(ncores))
 	salida=np.array(pool.map(multipole_shear_unpack, entrada))
