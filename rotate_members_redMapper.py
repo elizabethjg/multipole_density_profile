@@ -182,13 +182,14 @@ yedges = np.linspace(-2.,2.,50)
 xcenters = (xedges[:-1] + xedges[1:]) / 2.
 ycenters = (yedges[:-1] + yedges[1:]) / 2.
 X,Y = np.meshgrid(xcenters,ycenters)
-f, ax = plt.subplots(2, 4, sharey=True,figsize=(8,4))
+f, ax = plt.subplots(2, 4, sharey=False,figsize=(8,4))
 
 
 levels = np.linspace(150,1000,10)
 H, xedges, yedges = np.histogram2d(dx, dy, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,0].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,0].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
+ax[0,0].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
 ax[0,0].axis([-1.2,1.2,-1.2,1.2])
 
 H, xedges, yedges = np.histogram2d(x_t,y_t, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
@@ -196,18 +197,21 @@ ax[0,1].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,1].axis([-1.2,1.2,-1.2,1.2])
 ax[0,1].text(0.7,0.8,'$\phi_1$',fontsize = 14)
 plt.setp(ax[0,1].get_xticklabels(), visible=False)
+plt.setp(ax[0,1].get_yticklabels(), visible=False)
 
 H, xedges, yedges = np.histogram2d(x_l,y_l, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,2].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,2].axis([-1.2,1.2,-1.2,1.2])
 ax[0,2].text(0.7,0.8,'$\phi_L$',fontsize = 14)
 plt.setp(ax[0,2].get_xticklabels(), visible=False)
+plt.setp(ax[0,2].get_yticklabels(), visible=False)
 
 H, xedges, yedges = np.histogram2d(x_d,y_d, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[0,3].contour(X, Y, H.T,levels,cmap='plasma')
 ax[0,3].axis([-1.2,1.2,-1.2,1.2])
 ax[0,3].text(0.7,0.8,r'$\phi_d$',fontsize = 14)
 plt.setp(ax[0,3].get_xticklabels(), visible=False)
+plt.setp(ax[0,3].get_yticklabels(), visible=False)
 
 ax[1,0].axis('off')
 
@@ -217,21 +221,24 @@ ax[1,1].axis([-1.2,1.2,-1.2,1.2])
 ax[1,1].text(0.7,0.8,u'$\phi^*_1$',fontsize = 14)
 ax[1,1].set_ylabel('$x_2/R_{\lambda}$',fontsize = '14')
 ax[1,1].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+ax[1,1].yaxis.set_ticks([-1,0])
 
 H, xedges, yedges = np.histogram2d(x_pwl,y_pwl, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[1,2].contour(X, Y, H.T,levels,cmap='plasma')
 ax[1,2].axis([-1.2,1.2,-1.2,1.2])
 ax[1,2].text(0.7,0.8,u'$\phi^*_L$',fontsize = 14)
 ax[1,2].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+plt.setp(ax[1,2].get_yticklabels(), visible=False)
 
 H, xedges, yedges = np.histogram2d(x_pwd,y_pwd, bins=(xedges, yedges))#,weights=np.log10(Lum_r))
 ax[1,3].contour(X, Y, H.T,levels,cmap='plasma')
 ax[1,3].axis([-1.2,1.2,-1.2,1.2])
 ax[1,3].text(0.7,0.8,u'$\phi^*_d$',fontsize = 14)
 ax[1,3].set_xlabel('$x_1/R_{\lambda}$',fontsize = '14')
+plt.setp(ax[1,3].get_yticklabels(), visible=False)
 
 f.subplots_adjust(hspace=0,wspace=0)
-plt.savefig(folder+'contours.eps',format='eps',bbox_inches='tight')
+plt.savefig(folder+'contours.pdf',format='pdf',bbox_inches='tight')
 
 # '''
 #########################
