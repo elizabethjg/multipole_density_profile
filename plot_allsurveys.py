@@ -27,7 +27,7 @@ RA = cs82.RAJ2000
 DEC = cs82.DECJ2000
 RA[RA < 0] = RA[RA<0] + 360.
 
-plt.plot(clusters.RA,clusters.DEC,'ko')
+plt.plot(clusters.RA,clusters.DEC,'C7o')
 plt.plot(cfht.RAJ2000,cfht.DECJ2000,'C3,')
 plt.plot(kids.RAJ2000,kids.DECJ2000,'C4,')
 plt.plot(RA,DEC,'C5,')

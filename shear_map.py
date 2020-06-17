@@ -43,8 +43,11 @@ x,y = x[j],y[j]
 
 out = multipole_shear_parallel(r,M200=M200,z=z,ellip=e)
 
+f  = plt.figure(figsize=(12,4)) 
+gs = gridspec.GridSpec(1, 3, width_ratios=[1, 1,1.2])
+ax = [plt.subplot(gs[0]),plt.subplot(gs[1]),plt.subplot(gs[2])]
 
-f, ax = plt.subplots(1,3, figsize=(12,4), sharex=True, sharey=True)
+# f, ax = plt.subplots(1,3, figsize=(12,4), sharex=True, sharey=True)
 f.subplots_adjust(hspace=0,wspace=0)
 ######################
 # MONOPOLE
@@ -63,7 +66,7 @@ g0_y[g0_1 < 0.] -= g0_1[g0_1 < 0.]
 g0_y += np.abs(g0_2*np.sin(np.pi/4.))
 
 g0_norm = np.sqrt(g0_x**2 + g0_y**2)
-mq = ax[0].quiver(x,y,g0_x/g0_norm,g0_y/g0_norm,g0_norm,pivot='mid',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
+mq = ax[0].quiver(x,y,g0_x/g0_norm,g0_y/g0_norm,g0_norm,pivot='mid',cmap = 'plasma',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
 
 ######################
 # QUADRUPOLE
@@ -85,8 +88,8 @@ g2_y[g2_1 < 0.] -= g2_1[g2_1 < 0.]
 g2_y += np.abs(g2_2*np.sin(np.pi/4.))
 
 g2_norm = np.sqrt(g2_x**2 +g2_y**2)
-qq = ax[1].quiver(x,y,g2_x/g2_norm,g2_y/g2_norm,g2_norm,pivot='mid',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
-
+qq = ax[1].quiver(x,y,g2_x/g2_norm,g2_y/g2_norm,g2_norm,cmap = 'plasma',pivot='mid',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
+plt.setp(ax[1].get_yticklabels(), visible=False)
 ######################
 # TOTAL SHEAR MAP
 ######################
@@ -107,12 +110,20 @@ g_y += np.abs(g_2*np.sin(np.pi/4.))
 
 g_norm = np.sqrt(g_x**2 +g_y**2)
 
-tq = ax[2].quiver(x,y,g_x/g_norm,g_y/g_norm,g_norm,pivot='mid',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
+tq = ax[2].quiver(x,y,g_x/g_norm,g_y/g_norm,g_norm,cmap = 'plasma',pivot='mid',headlength=0, headwidth = 1,norm=matplotlib.colors.LogNorm())
+plt.setp(ax[2].get_yticklabels(), visible=False)
 
-plt.axis([-1.2,1.2,-1.2,1.2])
+ax[0].axis([-1.2,1.2,-1.2,1.2])
+ax[1].axis([-1.2,1.2,-1.2,1.2])
+ax[2].axis([-1.2,1.2,-1.2,1.2])
 
-mq.set_clim(20,80)
-qq.set_clim(20,80)
-tq.set_clim(20,80)
-# cbar = f.colorbar(ticks=[10,20,30,40])
-# cbar.ax.set_yticklabels(['10','20','30'])
+mq.set_clim(30,150)
+qq.set_clim(30,150)
+tq.set_clim(30,150)
+ax[0].set_ylabel('y [Mpc]')
+ax[0].set_xlabel('x [Mpc]')
+ax[1].set_xlabel('x [Mpc]')
+ax[2].set_xlabel('x [Mpc]')
+cbar = f.colorbar(tq,ticks=[40,80,120])
+cbar.ax.set_yticklabels(['40','80','120'])
+cbar.set_label(u'$M_\odot$pc$^{-2}$', rotation=270)
