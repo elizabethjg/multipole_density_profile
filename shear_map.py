@@ -18,7 +18,7 @@ z    = 0.25
 ############  MAKING A GRID
 
 # a  = np.logspace(np.log10(0.01),np.log10(5.),10)
-a  = np.arange(-1,1.3,0.25)
+a  = np.arange(-1.001,1.3,0.25)
 # a  = np.append(a,-1.*a)
 
 x,y = np.meshgrid(a,a)

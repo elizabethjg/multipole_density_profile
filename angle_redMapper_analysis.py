@@ -2,6 +2,7 @@ import numpy as np
 # from pylab import *
 from astropy.io import fits
 from astropy.cosmology import LambdaCDM
+sys.path.append('/home/eli/python_codes')
 #import modified_corner
 cosmo = LambdaCDM(H0=70., Om0=0.3, Ode0=0.7)
 from matplotlib import rc

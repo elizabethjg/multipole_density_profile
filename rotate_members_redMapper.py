@@ -1,6 +1,7 @@
 import numpy as np
 # from pylab import *
 from astropy.io import fits
+sys.path.append('/home/eli/python_codes')
 from astropy.cosmology import LambdaCDM
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})

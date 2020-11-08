@@ -10,11 +10,11 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 13})
 
-# folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/'
-# out = np.loadtxt(folder+'table_mcmc_700_5000.out',dtype='str').T
+folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/member_distribution/profiles/'
+out = np.loadtxt(folder+'table_mcmc_700_5000.out',dtype='str').T
 
-folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/profiles/terciles/'
-out = np.loadtxt(folder+'table_terciles.out',dtype='str').T
+# folder = '/home/eli/Documentos/Astronomia/posdoc/halo-elongation/redMapper/member_distribution/profiles/terciles/'
+# out = np.loadtxt(folder+'table_terciles.out',dtype='str').T
 
 samples = out[0]
 M200    = out[1].astype(float)
@@ -33,19 +33,19 @@ rout    = out[4].astype(float)
 # chi  = chi_miss 
 
 # '''
-# et      = out[5].astype(float)
-# e_et    = np.array([out[6].astype(float),out[7].astype(float)])
-# chi_t   = out[8].astype(float)
-# ex      = out[9].astype(float)
-# e_ex    = np.array([out[10].astype(float),out[11].astype(float)])
-# chi_x   = out[12].astype(float)
-# eb      = out[13].astype(float)
-# e_eb    = np.array([out[14].astype(float),out[15].astype(float)])
-# chi_b   = out[16].astype(float)
-# eraw     = out[17].astype(float)
-# e_eraw   = out[18].astype(float)
-eb    = out[5].astype(float)
-e_eb  = np.array([out[6].astype(float),out[7].astype(float)])
+et      = out[5].astype(float)
+e_et    = np.array([out[6].astype(float),out[7].astype(float)])
+chi_t   = out[8].astype(float)
+ex      = out[9].astype(float)
+e_ex    = np.array([out[10].astype(float),out[11].astype(float)])
+chi_x   = out[12].astype(float)
+eb      = out[13].astype(float)
+e_eb    = np.array([out[14].astype(float),out[15].astype(float)])
+chi_b   = out[16].astype(float)
+eraw     = out[17].astype(float)
+e_eraw   = out[18].astype(float)
+# eb    = out[5].astype(float)
+# e_eb  = np.array([out[6].astype(float),out[7].astype(float)])
 # '''
 
 
@@ -272,7 +272,7 @@ plt.xticks(ang_ind+1,angles)
 axtot[0,0].set_ylabel(r'$\epsilon$',fontsize=18)
 axtot[1,0].set_ylabel(r'$\epsilon$',fontsize=18)
 # ax.legend()
-plt.savefig(folder+'plot_results_centred_700_5000/ellipticities_medians.pdf',bbox_inches='tight')
+# plt.savefig(folder+'plot_results_centred_700_5000/ellipticities_medians.pdf',bbox_inches='tight')
 '''
 ##################################
 # COMPARE RIN ROUT
@@ -499,7 +499,7 @@ ax[0].set_yticklabels([0.1,0.2,0.3,0.4])
 
 ax[1].set_xlabel('$\epsilon^*$',fontsize=18)
 ax[2].set_xlabel('$\epsilon^*$',fontsize=18)
-plt.savefig(folder+'plot_results_centred_700_5000/ellipticities_rrange.pdf',bbox_inches='tight')
+# plt.savefig(folder+'plot_results_centred_700_5000/ellipticities_rrange.pdf',bbox_inches='tight')
 
 
 
