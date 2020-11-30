@@ -1,5 +1,6 @@
 import sys, os
 sys.path.append('/mnt/clemente/lensing/python_codes')
+sys.path.append('/home/elizabeth/python_codes')
 import numpy as np
 from pylab import *
 from astropy.cosmology import LambdaCDM
