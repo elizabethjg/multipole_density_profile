@@ -33,12 +33,12 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
-     folder = '/mnt/projects/lensing/redMaPPer/compressed/'
+     folder = '/mnt/projects/lensing/redMaPPer/'
      
-     cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
-     kids     = fits.open(folder+'gx_KiDS_redMapper.fits')[1].data
-     cs82     = fits.open(folder+'gx_CS82_redMapper.fits')[1].data
-     rcsl     = fits.open(folder+'gx_RCSL_redMapper.fits')[1].data
+     cfht     = fits.open(folder+'compressed/gx_CFHT_redMapper.fits')[1].data
+     kids     = fits.open(folder+'compressed/gx_KiDS_redMapper.fits')[1].data
+     cs82     = fits.open(folder+'compressed/gx_CS82_redMapper.fits')[1].data
+     rcsl     = fits.open(folder+'compressed/gx_RCSL_redMapper.fits')[1].data
      angles   = fits.open(folder+'angles_redMapper_forprofile.fits')[1].data
      clusters = fits.open(folder+'redmapper_dr8_public_v6.3_catalog.fits')[1].data
      borderid = np.loadtxt(folder+'redMapperID_border.list')
