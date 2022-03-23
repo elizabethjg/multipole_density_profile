@@ -7,10 +7,12 @@ from make_profile_redMapper import *
 
 # profile_redMapper('total_z04_v3',20.,150.,zmin = 0.1, zmax = 0.4,
                       # z_back = 0.1, odds_min = 0.5, RIN = 100., ROUT = 5000., ndots = 10.)
+                      
+profile_redMapper('redMaPPer',20.,150.,zmin = 0.1, zmax = 0.4, z_back = 0.1, odds_min = 0.5)
 
-profile_redMapper_indcat('CFHT','total',20,150,zmin = 0.1, zmax = 0.4,
-					z_back = 0.1, odds_min = 0.5,
-					RIN = 100., ROUT = 5000., ndots = 10.,zlim = 1.3)
+# profile_redMapper_indcat('CFHT','total',20,150,zmin = 0.1, zmax = 0.4,
+					# z_back = 0.1, odds_min = 0.5,
+					# RIN = 100., ROUT = 5000., ndots = 10.,zlim = 1.3)
 
 '''
 samples  = ['total_z033','total_z04','total_z045']
