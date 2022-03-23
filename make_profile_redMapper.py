@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/home/elizabeth/lens_codes_v3.7')
 import numpy as np
 # from pylab import *
 from astropy.io import fits
