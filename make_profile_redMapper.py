@@ -33,7 +33,7 @@ def profile_redMapper(sample,lmin,lmax,zmin = 0.1, zmax = 0.33,
      except:
           print 'not running in parallel'
 
-     folder = '/mnt/clemente/lensing/redMaPPer/'
+     folder = '/mnt/clemente/lensing/redMaPPer/compressed'
      
      cfht     = fits.open(folder+'gx_CFHT_redMapper.fits')[1].data
      kids     = fits.open(folder+'gx_KiDS_redMapper.fits')[1].data
